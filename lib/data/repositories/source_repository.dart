@@ -64,7 +64,7 @@ class SourceRepository {
           targetSourceType: tx.SourceType.source,
           date: DateTime.now(),
           createdAt: DateTime.now(),
-          description: 'Transfert depuis "${fromSourceName}"',
+          description: 'Transfert depuis "$fromSourceName"',
         );
         await _transactionRepo.putTransaction(inTransaction);
 

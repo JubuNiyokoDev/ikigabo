@@ -9,7 +9,6 @@ import '../../../data/models/budget_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/budget_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/currency_provider.dart';
 
 class AddBudgetScreen extends ConsumerStatefulWidget {
   final BudgetModel? budget;
@@ -297,7 +296,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               Expanded(
                 flex: 1,
                 child: DropdownButtonFormField<String>(
-                  value: _selectedCurrency,
+                  initialValue: _selectedCurrency,
                   decoration: const InputDecoration(
                     labelText: 'Devise',
                     contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -521,7 +520,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             subtitle: const Text('Recevoir des alertes sur ce budget'),
             value: _notificationsEnabled,
             onChanged: (value) => setState(() => _notificationsEnabled = value),
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             contentPadding: EdgeInsets.zero,
           ),
           if (_notificationsEnabled) ...[

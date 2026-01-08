@@ -31,15 +31,15 @@ class BankDetailScreen extends ConsumerWidget {
             _buildHeader(context, isDark, l10n),
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 children: [
                   _buildBalanceCard(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildInfoSection(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   if (bank.bankType == BankType.paid) ...[
                     _buildInterestSection(isDark, l10n),
-                    SizedBox(height: AppSizes.spacing12),
+                    const SizedBox(height: AppSizes.spacing12),
                   ],
                   _buildActionsSection(context, ref, isDark, l10n),
                 ],
@@ -53,8 +53,8 @@ class BankDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(AppSizes.spacing12),
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.primary, AppColors.secondary],
           begin: Alignment.topLeft,
@@ -83,7 +83,7 @@ class BankDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Container(
             width: 32.w,
             height: 32.h,
@@ -97,10 +97,10 @@ class BankDetailScreen extends ConsumerWidget {
               color: Colors.white,
             ),
           ).animate().scale(delay: 100.ms),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Text(
             bank.name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -110,7 +110,7 @@ class BankDetailScreen extends ConsumerWidget {
           if (bank.accountNumber != null)
             Text(
               bank.accountNumber!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppSizes.textSmall,
                 color: Colors.white70,
               ),
@@ -122,7 +122,7 @@ class BankDetailScreen extends ConsumerWidget {
 
   Widget _buildBalanceCard(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -137,17 +137,17 @@ class BankDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textSecondaryDark : Colors.black54,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           CurrencyAmountWidget(
             amount: bank.balance,
             originalCurrency: bank.currency,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
             decoration: BoxDecoration(
@@ -172,7 +172,7 @@ class BankDetailScreen extends ConsumerWidget {
 
   Widget _buildInfoSection(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -183,7 +183,7 @@ class BankDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.info, color: AppColors.primary, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.informations,
                 style: TextStyle(
@@ -194,7 +194,7 @@ class BankDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _InfoRow(
             label: l10n.bankTypeLabel,
             value: bank.bankType == BankType.free ? l10n.freeBank : l10n.paidBank,
@@ -239,7 +239,7 @@ class BankDetailScreen extends ConsumerWidget {
     final nextDeduction = bank.nextDeductionDate;
 
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -251,7 +251,7 @@ class BankDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.warning, color: AppColors.warning, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.bankFeesLabel,
                 style: TextStyle(
@@ -262,7 +262,7 @@ class BankDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _InfoRow(
             label: l10n.feeAmountLabel,
             value: bank.interestCalculation == InterestCalculation.fixedAmount
@@ -304,7 +304,7 @@ class BankDetailScreen extends ConsumerWidget {
 
   Widget _buildActionsSection(BuildContext context, WidgetRef ref, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -320,7 +320,7 @@ class BankDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textDark : Colors.black87,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _ActionButton(
             label: l10n.editBank,
             icon: AppIcons.edit,
@@ -334,7 +334,7 @@ class BankDetailScreen extends ConsumerWidget {
               );
             },
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _ActionButton(
             label: l10n.deleteBank,
             icon: AppIcons.delete,
@@ -471,7 +471,7 @@ class _ActionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
-        padding: EdgeInsets.all(AppSizes.spacing12),
+        padding: const EdgeInsets.all(AppSizes.spacing12),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16.r),

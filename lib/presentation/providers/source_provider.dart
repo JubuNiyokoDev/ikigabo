@@ -47,7 +47,7 @@ final originalSourcesProvider = FutureProvider<List<SourceModel>>((ref) async {
     error: (_, __) => Future.value(<BankModel>[]),
   );
 
-  List<SourceModel> allSources = [];
+  final List<SourceModel> allSources = [];
 
   // Add regular sources
   allSources.addAll(sources.where((s) => !s.isDeleted));
@@ -109,7 +109,7 @@ final unifiedSourcesProvider = FutureProvider<List<SourceModel>>((ref) async {
     error: (_, __) => Future.value(<DebtModel>[]),
   );
 
-  List<SourceModel> allSources = [];
+  final List<SourceModel> allSources = [];
 
   // Add regular sources with conversion
   for (final source in sources.where((s) => !s.isDeleted)) {

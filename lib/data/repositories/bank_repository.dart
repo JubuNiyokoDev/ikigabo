@@ -61,7 +61,7 @@ class BankRepository {
           targetSourceType: tx.SourceType.bank,
           date: DateTime.now(),
           createdAt: DateTime.now(),
-          description: 'Dépôt depuis "${sourceName}"',
+          description: 'Dépôt depuis "$sourceName"',
         );
         await _transactionRepo.putTransaction(inTransaction);
 

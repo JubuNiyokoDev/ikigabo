@@ -30,8 +30,8 @@ class _AddTransactionBottomSheetState
   final _descriptionController = TextEditingController();
 
   TransactionType _type = TransactionType.expense;
-  IncomeCategory _incomeCategory = IncomeCategory.salary;
-  ExpenseCategory _expenseCategory = ExpenseCategory.food;
+  final IncomeCategory _incomeCategory = IncomeCategory.salary;
+  final ExpenseCategory _expenseCategory = ExpenseCategory.food;
   int? _selectedSourceId;
   SourceType? _selectedSourceType;
   String _selectedCurrency = 'BIF';
@@ -149,22 +149,22 @@ class _AddTransactionBottomSheetState
               key: _formKey,
               child: ListView(
                 shrinkWrap: true,
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 children: [
                   _buildTypeSelector(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildAmountField(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildCurrencySelector(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildCategorySelector(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildSourceSelector(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildDatePicker(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildDescriptionField(isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildSaveButton(l10n),
                   SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
                 ],
@@ -179,7 +179,7 @@ class _AddTransactionBottomSheetState
   Widget _buildHeader(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -195,7 +195,7 @@ class _AddTransactionBottomSheetState
             ),
             child: Icon(AppIcons.add, color: AppColors.primary, size: 18.sp),
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +245,7 @@ class _AddTransactionBottomSheetState
             isDark: isDark,
           ),
         ),
-        SizedBox(width: AppSizes.spacing8),
+        const SizedBox(width: AppSizes.spacing8),
         Expanded(
           child: _TypeButton(
             label: l10n.expense,
@@ -312,7 +312,7 @@ class _AddTransactionBottomSheetState
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
@@ -393,7 +393,7 @@ class _AddTransactionBottomSheetState
                   color: isDark ? AppColors.textDark : Colors.black87,
                 ),
               ),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
@@ -403,7 +403,7 @@ class _AddTransactionBottomSheetState
                 ),
                 child: Text(
                   'Aucune catégorie disponible pour ${_type == TransactionType.income ? "les revenus" : "les dépenses"}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.warning,
                     fontSize: AppSizes.textSmall,
                   ),
@@ -424,7 +424,7 @@ class _AddTransactionBottomSheetState
                 color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Wrap(
               spacing: 8.w,
               runSpacing: 8.h,
@@ -485,7 +485,7 @@ class _AddTransactionBottomSheetState
           ],
         );
       },
-      loading: () => Container(
+      loading: () => SizedBox(
         height: 60.h,
         child: const Center(child: CircularProgressIndicator()),
       ),
@@ -511,7 +511,7 @@ class _AddTransactionBottomSheetState
 
         if (availableSources.isEmpty) {
           return Container(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.r),
@@ -521,12 +521,12 @@ class _AddTransactionBottomSheetState
             ),
             child: Row(
               children: [
-                Icon(AppIcons.warning, color: AppColors.warning, size: 20),
-                SizedBox(width: AppSizes.spacing12),
+                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(
                     'Aucune source disponible pour $_selectedCurrency',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.warning,
                       fontSize: AppSizes.textSmall,
                     ),
@@ -548,9 +548,9 @@ class _AddTransactionBottomSheetState
                 color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Container(
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceDark : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
@@ -569,8 +569,8 @@ class _AddTransactionBottomSheetState
                           : SourceType.source;
                     }),
                     child: Container(
-                      padding: EdgeInsets.all(AppSizes.spacing12),
-                      margin: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(AppSizes.spacing12),
+                      margin: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.1)
@@ -589,13 +589,13 @@ class _AddTransactionBottomSheetState
                               color: AppColors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               AppIcons.wallet,
                               color: AppColors.primary,
                               size: 18,
                             ),
                           ),
-                          SizedBox(width: AppSizes.spacing12),
+                          const SizedBox(width: AppSizes.spacing12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,7 +612,7 @@ class _AddTransactionBottomSheetState
                                 ),
                                 Text(
                                   '${source.amount.toStringAsFixed(0)} ${source.currency}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: AppSizes.textSmall,
                                     color: AppColors.success,
                                     fontWeight: FontWeight.w500,
@@ -622,7 +622,7 @@ class _AddTransactionBottomSheetState
                             ),
                           ),
                           if (isSelected)
-                            Icon(
+                            const Icon(
                               AppIcons.success,
                               color: AppColors.primary,
                               size: 20,
@@ -637,7 +637,7 @@ class _AddTransactionBottomSheetState
           ],
         );
       },
-      loading: () => Container(
+      loading: () => const SizedBox(
         height: 60,
         child: Center(child: CircularProgressIndicator()),
       ),
@@ -777,7 +777,7 @@ class _AddTransactionBottomSheetState
         ),
         child: Text(
           l10n.save,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppSizes.textMedium,
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -857,7 +857,7 @@ class _TypeButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
-        padding: EdgeInsets.all(AppSizes.spacing8),
+        padding: const EdgeInsets.all(AppSizes.spacing8),
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.2)
@@ -893,7 +893,7 @@ class _TypeButton extends StatelessWidget {
                 size: 14.sp,
               ),
             ),
-            SizedBox(height: AppSizes.spacing4),
+            const SizedBox(height: AppSizes.spacing4),
             Text(
               label,
               style: TextStyle(

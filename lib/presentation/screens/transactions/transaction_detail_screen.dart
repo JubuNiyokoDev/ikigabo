@@ -46,14 +46,14 @@ class TransactionDetailScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(AppSizes.spacing16),
+          padding: const EdgeInsets.all(AppSizes.spacing16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildAmountCard(isDark, l10n).animate().fadeIn(delay: 100.ms),
-              SizedBox(height: AppSizes.spacing16),
+              const SizedBox(height: AppSizes.spacing16),
               _buildDetailsCard(isDark, l10n).animate().fadeIn(delay: 200.ms),
-              SizedBox(height: AppSizes.spacing16),
+              const SizedBox(height: AppSizes.spacing16),
               _buildSourceCard(isDark, l10n).animate().fadeIn(delay: 300.ms),
             ],
           ),
@@ -69,7 +69,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(AppSizes.spacing20),
+      padding: const EdgeInsets.all(AppSizes.spacing20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [color, color.withValues(alpha: 0.8)],
@@ -96,7 +96,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
             child: Icon(icon, color: Colors.white, size: 30),
           ),
-          SizedBox(height: AppSizes.spacing16),
+          const SizedBox(height: AppSizes.spacing16),
           CurrencyAmountWidget(
             amount: transaction.amount,
             originalCurrency: transaction.currency,
@@ -106,7 +106,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: AppSizes.spacing8),
+          const SizedBox(height: AppSizes.spacing8),
           Text(
             isIncome ? l10n.entry : l10n.exit,
             style: const TextStyle(
@@ -122,7 +122,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   Widget _buildDetailsCard(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing16),
+      padding: const EdgeInsets.all(AppSizes.spacing16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -138,7 +138,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textDark : Colors.black87,
             ),
           ),
-          SizedBox(height: AppSizes.spacing16),
+          const SizedBox(height: AppSizes.spacing16),
           _buildDetailRow(
             l10n.description,
             transaction.displayDescription,
@@ -170,7 +170,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   Widget _buildSourceCard(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing16),
+      padding: const EdgeInsets.all(AppSizes.spacing16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -186,7 +186,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textDark : Colors.black87,
             ),
           ),
-          SizedBox(height: AppSizes.spacing16),
+          const SizedBox(height: AppSizes.spacing16),
           if (transaction.sourceName != null)
             _buildDetailRow(
               l10n.source,
@@ -215,7 +215,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   Widget _buildDetailRow(String label, String value, IconData icon, bool isDark) {
     return Padding(
-      padding: EdgeInsets.only(bottom: AppSizes.spacing12),
+      padding: const EdgeInsets.only(bottom: AppSizes.spacing12),
       child: Row(
         children: [
           Container(
@@ -227,7 +227,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
             child: Icon(icon, color: AppColors.primary, size: 16),
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +239,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                     color: isDark ? AppColors.textSecondaryDark : Colors.grey,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: TextStyle(

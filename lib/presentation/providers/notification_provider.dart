@@ -59,11 +59,11 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
   void _loadSettings() {
     if (_prefsService != null) {
       state = NotificationSettings(
-        debtReminders: _prefsService!.getDebtRemindersEnabled(),
-        bankFeeReminders: _prefsService!.getBankFeesEnabled(),
-        wealthMilestones: _prefsService!.getWealthMilestonesEnabled(),
-        backupReminders: _prefsService!.getBackupRemindersEnabled(),
-        overdueAlerts: _prefsService!.getOverdueAlertsEnabled(),
+        debtReminders: _prefsService.getDebtRemindersEnabled(),
+        bankFeeReminders: _prefsService.getBankFeesEnabled(),
+        wealthMilestones: _prefsService.getWealthMilestonesEnabled(),
+        backupReminders: _prefsService.getBackupRemindersEnabled(),
+        overdueAlerts: _prefsService.getOverdueAlertsEnabled(),
       );
     }
   }

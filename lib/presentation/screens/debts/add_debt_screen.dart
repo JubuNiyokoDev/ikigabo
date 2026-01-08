@@ -262,34 +262,34 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             children: [
               _buildDebtTypeSelector(isDark, l10n).animate().fadeIn(delay: 100.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildPersonNameField(isDark, l10n).animate().fadeIn(delay: 150.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildPersonContactField(isDark, l10n).animate().fadeIn(delay: 200.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildTotalAmountField(isDark).animate().fadeIn(delay: 250.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               if (widget.debt == null && double.tryParse(_totalAmountController.text) != null && double.parse(_totalAmountController.text) > 0)
                 _buildSourceSelector(isDark, l10n).animate().fadeIn(delay: 275.ms),
               if (widget.debt == null && double.tryParse(_totalAmountController.text) != null && double.parse(_totalAmountController.text) > 0)
-                SizedBox(height: AppSizes.spacing12),
+                const SizedBox(height: AppSizes.spacing12),
               _buildCurrencySelector(isDark).animate().fadeIn(delay: 300.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildDatePicker(isDark).animate().fadeIn(delay: 350.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildDueDatePicker(isDark).animate().fadeIn(delay: 400.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildReminderSection(isDark, l10n).animate().fadeIn(delay: 425.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildInterestSection(isDark).animate().fadeIn(delay: 450.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildCollateralField(isDark).animate().fadeIn(delay: 500.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildDescriptionField(isDark).animate().fadeIn(delay: 550.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildSaveButton().animate().fadeIn(delay: 600.ms),
             ],
           ),
@@ -310,7 +310,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Row(
           children: [
             Flexible(
@@ -323,7 +323,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                 isDark: isDark,
               ),
             ),
-            SizedBox(width: AppSizes.spacing12),
+            const SizedBox(width: AppSizes.spacing12),
             Flexible(
               child: _TypeButton(
                 label: l10n.borrowed,
@@ -437,7 +437,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Row(
           children: AppCurrencies.all.map((currency) {
             final isSelected = _currency == currency.code;
@@ -582,7 +582,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
 
   Widget _buildReminderSection(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -621,7 +621,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             ],
           ),
           if (_hasReminder) ...[
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             InkWell(
               onTap: () async {
                 final date = await showDatePicker(
@@ -680,7 +680,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
   Widget _buildInterestSection(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -719,7 +719,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             ],
           ),
           if (_hasInterest) ...[
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             TextFormField(
               controller: _interestRateController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -814,7 +814,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                 color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
 
             // Option argent externe
             GestureDetector(
@@ -842,7 +842,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                       AppIcons.money,
                       color: _isExternalMoney ? AppColors.primary : AppColors.textSecondaryDark,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text(
                       l10n.externalMoney,
                       style: TextStyle(
@@ -885,12 +885,12 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(AppIcons.warning, color: AppColors.warning, size: 20),
-                        SizedBox(width: 12),
+                        const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            l10n.noCurrencySourceAvailable + ' ' + _currency,
-                            style: TextStyle(
+                            '${l10n.noCurrencySourceAvailable} $_currency',
+                            style: const TextStyle(
                               color: AppColors.warning,
                               fontSize: 12,
                             ),
@@ -906,7 +906,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                   final realId = source.id > 0 ? source.id : -source.id;
                   final sourceKey = '${realId}_${source.iconName ?? 'source'}';
                   final selectedKey = _selectedSourceId != null && _selectedSourceName != null
-                      ? '${_selectedSourceId}_${_selectedSourceType}'
+                      ? '${_selectedSourceId}_$_selectedSourceType'
                       : null;
                   final isSelected = !_isExternalMoney && selectedKey == sourceKey;
 
@@ -937,7 +937,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                             source.iconName == 'bank' ? AppIcons.bank : AppIcons.wallet,
                             color: isSelected ? AppColors.primary : AppColors.textSecondaryDark,
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -953,7 +953,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
                                 ),
                                 Text(
                                   '${source.amount.toStringAsFixed(0)} ${source.currency}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textSecondaryDark,
                                   ),
@@ -1012,7 +1012,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
         ),
         child: Text(
           widget.debt == null ? l10n.addDebt : l10n.save,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppSizes.textMedium,
             fontWeight: FontWeight.w600,
             color: Colors.white,

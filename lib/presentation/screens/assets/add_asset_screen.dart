@@ -235,23 +235,23 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             children: [
               _buildNameField(isDark, l10n).animate().fadeIn(delay: 100.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildAssetTypeSelector(
                 isDark,
                 l10n,
               ).animate().fadeIn(delay: 150.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildPurchasePriceField(isDark).animate().fadeIn(delay: 200.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               if (_showSourceSelector)
                 _buildSourceSelector(
                   isDark,
                   l10n,
                 ).animate().fadeIn(delay: 220.ms),
-              if (_showSourceSelector) SizedBox(height: AppSizes.spacing12),
+              if (_showSourceSelector) const SizedBox(height: AppSizes.spacing12),
               if (double.tryParse(_purchasePriceController.text) != null &&
                   double.parse(_purchasePriceController.text) > 0 &&
                   widget.asset == null)
@@ -262,19 +262,19 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
               if (double.tryParse(_purchasePriceController.text) != null &&
                   double.parse(_purchasePriceController.text) > 0 &&
                   widget.asset == null)
-                SizedBox(height: AppSizes.spacing12),
+                const SizedBox(height: AppSizes.spacing12),
               _buildCurrentValueField(isDark).animate().fadeIn(delay: 250.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildCurrencySelector(isDark).animate().fadeIn(delay: 300.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildQuantityFields(isDark).animate().fadeIn(delay: 350.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildPurchaseDatePicker(isDark).animate().fadeIn(delay: 400.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildLocationField(isDark).animate().fadeIn(delay: 450.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildDescriptionField(isDark).animate().fadeIn(delay: 500.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildSaveButton(l10n).animate().fadeIn(delay: 550.ms),
             ],
           ),
@@ -319,7 +319,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Wrap(
           spacing: 6.w,
           runSpacing: 6.h,
@@ -334,7 +334,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
               backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
               selectedColor: AppColors.accent.withValues(alpha: 0.3),
               checkmarkColor: AppColors.accent,
-              labelStyle: TextStyle(fontSize: AppSizes.textSmall),
+              labelStyle: const TextStyle(fontSize: AppSizes.textSmall),
             );
           }).toList(),
         ),
@@ -432,7 +432,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
@@ -510,7 +510,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
             ),
           ),
         ),
-        SizedBox(width: AppSizes.spacing12),
+        const SizedBox(width: AppSizes.spacing12),
         Expanded(
           child: TextFormField(
             controller: _unitController,
@@ -647,7 +647,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
         ),
         child: Text(
           widget.asset == null ? l10n.addAsset : l10n.save,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppSizes.textMedium,
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -694,7 +694,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
 
         if (availableSources.isEmpty) {
           return Container(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.r),
@@ -704,12 +704,12 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
             ),
             child: Row(
               children: [
-                Icon(AppIcons.warning, color: AppColors.warning, size: 20),
-                SizedBox(width: AppSizes.spacing12),
+                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(
-                    l10n.noMoneySourceAvailable + ' ' + l10n.createSourceFirst,
-                    style: TextStyle(
+                    '${l10n.noMoneySourceAvailable} ${l10n.createSourceFirst}',
+                    style: const TextStyle(
                       color: AppColors.warning,
                       fontSize: AppSizes.textSmall,
                     ),
@@ -731,9 +731,9 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                 color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Container(
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceDark : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
@@ -754,8 +754,8 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                       _selectedSource = isSelected ? null : source;
                     }),
                     child: Container(
-                      padding: EdgeInsets.all(AppSizes.spacing12),
-                      margin: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(AppSizes.spacing12),
+                      margin: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.1)
@@ -780,7 +780,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                               size: 18,
                             ),
                           ),
-                          SizedBox(width: AppSizes.spacing12),
+                          const SizedBox(width: AppSizes.spacing12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,7 +797,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                                 ),
                                 Text(
                                   '${source.amount.toStringAsFixed(0)} ${source.currency}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: AppSizes.textSmall,
                                     color: AppColors.success,
                                     fontWeight: FontWeight.w500,
@@ -807,7 +807,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                             ),
                           ),
                           if (isSelected)
-                            Icon(
+                            const Icon(
                               AppIcons.success,
                               color: AppColors.primary,
                               size: 20,
@@ -822,15 +822,15 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
           ],
         );
       },
-      loading: () => Container(
+      loading: () => const SizedBox(
         height: 60,
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (e, s) => Container(
-        padding: EdgeInsets.all(AppSizes.spacing12),
+        padding: const EdgeInsets.all(AppSizes.spacing12),
         child: Text(
           l10n.loadingError,
-          style: TextStyle(color: AppColors.error),
+          style: const TextStyle(color: AppColors.error),
         ),
       ),
     );
@@ -853,7 +853,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
 
   Widget _buildSkipSourceOption(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -881,7 +881,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
             },
             activeColor: AppColors.primary,
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,7 +894,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
                     color: isDark ? AppColors.textDark : Colors.black87,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   l10n.assetWasAlreadyOwned,
                   style: TextStyle(

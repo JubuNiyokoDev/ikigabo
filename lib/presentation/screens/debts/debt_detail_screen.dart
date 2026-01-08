@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,20 +37,20 @@ class DebtDetailScreen extends ConsumerWidget {
             _buildHeader(context, isGiven, isDark, l10n),
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 children: [
                   _buildAmountCard(context, isGiven, progress, isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildProgressSection(context, progress, isGiven, isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildInfoSection(context, isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   if (debt.hasInterest) ...[
                     _buildInterestSection(context, isDark, l10n),
-                    SizedBox(height: AppSizes.spacing12),
+                    const SizedBox(height: AppSizes.spacing12),
                   ],
                   _buildPaymentHistory(context, isDark, l10n),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildActionsSection(context, ref, isDark, l10n),
                 ],
               ),
@@ -64,7 +63,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, bool isGiven, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isGiven
@@ -96,7 +95,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Container(
             width: 32.w,
             height: 32.h,
@@ -110,10 +109,10 @@ class DebtDetailScreen extends ConsumerWidget {
               color: Colors.white,
             ),
           ).animate().scale(delay: 100.ms),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Text(
             debt.personName,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -123,7 +122,7 @@ class DebtDetailScreen extends ConsumerWidget {
           SizedBox(height: 2.h),
           Text(
             isGiven ? l10n.lentTo : l10n.borrowedFrom,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textSmall,
               color: Colors.white70,
             ),
@@ -135,7 +134,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildAmountCard(BuildContext context, bool isGiven, double progress, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -154,7 +153,7 @@ class DebtDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textSecondaryDark : Colors.black54,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           CurrencyAmountWidget(
             amount: debt.remainingAmount,
             originalCurrency: debt.currency,
@@ -164,7 +163,7 @@ class DebtDetailScreen extends ConsumerWidget {
               color: isGiven ? AppColors.success : AppColors.error,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
             decoration: BoxDecoration(
@@ -187,7 +186,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildProgressSection(BuildContext context, double progress, bool isGiven, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -198,7 +197,7 @@ class DebtDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.chart, color: AppColors.primary, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.progression,
                 style: TextStyle(
@@ -209,7 +208,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           ClipRRect(
             borderRadius: BorderRadius.circular(8.r),
             child: LinearProgressIndicator(
@@ -221,7 +220,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -278,7 +277,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildInfoSection(BuildContext context, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -289,7 +288,7 @@ class DebtDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.info, color: AppColors.primary, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.informationsLabel,
                 style: TextStyle(
@@ -300,7 +299,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           if (debt.personContact != null) ...[
             _InfoRow(
               label: l10n.contactLabel,
@@ -327,9 +326,9 @@ class DebtDetailScreen extends ConsumerWidget {
               isDark: isDark,
             ),
             if (debt.isOverdue) ...[
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               Container(
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
@@ -340,10 +339,10 @@ class DebtDetailScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(AppIcons.warning, color: AppColors.error, size: 24.sp),
-                    SizedBox(width: AppSizes.spacing12),
+                    const SizedBox(width: AppSizes.spacing12),
                     Text(
                       l10n.debtOverdueWarning,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppSizes.textSmall,
                         fontWeight: FontWeight.w600,
                         color: AppColors.error,
@@ -382,7 +381,7 @@ class DebtDetailScreen extends ConsumerWidget {
     final interestAmount = totalWithInterest - debt.totalAmount;
 
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -394,7 +393,7 @@ class DebtDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.warning, color: AppColors.warning, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.interestLabel,
                 style: TextStyle(
@@ -405,7 +404,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _InfoRow(
             label: l10n.interestRateLabel,
             value: '${debt.interestRate}%',
@@ -433,7 +432,7 @@ class DebtDetailScreen extends ConsumerWidget {
                     CurrencyAmountWidget(
                       amount: interestAmount,
                       originalCurrency: debt.currency,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppSizes.textSmall,
                         fontWeight: FontWeight.w600,
                         color: AppColors.error,
@@ -464,7 +463,7 @@ class DebtDetailScreen extends ConsumerWidget {
                     CurrencyAmountWidget(
                       amount: totalWithInterest,
                       originalCurrency: debt.currency,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppSizes.textSmall,
                         fontWeight: FontWeight.w600,
                         color: AppColors.error,
@@ -482,7 +481,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildPaymentHistory(BuildContext context, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -493,7 +492,7 @@ class DebtDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(AppIcons.money, color: AppColors.primary, size: 24.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.paymentHistoryLabel,
                 style: TextStyle(
@@ -504,7 +503,7 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           if (debt.paidAmount > 0) ...[
             _PaymentHistoryItem(
               amount: debt.paidAmount,
@@ -515,7 +514,7 @@ class DebtDetailScreen extends ConsumerWidget {
           ] else ...[
             Center(
               child: Padding(
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 child: Text(
                   l10n.noPaymentsRecorded,
                   style: TextStyle(
@@ -533,7 +532,7 @@ class DebtDetailScreen extends ConsumerWidget {
 
   Widget _buildActionsSection(BuildContext context, WidgetRef ref, bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -549,7 +548,7 @@ class DebtDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textDark : Colors.black87,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           if (debt.status != DebtStatus.fullyPaid) ...[
             _ActionButton(
               label: l10n.recordPayment,
@@ -559,7 +558,7 @@ class DebtDetailScreen extends ConsumerWidget {
                 _showPaymentDialog(context, ref);
               },
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
           ],
           _ActionButton(
             label: l10n.editDebt,
@@ -572,7 +571,7 @@ class DebtDetailScreen extends ConsumerWidget {
               );
             },
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _ActionButton(
             label: l10n.deleteDebt,
             icon: AppIcons.delete,
@@ -746,7 +745,7 @@ class _ActionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
-        padding: EdgeInsets.all(AppSizes.spacing12),
+        padding: const EdgeInsets.all(AppSizes.spacing12),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16.r),
@@ -810,20 +809,20 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
           children: [
             Text(
               l10n.recordPaymentTitle,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppSizes.textMedium,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textDark,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Text(
               '${l10n.remainingAmountLabel}: ${widget.debt.remainingAmount} ${widget.debt.currency}',
               style: const TextStyle(color: AppColors.textSecondaryDark),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             TextFormField(
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -836,13 +835,13 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
               ),
               onChanged: (value) => setState(() {}),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             if (double.tryParse(_amountController.text) != null && double.parse(_amountController.text) > 0) ...[
               Text(
                 widget.debt.type == DebtType.given ? l10n.whereToReceiveMoney : l10n.whereToTakeMoney,
                 style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark),
               ),
-              SizedBox(height: AppSizes.spacing8),
+              const SizedBox(height: AppSizes.spacing8),
               GestureDetector(
                 onTap: () => setState(() {
                   _isExternalMoney = true;
@@ -850,7 +849,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                   _selectedSourceName = null;
                 }),
                 child: Container(
-                  padding: EdgeInsets.all(AppSizes.spacing12),
+                  padding: const EdgeInsets.all(AppSizes.spacing12),
                   decoration: BoxDecoration(
                     color: _isExternalMoney ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surfaceDark,
                     borderRadius: BorderRadius.circular(8.r),
@@ -859,7 +858,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                   child: Row(
                     children: [
                       Icon(AppIcons.money, color: _isExternalMoney ? AppColors.primary : AppColors.textSecondaryDark),
-                      SizedBox(width: AppSizes.spacing8),
+                      const SizedBox(width: AppSizes.spacing8),
                       Text(
                         l10n.externalMoneyLabel,
                         style: TextStyle(color: _isExternalMoney ? AppColors.primary : AppColors.textDark),
@@ -869,7 +868,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                   ),
                 ),
               ),
-              SizedBox(height: AppSizes.spacing8),
+              const SizedBox(height: AppSizes.spacing8),
               Consumer(
                 builder: (context, ref, child) {
                   final sourcesAsync = ref.watch(originalSourcesProvider);
@@ -881,7 +880,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                       ).toList();
                       
                       if (compatibleSources.isEmpty) {
-                        return Container(
+                        return SizedBox(
                           height: 100,
                           child: Center(
                             child: Text(
@@ -893,7 +892,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                         );
                       }
                       
-                      return Container(
+                      return SizedBox(
                         height: 200,
                         child: ListView.builder(
                           itemCount: compatibleSources.length,
@@ -902,7 +901,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                             final realId = source.id > 0 ? source.id : -source.id;
                             final sourceKey = '${realId}_${source.iconName ?? 'source'}';
                             final selectedKey = _selectedSourceId != null && _selectedSourceName != null
-                                ? '${_selectedSourceId}_${_selectedSourceType}'
+                                ? '${_selectedSourceId}_$_selectedSourceType'
                                 : null;
                             final isSelected = !_isExternalMoney && selectedKey == sourceKey;
                             return GestureDetector(
@@ -913,8 +912,8 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                                 _selectedSourceType = source.iconName ?? 'source';
                               }),
                               child: Container(
-                                margin: EdgeInsets.only(bottom: AppSizes.spacing8),
-                                padding: EdgeInsets.all(AppSizes.spacing12),
+                                margin: const EdgeInsets.only(bottom: AppSizes.spacing8),
+                                padding: const EdgeInsets.all(AppSizes.spacing12),
                                 decoration: BoxDecoration(
                                   color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surfaceDark,
                                   borderRadius: BorderRadius.circular(8.r),
@@ -926,7 +925,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                                       source.iconName == 'bank' ? AppIcons.bank : AppIcons.wallet,
                                       color: isSelected ? AppColors.primary : AppColors.textSecondaryDark,
                                     ),
-                                    SizedBox(width: AppSizes.spacing12),
+                                    const SizedBox(width: AppSizes.spacing12),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -936,7 +935,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                                             style: TextStyle(color: isSelected ? AppColors.primary : AppColors.textDark),
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          Text('${source.amount.toStringAsFixed(0)} ${source.currency}', style: TextStyle(fontSize: AppSizes.textSmall, color: AppColors.textSecondaryDark)),
+                                          Text('${source.amount.toStringAsFixed(0)} ${source.currency}', style: const TextStyle(fontSize: AppSizes.textSmall, color: AppColors.textSecondaryDark)),
                                         ],
                                       ),
                                     ),
@@ -954,7 +953,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                 },
               ),
             ],
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Row(
               children: [
                 Expanded(
@@ -963,7 +962,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                     child: Text(l10n.cancel),
                   ),
                 ),
-                SizedBox(width: AppSizes.spacing12),
+                const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _savePayment,
@@ -1079,8 +1078,8 @@ class _PaymentHistoryItem extends ConsumerWidget {
     ref.watch(displayCurrencyProvider);
 
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
-      margin: EdgeInsets.only(bottom: AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
+      margin: const EdgeInsets.only(bottom: AppSizes.spacing12),
       decoration: BoxDecoration(
         color: AppColors.backgroundDark,
         borderRadius: BorderRadius.circular(16.r),
@@ -1100,14 +1099,14 @@ class _PaymentHistoryItem extends ConsumerWidget {
               size: 24.sp,
             ),
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   isInitial ? l10n.cumulativePayments : l10n.payment,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: AppSizes.textMedium,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textDark,
@@ -1116,7 +1115,7 @@ class _PaymentHistoryItem extends ConsumerWidget {
                 SizedBox(height: 2.h),
                 Text(
                   '${date.day}/${date.month}/${date.year}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: AppSizes.textMedium,
                     color: AppColors.textSecondaryDark,
                   ),
@@ -1127,7 +1126,7 @@ class _PaymentHistoryItem extends ConsumerWidget {
           CurrencyAmountWidget(
             amount: amount,
             originalCurrency: debt.currency,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: AppColors.success,

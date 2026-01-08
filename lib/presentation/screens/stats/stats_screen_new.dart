@@ -77,7 +77,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     color: isDark ? AppColors.textDark : Colors.black87,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   l10n.analyzeYourFinances,
                   style: TextStyle(
@@ -220,11 +220,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         children: [
           Row(
             children: [
-              Icon(AppIcons.pieChart, color: AppColors.primary, size: 20),
+              const Icon(AppIcons.pieChart, color: AppColors.primary, size: 20),
               const SizedBox(width: 14),
               Text(
                 l10n.distribution,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -239,10 +239,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 if (income == 0 && expense == 0) {
                   return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(40),
+                      padding: const EdgeInsets.all(40),
                       child: Text(
                         l10n.noData,
-                        style: TextStyle(color: AppColors.textSecondaryDark),
+                        style: const TextStyle(color: AppColors.textSecondaryDark),
                       ),
                     ),
                   );
@@ -328,11 +328,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         children: [
           Row(
             children: [
-              Icon(AppIcons.chart, color: AppColors.primary, size: 24),
+              const Icon(AppIcons.chart, color: AppColors.primary, size: 24),
               const SizedBox(width: 14),
               Text(
                 l10n.trend,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -349,7 +349,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(color: AppColors.borderDark, strokeWidth: 1);
+                    return const FlLine(color: AppColors.borderDark, strokeWidth: 1);
                   },
                 ),
                 titlesData: FlTitlesData(
@@ -474,11 +474,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         children: [
           Row(
             children: [
-              Icon(AppIcons.filter, color: AppColors.primary, size: 24),
+              const Icon(AppIcons.filter, color: AppColors.primary, size: 24),
               const SizedBox(width: 14),
               Text(
                 l10n.byCategory,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,

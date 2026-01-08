@@ -33,7 +33,7 @@ class AssetDetailScreen extends ConsumerWidget {
             _buildHeader(context, isDark),
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(AppSizes.spacing12),
+                padding: const EdgeInsets.all(AppSizes.spacing12),
                 children: [
                   _buildValueCard(
                     context,
@@ -42,11 +42,11 @@ class AssetDetailScreen extends ConsumerWidget {
                     profitLoss,
                     profitLossPercentage,
                   ),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildInfoSection(context, isDark),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildFinancialSection(context, isDark),
-                  SizedBox(height: AppSizes.spacing12),
+                  const SizedBox(height: AppSizes.spacing12),
                   _buildActionsSection(context, ref, isDark),
                 ],
               ),
@@ -59,8 +59,8 @@ class AssetDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, bool isDark) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(AppSizes.spacing12),
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.accent, AppColors.secondary],
           begin: Alignment.topLeft,
@@ -89,7 +89,7 @@ class AssetDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Container(
             width: 28.w,
             height: 28.h,
@@ -99,10 +99,10 @@ class AssetDetailScreen extends ConsumerWidget {
             ),
             child: Icon(_getTypeIcon(), size: 14.sp, color: Colors.white),
           ).animate().scale(delay: 100.ms),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Text(
             asset.name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -112,7 +112,7 @@ class AssetDetailScreen extends ConsumerWidget {
           SizedBox(height: 2.h),
           Text(
             _getTypeLabel(asset.type, context),
-            style: TextStyle(fontSize: AppSizes.textSmall, color: Colors.white70),
+            style: const TextStyle(fontSize: AppSizes.textSmall, color: Colors.white70),
           ).animate().fadeIn(delay: 250.ms),
         ],
       ),
@@ -157,7 +157,7 @@ class AssetDetailScreen extends ConsumerWidget {
   ) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -239,7 +239,7 @@ class AssetDetailScreen extends ConsumerWidget {
   Widget _buildInfoSection(BuildContext context, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -249,7 +249,7 @@ class AssetDetailScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(AppIcons.info, color: AppColors.primary, size: 16),
+              const Icon(AppIcons.info, color: AppColors.primary, size: 16),
               const SizedBox(width: 8),
               Text(
                 l10n.information,
@@ -299,7 +299,7 @@ class AssetDetailScreen extends ConsumerWidget {
   Widget _buildFinancialSection(BuildContext context, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -309,8 +309,8 @@ class AssetDetailScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(AppIcons.money, color: AppColors.primary, size: 16),
-              SizedBox(width: AppSizes.spacing12),
+              const Icon(AppIcons.money, color: AppColors.primary, size: 16),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.financialDetails,
                 style: TextStyle(
@@ -321,7 +321,7 @@ class AssetDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _InfoRow(
             label: l10n.purchasePrice,
             value: '',
@@ -391,7 +391,7 @@ class AssetDetailScreen extends ConsumerWidget {
   Widget _buildActionsSection(BuildContext context, WidgetRef ref, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -407,7 +407,7 @@ class AssetDetailScreen extends ConsumerWidget {
               color: isDark ? AppColors.textDark : Colors.black87,
             ),
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _ActionButton(
             label: l10n.editAsset,
             icon: AppIcons.edit,
@@ -419,7 +419,7 @@ class AssetDetailScreen extends ConsumerWidget {
               );
             },
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           _ActionButton(
             label: l10n.deleteAsset,
             icon: AppIcons.delete,
@@ -566,7 +566,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppSizes.textSmall,
                   color: AppColors.textSecondaryDark,
                 ),

@@ -5,7 +5,6 @@ import 'package:ikigabo/core/constants/app_sizes.dart';
 import 'package:ikigabo/core/utils/currency_formatter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/currencies.dart';
 import '../../../data/models/asset_model.dart';
 import '../../../l10n/app_localizations.dart';
@@ -79,7 +78,7 @@ class AssetsListScreen extends ConsumerWidget {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppColors.accent, AppColors.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -104,7 +103,7 @@ class AssetsListScreen extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.assets,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppSizes.textMedium,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -113,7 +112,7 @@ class AssetsListScreen extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       l10n.convertibleAsset,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppSizes.textSmall,
                         color: Colors.white70,
                       ),
@@ -134,7 +133,7 @@ class AssetsListScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             l10n.totalValue,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textSmall,
               color: Colors.white70,
             ),
@@ -143,14 +142,14 @@ class AssetsListScreen extends ConsumerWidget {
           totalValueAsync.when(
             data: (value) => DisplayCurrencyAmountWidget(
               amount: value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppSizes.textLarge,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
             loading: () => const CircularProgressIndicator(color: Colors.white),
-            error: (e, s) => DisplayCurrencyAmountWidget(
+            error: (e, s) => const DisplayCurrencyAmountWidget(
               amount: 0,
               style: TextStyle(
                 fontSize: AppSizes.textLarge,
@@ -364,7 +363,7 @@ class AssetsListScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 l10n.noAssets,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppSizes.textLarge,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -373,7 +372,7 @@ class AssetsListScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 l10n.addFirstAsset,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppSizes.textSmall,
                   color: AppColors.textSecondaryDark,
                 ),
@@ -401,7 +400,7 @@ class AssetsListScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             l10n.error,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -411,7 +410,7 @@ class AssetsListScreen extends ConsumerWidget {
           Text(
             error,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textMedium,
               color: AppColors.textSecondaryDark,
             ),
@@ -510,7 +509,7 @@ class _AssetCard extends ConsumerWidget {
                             ),
                             child: Text(
                               'x${asset.quantity}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: AppSizes.textSmall,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -536,7 +535,7 @@ class _AssetCard extends ConsumerWidget {
                           child: CurrencyAmountWidget(
                             amount: asset.totalValue,
                             originalCurrency: asset.currency,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: AppSizes.textSmall,
                               fontWeight: FontWeight.bold,
                               color: AppColors.accent,
