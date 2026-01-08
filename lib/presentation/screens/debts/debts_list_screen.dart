@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:ikigabo/presentation/widgets/shimmer_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
@@ -11,8 +12,10 @@ import '../../providers/search_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
+import '../../widgets/page_with_banner.dart';
 import 'add_debt_screen.dart';
 import 'debt_detail_screen.dart';
+import '../../../core/services/ad_manager.dart';
 
 class DebtsListScreen extends ConsumerStatefulWidget {
   const DebtsListScreen({super.key});
@@ -76,6 +79,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          AdManager.showDebtAd();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddDebtScreen()),
@@ -275,15 +279,28 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
   }
 
   Widget _buildDebtsList(List<DebtModel> debts, AppLocalizations l10n) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: debts.length,
-      itemBuilder: (context, index) {
-        final debt = debts[index];
-        return _DebtCard(
-          debt: debt,
-          l10n: l10n,
-        ).animate().fadeIn(delay: (500 + index * 50).ms);
+    return Consumer(
+      builder: (context, ref, child) {
+        final items = debts
+            .map(
+              (debt) => _DebtCard(
+                debt: debt,
+                l10n: l10n,
+              ).animate().fadeIn(delay: (500 + debts.indexOf(debt) * 50).ms),
+            )
+            .toList();
+
+        final itemsWithBanner = BannerInjector.injectBanner(
+          items,
+          ref,
+          position: 1,
+        );
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: itemsWithBanner.length,
+          itemBuilder: (context, index) => itemsWithBanner[index],
+        );
       },
     );
   }
@@ -308,7 +325,9 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
                 child: Icon(
                   AppIcons.money,
                   size: 20,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
               ),
               const SizedBox(height: 16),
@@ -325,7 +344,9 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
                 l10n.addFirstDebt,
                 style: TextStyle(
                   fontSize: AppSizes.textSmall,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
               ),
             ],
@@ -336,9 +357,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+    return const Center(child: ShimmerList(itemCount: 5));
   }
 
   Widget _buildErrorState(String error, AppLocalizations l10n) {
@@ -420,7 +439,9 @@ class _SummaryCard extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
               ),
               const SizedBox(height: 4),
@@ -435,7 +456,7 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 loading: () => const SizedBox(
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: ShimmerWidget(width: 80, height: 18),
                 ),
                 error: (e, s) => const DisplayCurrencyAmountWidget(
                   amount: 0,
@@ -546,7 +567,9 @@ class _DebtCard extends ConsumerWidget {
                           isGiven ? l10n.lentTo : l10n.borrowedFrom,
                           style: TextStyle(
                             fontSize: AppSizes.textSmall,
-                            color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -574,7 +597,9 @@ class _DebtCard extends ConsumerWidget {
                             fontSize: AppSizes.textSmall,
                             color: debt.isOverdue
                                 ? AppColors.error
-                                : (isDark ? AppColors.textSecondaryDark : Colors.grey.shade600),
+                                : (isDark
+                                      ? AppColors.textSecondaryDark
+                                      : Colors.grey.shade600),
                           ),
                         ),
                       ],
@@ -588,7 +613,9 @@ class _DebtCard extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: progress / 100,
                   minHeight: 6,
-                  backgroundColor: isDark ? AppColors.borderDark : Colors.grey.shade300,
+                  backgroundColor: isDark
+                      ? AppColors.borderDark
+                      : Colors.grey.shade300,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     isGiven ? AppColors.success : AppColors.error,
                   ),
@@ -602,7 +629,9 @@ class _DebtCard extends ConsumerWidget {
                     '${progress.toStringAsFixed(0)}% ${l10n.paid}',
                     style: TextStyle(
                       fontSize: AppSizes.textSmall,
-                      color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : Colors.grey.shade600,
                     ),
                   ),
                   Row(
@@ -664,18 +693,24 @@ class _DebtCard extends ConsumerWidget {
   Future<bool> _showDeleteDialog(BuildContext context, WidgetRef ref) async {
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
-    
+
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
             title: Text(
               'Supprimer la dette',
-              style: TextStyle(color: isDark ? AppColors.textDark : Colors.black87),
+              style: TextStyle(
+                color: isDark ? AppColors.textDark : Colors.black87,
+              ),
             ),
             content: Text(
               'Êtes-vous sûr de vouloir supprimer cette dette avec "${debt.personName}" ?',
-              style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : Colors.grey.shade600,
+              ),
             ),
             actions: [
               TextButton(
@@ -718,54 +753,56 @@ class _AlertCard extends StatelessWidget {
       builder: (context, ref, child) {
         final themeMode = ref.watch(themeProvider);
         final isDark = themeMode == ThemeMode.dark;
-        
+
         return Container(
-      padding: const EdgeInsets.all(18),
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
+          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '$count dette${count > 1 ? 's' : ''}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
-                  ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$count dette${count > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Icon(AppIcons.back, color: color, size: 16),
+            ],
           ),
-          Icon(AppIcons.back, color: color, size: 16),
-        ],
-      ),
-    );
+        );
       },
     );
   }

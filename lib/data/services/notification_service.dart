@@ -235,46 +235,42 @@ class NotificationService {
   }
 
   Future<void> celebrateWealthMilestone(double newWealth, String currency) async {
-    final milestones = [50000, 100000, 250000, 500000, 1000000, 2500000, 5000000];
+    // Vérifier si les objectifs patrimoine sont activés
+    if (_prefsService?.getWealthMilestonesEnabled() != true) return;
     
-    for (final milestone in milestones) {
+    final milestones = [50000, 100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000];
+    
+    // Trouver le plus grand milestone atteint
+    int? achievedMilestone;
+    for (final milestone in milestones.reversed) {
       if (newWealth >= milestone) {
-        final key = 'milestone_$milestone';
-        final alreadyCelebrated = _prefsService?.getBool(key) ?? false;
-        
-        if (!alreadyCelebrated) {
-          _addNotification(
-            NotificationItem(
-              id: 'wealth_milestone_$milestone',
-              title: '🎉 Félicitations !',
-              body: 'Vous avez atteint ${milestone ~/ 1000}K $currency de patrimoine !',
-              type: NotificationType.wealthMilestone,
-              scheduledDate: DateTime.now(),
-            ),
-          );
-          
-          await _prefsService?.setBool(key, true);
-          break;
-        }
+        achievedMilestone = milestone;
+        break;
       }
+    }
+    
+    if (achievedMilestone == null) return;
+    
+    final key = 'milestone_$achievedMilestone';
+    final alreadyCelebrated = _prefsService?.getBool(key) ?? false;
+    
+    if (!alreadyCelebrated) {
+      _addNotification(
+        NotificationItem(
+          id: 'wealth_milestone_$achievedMilestone',
+          title: '🎉 Nouveau Palier Atteint !',
+          body: 'Votre patrimoine total est maintenant de ${newWealth.toStringAsFixed(0)} $currency (palier ${achievedMilestone ~/ 1000}K franchi)',
+          type: NotificationType.wealthMilestone,
+          scheduledDate: DateTime.now(),
+        ),
+      );
+      
+      await _prefsService?.setBool(key, true);
     }
   }
 
-  Future<void> showWealthMilestone(double amount, String currency) async {
-    // Vérifier si les objectifs patrimoine sont activés
-    if (_prefsService?.getWealthMilestonesEnabled() != true) return;
-
-    _addNotification(
-      NotificationItem(
-        id: 'wealth_milestone_${DateTime.now().millisecondsSinceEpoch}',
-        title: 'Félicitations',
-        body:
-            'Votre patrimoine a atteint ${amount.toStringAsFixed(0)} $currency',
-        type: NotificationType.wealthMilestone,
-        scheduledDate: DateTime.now(),
-      ),
-    );
-  }
+  // Supprimer cette méthode inutile qui crée des notifications aléatoires
+  // Future<void> showWealthMilestone(double amount, String currency) async {
 
   Future<void> scheduleBankFeeAlert(BankModel bank) async {
     if (bank.bankType == BankType.free || bank.nextDeductionDate == null) {

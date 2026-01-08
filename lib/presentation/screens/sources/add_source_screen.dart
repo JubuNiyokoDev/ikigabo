@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
+import '../../../core/services/ad_manager.dart';
 
 class AddSourceScreen extends ConsumerStatefulWidget {
   final SourceModel? source;
@@ -191,6 +192,9 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
               ),
             ),
           );
+          
+          // Pub après action source
+          AdManager.showSourceAd();
         }
       } catch (e) {
         if (mounted) {
@@ -561,7 +565,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   }
 
   Widget _buildSourceSelector(bool isDark, AppLocalizations l10n) {
-    final sourcesAsync = ref.watch(originalSourcesProvider);
+    final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
 
     return sourcesAsync.when(
       data: (sources) {

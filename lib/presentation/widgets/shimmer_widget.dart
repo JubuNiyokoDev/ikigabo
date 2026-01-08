@@ -48,43 +48,60 @@ class ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height ?? 80,
-      margin: margin ?? const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          const ShimmerWidget(width: 48, height: 48, borderRadius: BorderRadius.all(Radius.circular(12))),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ShimmerWidget(
-                  width: double.infinity,
-                  height: 16,
+      height: height ?? 70,
+      margin: margin ?? const EdgeInsets.only(bottom: 8),
+      child: Shimmer.fromColors(
+        baseColor: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.surfaceDark
+            : Colors.grey[300]!,
+        highlightColor: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.cardBackgroundDark
+            : Colors.grey[100]!,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 8),
-                ShimmerWidget(
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  height: 12,
-                  borderRadius: BorderRadius.circular(6),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      width: 80,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          ShimmerWidget(
-            width: 80,
-            height: 16,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -102,11 +119,11 @@ class ShimmerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        itemCount,
-        (index) => ShimmerCard(height: itemHeight),
-      ),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
+      itemBuilder: (context, index) => ShimmerCard(height: itemHeight),
     );
   }
 }

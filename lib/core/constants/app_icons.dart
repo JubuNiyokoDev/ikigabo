@@ -98,4 +98,6 @@ class AppIcons {
   static const contact = HugeIcons.strokeRoundedContact;
   static const phone = HugeIcons.strokeRoundedSmartPhone01;
   static const email = HugeIcons.strokeRoundedMail01;
+  static const visibility = HugeIcons.strokeRoundedView;
+  static const visibilityOff = HugeIcons.strokeRoundedViewOff;
 }

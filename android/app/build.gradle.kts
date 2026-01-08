@@ -44,6 +44,11 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         
+        // Support pour pages mémoire 16KB
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+        
         // Optimiser les ressources - syntaxe moderne
         resourceConfigurations += listOf("en", "fr")
         vectorDrawables.useSupportLibrary = true

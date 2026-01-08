@@ -23,6 +23,7 @@ import '../backup/backup_screen.dart';
 import '../categories/categories_management_screen.dart';
 import '../budgets/budgets_screen.dart';
 import '../security/pin_screen.dart';
+import '../../../core/services/ad_manager.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -477,6 +478,11 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Déclencher ads settings
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdManager.showSettingsAd();
+    });
+    
     final themeMode = ref.watch(themeProvider);
     final currentLocale = ref.watch(localeProvider);
     final displayCurrencyAsync = ref.watch(displayCurrencyProvider);

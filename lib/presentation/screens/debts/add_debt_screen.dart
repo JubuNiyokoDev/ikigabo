@@ -138,7 +138,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
 
           // Vérifier la compatibilité des devises si source sélectionnée
           if (!_isExternalMoney) {
-            final sourcesAsync = ref.read(originalSourcesProvider);
+            final sourcesAsync = ref.read(originalUnifiedSourcesProvider);
             final sources = await sourcesAsync.when(
               data: (data) => Future.value(data),
               loading: () => Future.value(<SourceModel>[]),
@@ -815,7 +815,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
   Widget _buildSourceSelector(bool isDark, AppLocalizations l10n) {
     return Consumer(
       builder: (context, ref, child) {
-        final sourcesAsync = ref.watch(originalSourcesProvider);
+        final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

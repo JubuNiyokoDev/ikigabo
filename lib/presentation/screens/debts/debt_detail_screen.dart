@@ -871,7 +871,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
               const SizedBox(height: AppSizes.spacing8),
               Consumer(
                 builder: (context, ref, child) {
-                  final sourcesAsync = ref.watch(originalSourcesProvider);
+                  final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
                   return sourcesAsync.when(
                     data: (sources) {
                       // Filtrer les sources compatibles avec la devise de la dette
@@ -996,7 +996,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
 
     // Vérifier la compatibilité des devises si source sélectionnée
     if (!_isExternalMoney) {
-      final sourcesAsync = ref.read(originalSourcesProvider);
+      final sourcesAsync = ref.read(originalUnifiedSourcesProvider);
       final sources = await sourcesAsync.when(
         data: (data) => Future.value(data),
         loading: () => Future.value(<SourceModel>[]),

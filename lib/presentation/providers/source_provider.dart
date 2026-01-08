@@ -30,8 +30,8 @@ final sourcesStreamProvider = StreamProvider<List<SourceModel>>((ref) {
   return repository.watchSources();
 });
 
-// Original Sources + Banks (without conversion) for bank creation
-final originalSourcesProvider = FutureProvider<List<SourceModel>>((ref) async {
+// Original Sources + Banks (without conversion) for transactions
+final originalUnifiedSourcesProvider = FutureProvider<List<SourceModel>>((ref) async {
   final sourcesAsync = ref.watch(sourcesStreamProvider);
   final banksAsync = ref.watch(banksStreamProvider);
 
@@ -68,8 +68,7 @@ final originalSourcesProvider = FutureProvider<List<SourceModel>>((ref) async {
         color: '#2196F3',
         isDeleted: false,
       );
-      // Utiliser un ID unique pour éviter les conflits avec les vraies sources
-      bankAsSource.id = -bank.id; // ID négatif pour les banques
+      bankAsSource.id = -bank.id;
       allSources.add(bankAsSource);
     }
   }

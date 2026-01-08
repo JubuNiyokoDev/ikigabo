@@ -61,7 +61,7 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(debtsStreamProvider);
       _ref.invalidate(tx.transactionsStreamProvider);
       _ref.invalidate(unifiedSourcesProvider);
-      _ref.invalidate(originalSourcesProvider);
+      _ref.invalidate(originalUnifiedSourcesProvider);
       _ref.invalidate(dashboard.totalWealthProvider);
       _ref.invalidate(tx.totalIncomeProvider);
       _ref.invalidate(tx.totalExpenseProvider);

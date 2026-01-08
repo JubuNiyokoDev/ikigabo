@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ikigabo/core/services/ad_manager.dart';
 import 'package:ikigabo/data/models/category_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
@@ -15,6 +17,7 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../../core/services/ads_service.dart';
 
 class AddTransactionBottomSheet extends ConsumerStatefulWidget {
   const AddTransactionBottomSheet({super.key});
@@ -57,6 +60,17 @@ class _AddTransactionBottomSheetState
       if (_selectedSourceId == null) {
         _showError('Veuillez sélectionner une source');
         return;
+      }
+
+      final amount = double.parse(_amountController.text);
+
+      // Pub récompensée pour transactions importantes (> 50000)
+      if (amount > 50000) {
+        final rewardGranted = await AdManager.showRewardedForLargeTransaction();
+        if (!rewardGranted) {
+          _showError('Regardez la pub pour cette transaction importante');
+          return;
+        }
       }
 
       // Convertir l'ID négatif en ID positif pour les banques/assets/dettes
@@ -106,6 +120,9 @@ class _AddTransactionBottomSheetState
         if (mounted) {
           Navigator.pop(context);
           _showSuccess(l10n.transactionAddedSuccess);
+
+          // Pub discrète après 2ème transaction
+          _showAdIfNeeded();
         }
       } catch (e) {
         _showError('${l10n.error}: $e');
@@ -135,6 +152,17 @@ class _AddTransactionBottomSheetState
     );
   }
 
+  void _showAdIfNeeded() async {
+    // Compteur simple pour afficher pub tous les 2 transactions
+    final prefs = await SharedPreferences.getInstance();
+    final transactionCount = (prefs.getInt('transaction_count') ?? 0) + 1;
+    await prefs.setInt('transaction_count', transactionCount);
+
+    if (transactionCount % 2 == 0) {
+      await AdsService.showInterstitial();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
@@ -145,9 +173,7 @@ class _AddTransactionBottomSheetState
     final maxHeight = screenHeight - safeAreaTop - 80; // Laisser 80px en haut
 
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
+      constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
         color: isDark ? AppColors.backgroundDark : Colors.grey[50],
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -178,7 +204,9 @@ class _AddTransactionBottomSheetState
                   _buildDescriptionField(isDark, l10n),
                   const SizedBox(height: AppSizes.spacing12),
                   _buildSaveButton(l10n),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 16),
+                  SizedBox(
+                    height: MediaQuery.of(context).viewInsets.bottom + 16,
+                  ),
                 ],
               ),
             ),
@@ -410,20 +438,25 @@ class _AddTransactionBottomSheetState
   }
 
   Widget _buildSourceSelector(bool isDark, AppLocalizations l10n) {
-    final sourcesAsync = ref.watch(originalSourcesProvider);
+    final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
 
     return sourcesAsync.when(
       data: (sources) {
-        // Filtrer les sources selon la devise sélectionnée
-        final availableSources = sources
-            .where(
-              (s) =>
-                  s.amount > 0 &&
-                  s.isActive &&
-                  !s.isDeleted &&
-                  s.currency == _selectedCurrency,
-            )
-            .toList();
+        // Filtrer les sources selon la devise sélectionnée et le type de transaction
+        final availableSources = sources.where((s) {
+          // Vérifications de base
+          if (!s.isActive || s.isDeleted || s.currency != _selectedCurrency) {
+            return false;
+          }
+
+          // Pour les entrées (income): toutes les sources actives
+          if (_type == TransactionType.income) {
+            return true;
+          }
+
+          // Pour les sorties (expense): sources avec solde > 0
+          return s.amount > 0;
+        }).toList();
 
         if (availableSources.isEmpty) {
           return Container(
@@ -437,11 +470,17 @@ class _AddTransactionBottomSheetState
             ),
             child: Row(
               children: [
-                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const Icon(
+                  AppIcons.warning,
+                  color: AppColors.warning,
+                  size: 20,
+                ),
                 const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(
-                    'Aucune source disponible pour $_selectedCurrency',
+                    _type == TransactionType.income
+                        ? 'Aucune source disponible pour $_selectedCurrency'
+                        : 'Aucune source avec solde disponible pour $_selectedCurrency',
                     style: const TextStyle(
                       color: AppColors.warning,
                       fontSize: AppSizes.textSmall,
@@ -482,7 +521,7 @@ class _AddTransactionBottomSheetState
                       _selectedSourceId = isSelected ? null : source.id;
                       _selectedSourceType = isSelected
                           ? null
-                          : SourceType.source;
+                          : _detectSourceType(source);
                     }),
                     child: Container(
                       padding: const EdgeInsets.all(AppSizes.spacing12),
@@ -505,8 +544,8 @@ class _AddTransactionBottomSheetState
                               color: AppColors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
-                              AppIcons.wallet,
+                            child: Icon(
+                              _getSourceIcon(source),
                               color: AppColors.primary,
                               size: 18,
                             ),
@@ -528,9 +567,11 @@ class _AddTransactionBottomSheetState
                                 ),
                                 Text(
                                   '${source.amount.toStringAsFixed(0)} ${source.currency}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: AppSizes.textSmall,
-                                    color: AppColors.success,
+                                    color: source.amount > 0
+                                        ? AppColors.success
+                                        : AppColors.textSecondaryDark,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -606,17 +647,17 @@ class _AddTransactionBottomSheetState
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
-                colorScheme: isDark 
-                  ? ColorScheme.dark(
-                      primary: AppColors.primary,
-                      surface: AppColors.surfaceDark,
-                      onSurface: AppColors.textDark,
-                    )
-                  : ColorScheme.light(
-                      primary: AppColors.primary,
-                      surface: Colors.white,
-                      onSurface: Colors.black87,
-                    ),
+                colorScheme: isDark
+                    ? ColorScheme.dark(
+                        primary: AppColors.primary,
+                        surface: AppColors.surfaceDark,
+                        onSurface: AppColors.textDark,
+                      )
+                    : ColorScheme.light(
+                        primary: AppColors.primary,
+                        surface: Colors.white,
+                        onSurface: Colors.black87,
+                      ),
               ),
               child: child!,
             );
@@ -758,13 +799,24 @@ class _AddTransactionBottomSheetState
 
   List<CategoryModel> _getDefaultCategories() {
     if (_type == TransactionType.income) {
-      return [...DefaultCategories.incomeCategories, ...DefaultCategories.bothCategories];
+      return [
+        ...DefaultCategories.incomeCategories,
+        ...DefaultCategories.bothCategories,
+      ];
     } else {
-      return [...DefaultCategories.expenseCategories, ...DefaultCategories.bothCategories];
+      return [
+        ...DefaultCategories.expenseCategories,
+        ...DefaultCategories.bothCategories,
+      ];
     }
   }
 
-  Widget _buildCategoryList(List<CategoryModel> categories, bool isDark, AppLocalizations l10n, bool isDefault) {
+  Widget _buildCategoryList(
+    List<CategoryModel> categories,
+    bool isDark,
+    AppLocalizations l10n,
+    bool isDefault,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -781,16 +833,20 @@ class _AddTransactionBottomSheetState
           spacing: 8.w,
           runSpacing: 8.h,
           children: categories.map((category) {
-            final categoryKey = isDefault ? category.name : category.id.toString();
-            final isSelected = isDefault 
-              ? _selectedCategoryId.toString() == category.name
-              : _selectedCategoryId == category.id;
+            final categoryKey = isDefault
+                ? category.name
+                : category.id.toString();
+            final isSelected = isDefault
+                ? _selectedCategoryId.toString() == category.name
+                : _selectedCategoryId == category.id;
             final color = Color(int.parse('0xFF${category.color}'));
 
             return GestureDetector(
               onTap: () => setState(() {
                 if (isDefault) {
-                  _selectedCategoryId = isSelected ? null : category.name.hashCode;
+                  _selectedCategoryId = isSelected
+                      ? null
+                      : category.name.hashCode;
                 } else {
                   _selectedCategoryId = isSelected ? null : category.id;
                 }
@@ -822,7 +878,9 @@ class _AddTransactionBottomSheetState
                         color: isSelected
                             ? color
                             : (isDark ? AppColors.textDark : Colors.black87),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                         fontSize: AppSizes.textSmall,
                       ),
                     ),

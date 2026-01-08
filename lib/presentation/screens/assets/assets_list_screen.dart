@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:ikigabo/core/constants/app_sizes.dart';
 import 'package:ikigabo/core/utils/currency_formatter.dart';
+import 'package:ikigabo/presentation/widgets/shimmer_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/currencies.dart';
@@ -12,8 +13,10 @@ import '../../providers/asset_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
+import '../../widgets/page_with_banner.dart';
 import 'add_asset_screen.dart';
 import 'asset_detail_screen.dart';
+import '../../../core/services/ad_manager.dart';
 
 class AssetsListScreen extends ConsumerWidget {
   const AssetsListScreen({super.key});
@@ -57,6 +60,7 @@ class AssetsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          AdManager.showAssetAd();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddAssetScreen()),
@@ -148,7 +152,7 @@ class AssetsListScreen extends ConsumerWidget {
                 color: Colors.white,
               ),
             ),
-            loading: () => const CircularProgressIndicator(color: Colors.white),
+            loading: () => const ShimmerWidget(width: 120, height: 24),
             error: (e, s) => const DisplayCurrencyAmountWidget(
               amount: 0,
               style: TextStyle(
@@ -323,15 +327,28 @@ class AssetsListScreen extends ConsumerWidget {
   }
 
   Widget _buildAssetsList(BuildContext context, List<AssetModel> assets) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: assets.length,
-      itemBuilder: (context, index) {
-        final asset = assets[index];
-        return _AssetCard(
-          asset: asset,
-          l10n: AppLocalizations.of(context)!,
-        ).animate().fadeIn(delay: (index * 50).ms);
+    return Consumer(
+      builder: (context, ref, child) {
+        final items = assets
+            .map(
+              (asset) => _AssetCard(
+                asset: asset,
+                l10n: AppLocalizations.of(context)!,
+              ).animate().fadeIn(delay: (assets.indexOf(asset) * 50).ms),
+            )
+            .toList();
+
+        final itemsWithBanner = BannerInjector.injectBanner(
+          items,
+          ref,
+          position: 2,
+        );
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: itemsWithBanner.length,
+          itemBuilder: (context, index) => itemsWithBanner[index],
+        );
       },
     );
   }
@@ -385,9 +402,7 @@ class AssetsListScreen extends ConsumerWidget {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+    return const Center(child: ShimmerList(itemCount: 5));
   }
 
   Widget _buildErrorState(String error, BuildContext context) {

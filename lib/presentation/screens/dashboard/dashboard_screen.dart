@@ -18,17 +18,40 @@ import '../../widgets/animations.dart';
 import '../../widgets/physics_animations.dart';
 import '../../widgets/notification_badge.dart';
 import '../../widgets/currency_amount_widget.dart';
+import '../../widgets/page_with_banner.dart';
 import '../banks/banks_list_screen.dart';
 import '../assets/assets_list_screen.dart';
 import '../debts/debts_list_screen.dart';
 import '../transactions/transactions_list_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../../../core/services/ads_service.dart';
+import '../../../core/services/ad_manager.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  bool _hasTriggeredAd = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialiser Unity Ads et déclencher ads dashboard une seule fois
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasTriggeredAd) {
+        AdsService.initialize();
+        AdManager.showDashboardAd();
+        _hasTriggeredAd = true;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
@@ -49,7 +72,7 @@ class DashboardScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: BannerInjector.injectBanner([
               _buildHeader(l10n, isDark, context).slideInFromLeft(),
               const SizedBox(height: 16),
               _buildBalanceCard(
@@ -79,7 +102,7 @@ class DashboardScreen extends ConsumerWidget {
               _buildDebtsSummary(debtStatsAsync, context, isDark, l10n),
               const SizedBox(height: 16),
               _buildTransactionsList(recentTransactionsAsync, isDark, l10n, context),
-            ],
+            ], ref, position: 4),
           ),
         ),
       ),
@@ -206,7 +229,7 @@ class DashboardScreen extends ConsumerWidget {
                 color: Colors.white,
               ),
             ),
-            loading: () => const CircularProgressIndicator(color: Colors.white),
+            loading: () => const ShimmerWidget(width: 120, height: 24),
             error: (e, s) => DisplayCurrencyAmountWidget(
               amount: 0,
               style: TextStyle(
@@ -255,14 +278,7 @@ class DashboardScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                loading: () => Container(
-                  width: 45.w,
-                  height: 16.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(5.r),
-                  ),
-                ),
+                loading: () => const ShimmerWidget(width: 45, height: 16),
                 error: (e, s) => Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 5.w,
@@ -530,7 +546,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: ShimmerList(itemCount: 3)),
               error: (e, s) => BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
@@ -651,7 +667,7 @@ class DashboardScreen extends ConsumerWidget {
             },
             loading: () => const SizedBox(
               height: 160,
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: ShimmerWidget(width: 160, height: 160)),
             ),
             error: (e, s) => SizedBox(
               height: 160,
@@ -1008,11 +1024,7 @@ class _StatCardLoading extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const SizedBox(
-            height: 14,
-            width: 54,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
+          const ShimmerWidget(width: 54, height: 14),
         ],
       ),
     );

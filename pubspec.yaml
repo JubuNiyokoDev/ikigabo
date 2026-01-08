@@ -2,7 +2,7 @@ name: ikigabo
 description: "Application de gestion de patrimoine personnel - Offline First"
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.1+5
 
 environment:
   sdk: ^3.10.3
@@ -55,6 +55,9 @@ dependencies:
 
   # PDF Generation
   pdf: ^3.11.1
+
+  # Unity Ads
+  unity_ads_plugin: ^0.3.20
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.4
