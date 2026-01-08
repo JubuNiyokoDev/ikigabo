@@ -65,7 +65,7 @@ class BankModel {
     this.id = Isar.autoIncrement,
     required this.name,
     this.balance = 0.0,
-    this.currency = 'FBU',
+    this.currency = 'BIF',
     this.bankType = BankType.free,
     this.interestType = InterestType.monthly,
     this.interestCalculation = InterestCalculation.fixedAmount,

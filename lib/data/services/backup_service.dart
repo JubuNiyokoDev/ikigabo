@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:file_picker/file_picker.dart';
 import '../models/source_model.dart' as src;
 import '../models/transaction_model.dart' as tx;
 import '../models/debt_model.dart';
@@ -109,42 +110,27 @@ class BackupService {
     }
   }
 
-  // Save backup to public folder with proper permission
+  // Save backup using Storage Access Framework (SAF)
   Future<String> saveBackupToStorage(String backupData) async {
-    // Demander la bonne permission selon la version Android
-    PermissionStatus permission;
-    if (await Permission.manageExternalStorage.isGranted) {
-      permission = PermissionStatus.granted;
-    } else {
-      permission = await Permission.manageExternalStorage.request();
-      if (permission.isDenied) {
-        // Essayer avec l'ancienne permission
-        permission = await Permission.storage.request();
-      }
-    }
-
-    if (!permission.isGranted) {
-      throw Exception(
-        'Permission de stockage requise pour sauvegarder le fichier',
+    try {
+      // Utiliser file_picker pour choisir l'emplacement
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Sauvegarder la sauvegarde Ikigabo',
+        fileName: 'ikigabo_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: utf8.encode(backupData), // Fournir les bytes directement
       );
+
+      if (outputFile == null) {
+        throw Exception('Sauvegarde annulée par l\'utilisateur');
+      }
+
+      // Le fichier est déjà sauvegardé par file_picker
+      return outputFile;
+    } catch (e) {
+      throw Exception('Erreur lors de la sauvegarde: $e');
     }
-
-    // Utiliser le dossier Downloads public
-    final directory = Directory('/storage/emulated/0/Download');
-
-    // Créer le dossier Ikigabo s'il n'existe pas
-    final ikigaboDir = Directory('${directory.path}/Ikigabo');
-    if (!await ikigaboDir.exists()) {
-      await ikigaboDir.create(recursive: true);
-    }
-
-    final timestamp = DateTime.now();
-    final fileName =
-        'ikigabo_backup_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.json';
-    final file = File('${ikigaboDir.path}/$fileName');
-
-    await file.writeAsString(backupData);
-    return file.path;
   }
 
   // Private methods

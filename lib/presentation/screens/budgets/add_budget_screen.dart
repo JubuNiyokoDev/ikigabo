@@ -598,6 +598,24 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       initialDate: isStartDate ? _startDate : _endDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).brightness == Brightness.dark
+              ? ColorScheme.dark(
+                  primary: AppColors.primary,
+                  surface: AppColors.surfaceDark,
+                  onSurface: AppColors.textDark,
+                )
+              : ColorScheme.light(
+                  primary: AppColors.primary,
+                  surface: Colors.white,
+                  onSurface: Colors.black87,
+                ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null) {

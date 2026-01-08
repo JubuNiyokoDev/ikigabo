@@ -16,7 +16,14 @@ class NotificationDetailBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final safeAreaTop = MediaQuery.of(context).padding.top;
+    final maxHeight = screenHeight - safeAreaTop - 80;
+
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
@@ -46,7 +53,7 @@ class NotificationDetailBottomSheet extends StatelessWidget {
                 width: 40.w,
                 height: 40.h,
                 decoration: BoxDecoration(
-                  color: _getTypeColor().withOpacity(0.2),
+                  color: _getTypeColor().withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
@@ -85,12 +92,16 @@ class NotificationDetailBottomSheet extends StatelessWidget {
           SizedBox(height: 16.h),
           
           // Message
-          Text(
-            notification.body,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: isDark ? AppColors.textDark : Colors.black87,
-              height: 1.4,
+          Flexible(
+            child: SingleChildScrollView(
+              child: Text(
+                notification.body,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: isDark ? AppColors.textDark : Colors.black87,
+                  height: 1.4,
+                ),
+              ),
             ),
           ),
           

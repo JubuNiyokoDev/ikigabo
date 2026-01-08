@@ -164,6 +164,8 @@ class NotificationService {
 
   Future<void> scheduleBudgetAlert(BudgetModel budget) async {
     if (!budget.notificationsEnabled) return;
+    // Vérifier si les notifications budget sont généralement activées
+    if (_prefsService?.getOverdueAlertsEnabled() != true) return;
 
     final warningThreshold = budget.warningThreshold ?? 80.0;
     final currentProgress = budget.progressPercentage;
@@ -196,6 +198,9 @@ class NotificationService {
   }
 
   Future<void> checkLowBalanceAlerts(List<SourceModel> sources, List<BankModel> banks) async {
+    // Vérifier si les alertes de solde faible sont activées
+    if (_prefsService?.getOverdueAlertsEnabled() != true) return;
+    
     final lowBalanceThreshold = _prefsService?.getLowBalanceThreshold() ?? 10000.0;
 
     for (final source in sources) {
@@ -315,6 +320,11 @@ class NotificationService {
   }
 
   void _addNotification(NotificationItem notification) {
+    // Vérifier si le type de notification est activé avant d'ajouter
+    if (!_isNotificationTypeEnabled(notification.type)) {
+      return;
+    }
+
     // Remove existing notification with same ID
     _notifications.removeWhere((n) => n.id == notification.id);
 
@@ -322,6 +332,27 @@ class NotificationService {
     _notifications.add(notification);
     _saveNotifications();
     _updateNotificationCount();
+  }
+
+  bool _isNotificationTypeEnabled(NotificationType type) {
+    if (_prefsService == null) return false;
+    
+    switch (type) {
+      case NotificationType.debtReminder:
+      case NotificationType.debtOverdue:
+        return _prefsService!.getDebtRemindersEnabled();
+      case NotificationType.bankFee:
+        return _prefsService!.getBankFeesEnabled();
+      case NotificationType.wealthMilestone:
+        return _prefsService!.getWealthMilestonesEnabled();
+      case NotificationType.backupReminder:
+        return _prefsService!.getBackupRemindersEnabled();
+      case NotificationType.budgetWarning:
+      case NotificationType.budgetExceeded:
+        return true; // Toujours activé pour les budgets
+      case NotificationType.lowBalance:
+        return _prefsService!.getOverdueAlertsEnabled();
+    }
   }
 
   void removeNotification(String id) {
