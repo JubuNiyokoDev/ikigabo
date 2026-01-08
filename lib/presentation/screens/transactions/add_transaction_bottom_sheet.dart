@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/currencies.dart';
+import '../../../core/constants/default_categories.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/transaction_provider.dart';
@@ -50,6 +51,11 @@ class _AddTransactionBottomSheetState
     if (_formKey.currentState!.validate()) {
       if (_selectedCategoryId == null) {
         _showError('Veuillez sélectionner une catégorie');
+        return;
+      }
+
+      if (_selectedSourceId == null) {
+        _showError('Veuillez sélectionner une source');
         return;
       }
 
@@ -134,8 +140,14 @@ class _AddTransactionBottomSheetState
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
     final l10n = AppLocalizations.of(context)!;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final safeAreaTop = MediaQuery.of(context).padding.top;
+    final maxHeight = screenHeight - safeAreaTop - 80; // Laisser 80px en haut
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.backgroundDark : Colors.grey[50],
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -166,7 +178,7 @@ class _AddTransactionBottomSheetState
                   _buildDescriptionField(isDark, l10n),
                   const SizedBox(height: AppSizes.spacing12),
                   _buildSaveButton(l10n),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 16),
                 ],
               ),
             ),
@@ -381,109 +393,13 @@ class _AddTransactionBottomSheetState
           }
         }).toList();
 
+        // Si aucune catégorie en DB, utiliser les catégories par défaut
         if (filteredCategories.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.category,
-                style: TextStyle(
-                  fontSize: AppSizes.textSmall,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textDark : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacing12),
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: AppColors.warning.withOpacity(0.3)),
-                ),
-                child: Text(
-                  'Aucune catégorie disponible pour ${_type == TransactionType.income ? "les revenus" : "les dépenses"}',
-                  style: const TextStyle(
-                    color: AppColors.warning,
-                    fontSize: AppSizes.textSmall,
-                  ),
-                ),
-              ),
-            ],
-          );
+          final defaultCategories = _getDefaultCategories();
+          return _buildCategoryList(defaultCategories, isDark, l10n, true);
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.category,
-              style: TextStyle(
-                fontSize: AppSizes.textSmall,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textDark : Colors.black87,
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacing12),
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: filteredCategories.map((category) {
-                final isSelected = _selectedCategoryId == category.id;
-                final color = Color(int.parse('0xFF${category.color}'));
-
-                return GestureDetector(
-                  onTap: () => setState(() {
-                    _selectedCategoryId = isSelected ? null : category.id;
-                  }),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? color.withOpacity(0.2)
-                          : (isDark ? AppColors.surfaceDark : Colors.white),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: isSelected ? color : AppColors.borderDark,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _getCategoryIcon(category.icon),
-                          color: isSelected
-                              ? color
-                              : AppColors.textSecondaryDark,
-                          size: 16.sp,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          category.name,
-                          style: TextStyle(
-                            color: isSelected
-                                ? color
-                                : (isDark
-                                      ? AppColors.textDark
-                                      : Colors.black87),
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            fontSize: AppSizes.textSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        );
+        return _buildCategoryList(filteredCategories, isDark, l10n, false);
       },
       loading: () => SizedBox(
         height: 60.h,
@@ -690,10 +606,17 @@ class _AddTransactionBottomSheetState
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.dark(
-                  primary: AppColors.primary,
-                  surface: isDark ? AppColors.surfaceDark : Colors.white,
-                ),
+                colorScheme: isDark 
+                  ? ColorScheme.dark(
+                      primary: AppColors.primary,
+                      surface: AppColors.surfaceDark,
+                      onSurface: AppColors.textDark,
+                    )
+                  : ColorScheme.light(
+                      primary: AppColors.primary,
+                      surface: Colors.white,
+                      onSurface: Colors.black87,
+                    ),
               ),
               child: child!,
             );
@@ -831,6 +754,86 @@ class _AddTransactionBottomSheetState
       default:
         return AppIcons.money;
     }
+  }
+
+  List<CategoryModel> _getDefaultCategories() {
+    if (_type == TransactionType.income) {
+      return [...DefaultCategories.incomeCategories, ...DefaultCategories.bothCategories];
+    } else {
+      return [...DefaultCategories.expenseCategories, ...DefaultCategories.bothCategories];
+    }
+  }
+
+  Widget _buildCategoryList(List<CategoryModel> categories, bool isDark, AppLocalizations l10n, bool isDefault) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.category,
+          style: TextStyle(
+            fontSize: AppSizes.textSmall,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.textDark : Colors.black87,
+          ),
+        ),
+        const SizedBox(height: AppSizes.spacing12),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: categories.map((category) {
+            final categoryKey = isDefault ? category.name : category.id.toString();
+            final isSelected = isDefault 
+              ? _selectedCategoryId.toString() == category.name
+              : _selectedCategoryId == category.id;
+            final color = Color(int.parse('0xFF${category.color}'));
+
+            return GestureDetector(
+              onTap: () => setState(() {
+                if (isDefault) {
+                  _selectedCategoryId = isSelected ? null : category.name.hashCode;
+                } else {
+                  _selectedCategoryId = isSelected ? null : category.id;
+                }
+              }),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color.withValues(alpha: 0.2)
+                      : (isDark ? AppColors.surfaceDark : Colors.white),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: isSelected ? color : AppColors.borderDark,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getCategoryIcon(category.icon),
+                      color: isSelected ? color : AppColors.textSecondaryDark,
+                      size: 16.sp,
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      category.name,
+                      style: TextStyle(
+                        color: isSelected
+                            ? color
+                            : (isDark ? AppColors.textDark : Colors.black87),
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontSize: AppSizes.textSmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 }
 

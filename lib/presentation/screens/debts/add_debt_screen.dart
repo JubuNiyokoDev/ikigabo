@@ -490,10 +490,17 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.dark(
-                  primary: AppColors.primary,
-                  surface: isDark ? AppColors.surfaceDark : Colors.white,
-                ),
+                colorScheme: isDark 
+                  ? ColorScheme.dark(
+                      primary: AppColors.primary,
+                      surface: AppColors.surfaceDark,
+                      onSurface: AppColors.textDark,
+                    )
+                  : ColorScheme.light(
+                      primary: AppColors.primary,
+                      surface: Colors.white,
+                      onSurface: Colors.black87,
+                    ),
               ),
               child: child!,
             );
@@ -536,10 +543,17 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.dark(
-                  primary: AppColors.primary,
-                  surface: isDark ? AppColors.surfaceDark : Colors.white,
-                ),
+                colorScheme: isDark 
+                  ? ColorScheme.dark(
+                      primary: AppColors.primary,
+                      surface: AppColors.surfaceDark,
+                      onSurface: AppColors.textDark,
+                    )
+                  : ColorScheme.light(
+                      primary: AppColors.primary,
+                      surface: Colors.white,
+                      onSurface: Colors.black87,
+                    ),
               ),
               child: child!,
             );
