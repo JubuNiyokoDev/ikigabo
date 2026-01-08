@@ -18,6 +18,7 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../providers/dashboard_provider.dart' as dashboard;
+import '../../../core/services/ad_manager.dart';
 
 class AddBankScreen extends ConsumerStatefulWidget {
   final BankModel? bank;
@@ -87,6 +88,15 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   Future<void> _saveBank() async {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
+      // Pub récompensée pour création banque (fonctionnalité importante)
+      if (widget.bank == null) {
+        final rewardGranted = await AdManager.showRewardedForBankCreation();
+        if (!rewardGranted) {
+          _showError('Regardez la pub pour créer votre banque');
+          return;
+        }
+      }
+      
       final amount = double.parse(_balanceController.text);
 
       // Vérifier la source si montant initial > 0
@@ -214,6 +224,9 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                 ? l10n.bankAddedSuccess
                 : l10n.bankUpdatedSuccess,
           );
+          
+          // Pub après action banque
+          AdManager.showBankAd();
         }
       } catch (e) {
         final l10n = AppLocalizations.of(context)!;
@@ -817,7 +830,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   }
 
   Widget _buildSourceSelector(bool isDark, AppLocalizations l10n) {
-    final sourcesAsync = ref.watch(originalSourcesProvider);
+    final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
 
     return sourcesAsync.when(
       data: (sources) {

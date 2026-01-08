@@ -141,7 +141,7 @@ class NotificationController extends StateNotifier<AsyncValue<void>> {
     if (!enabled) return;
 
     try {
-      await NotificationService().showWealthMilestone(amount, currency);
+      await NotificationService().celebrateWealthMilestone(amount, currency);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }

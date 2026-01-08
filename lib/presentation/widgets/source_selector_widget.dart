@@ -7,6 +7,7 @@ import '../../data/models/source_model.dart' as src;
 import '../providers/bank_provider.dart';
 import '../providers/source_provider.dart';
 import '../widgets/currency_amount_widget.dart';
+import 'shimmer_widget.dart';
 
 class MoneySource {
   final int id;
@@ -104,7 +105,7 @@ class SourceSelectorWidget extends ConsumerWidget {
                   )
                   .toList(),
             ),
-            loading: () => const CircularProgressIndicator(),
+            loading: () => const ShimmerWidget(width: 80, height: 16),
             error: (e, s) => const SizedBox(),
           ),
 
@@ -128,7 +129,7 @@ class SourceSelectorWidget extends ConsumerWidget {
                   )
                   .toList(),
             ),
-            loading: () => const CircularProgressIndicator(),
+            loading: () => const ShimmerWidget(width: 80, height: 16),
             error: (e, s) => const SizedBox(),
           ),
         ],

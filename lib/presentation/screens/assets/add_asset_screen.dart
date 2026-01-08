@@ -684,7 +684,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
   }
 
   Widget _buildSourceSelector(bool isDark, AppLocalizations l10n) {
-    final sourcesAsync = ref.watch(originalSourcesProvider);
+    final sourcesAsync = ref.watch(originalUnifiedSourcesProvider);
 
     return sourcesAsync.when(
       data: (sources) {

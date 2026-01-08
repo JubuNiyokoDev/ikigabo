@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ikigabo/presentation/providers/source_provider.dart';
+import 'package:ikigabo/presentation/widgets/shimmer_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/source_model.dart';
@@ -12,7 +13,9 @@ import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
+import '../../widgets/page_with_banner.dart';
 import 'add_source_screen.dart';
+import '../../../core/services/ad_manager.dart';
 
 class SourcesListScreen extends ConsumerStatefulWidget {
   const SourcesListScreen({super.key});
@@ -61,6 +64,7 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          AdManager.showSourceAd();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddSourceScreen()),
@@ -135,16 +139,25 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
   }
 
   Widget _buildSourcesList(List<SourceModel> sources, AppLocalizations l10n) {
+    final items = sources
+        .map(
+          (source) => _SourceCard(
+            source: source,
+            l10n: l10n,
+          ).animate().fadeIn(delay: (sources.indexOf(source) * 50).ms),
+        )
+        .toList();
+
+    final itemsWithBanner = BannerInjector.injectBanner(
+      items,
+      ref,
+      position: 2,
+    );
+
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 14.w),
-      itemCount: sources.length,
-      itemBuilder: (context, index) {
-        final source = sources[index];
-        return _SourceCard(
-          source: source,
-          l10n: l10n,
-        ).animate().fadeIn(delay: (index * 50).ms);
-      },
+      itemCount: itemsWithBanner.length,
+      itemBuilder: (context, index) => itemsWithBanner[index],
     );
   }
 
@@ -197,9 +210,7 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+    return const Center(child: ShimmerList(itemCount: 5));
   }
 
   Widget _buildErrorState(String error, AppLocalizations l10n) {
@@ -255,37 +266,36 @@ class _SourceCard extends ConsumerWidget {
       background: _buildSwipeBackground(isDark, isDelete: false),
       secondaryBackground: _buildSwipeBackground(isDark, isDelete: true),
       confirmDismiss: (direction) async {
+        // Empêcher la modification/suppression des banques, assets, dettes depuis cette page
+        if (source.id < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                direction == DismissDirection.endToStart
+                    ? 'Supprimez cet élément depuis sa page dédiée'
+                    : 'Modifiez cet élément depuis sa page dédiée',
+              ),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+          return false;
+        }
+
         if (direction == DismissDirection.endToStart) {
-          // Swipe vers la gauche = Supprimer
+          // Swipe vers la gauche = Supprimer (seulement vraies sources)
           final shouldDelete = await _showDeleteDialog(context, ref);
           if (shouldDelete) {
-            // Vérifier si c'est une vraie source ou une dette/banque/asset
-            if (source.id > 0) {
-              // Vraie source
-              await ref
-                  .read(sourceControllerProvider.notifier)
-                  .deleteSource(source.id);
-            } else {
-              // Dette, banque ou asset (ID négatif) - ne pas supprimer depuis ici
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Supprimez cet élément depuis sa page dédiée'),
-                  backgroundColor: AppColors.warning,
-                ),
-              );
-            }
+            await ref
+                .read(sourceControllerProvider.notifier)
+                .deleteSource(source.id);
           }
-          return shouldDelete && source.id > 0;
+          return shouldDelete;
         } else {
-          // Swipe vers la droite = Éditer
-          if (source.id > 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AddSourceScreen(source: source),
-              ),
-            );
-          }
+          // Swipe vers la droite = Éditer (seulement vraies sources)
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddSourceScreen(source: source)),
+          );
           return false;
         }
       },
@@ -303,6 +313,17 @@ class _SourceCard extends ConsumerWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(12.r),
             onTap: () {
+              // Empêcher la modification des banques, assets, dettes depuis cette page
+              if (source.id < 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Modifiez cet élément depuis sa page dédiée'),
+                    backgroundColor: AppColors.warning,
+                  ),
+                );
+                return;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -426,7 +447,10 @@ class _SourceCard extends ConsumerWidget {
               ),
             ),
             content: Text(
-              l10n.confirmDeleteAsset.replaceAll('"${source.name}"', '"${source.name}"'),
+              l10n.confirmDeleteAsset.replaceAll(
+                '"${source.name}"',
+                '"${source.name}"',
+              ),
               style: TextStyle(
                 color: isDark ? AppColors.textSecondaryDark : Colors.black54,
               ),

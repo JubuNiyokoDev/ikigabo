@@ -10,6 +10,7 @@ import 'l10n/fallback_material_localizations.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/pin_provider.dart';
+import 'presentation/providers/banner_provider.dart';
 import 'presentation/screens/security/pin_screen.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
 import 'presentation/screens/sources/sources_list_screen.dart';
@@ -23,6 +24,7 @@ import 'presentation/providers/debt_provider.dart';
 import 'presentation/providers/integrated_notification_provider.dart';
 import 'data/services/notification_service.dart';
 import 'core/services/real_alarm_service.dart';
+import 'presentation/widgets/shimmer_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,9 +110,7 @@ class AppNavigator extends ConsumerWidget {
 
     switch (pinState) {
       case PinState.loading:
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50)));
       case PinState.notSet:
         return PinScreen(
           mode: PinMode.setup,
@@ -148,6 +148,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(debtAlarmsInitProvider);
       ref.read(notificationWatcherProvider);
+      // Initialiser le banner provider
+      ref.read(bannerProvider);
     });
   }
 
@@ -280,10 +282,7 @@ class _NavigationScreen extends ConsumerWidget {
             children: [
               Text(
                 l10n.management,
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 6.h),
               Text(

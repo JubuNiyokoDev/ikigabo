@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ikigabo/core/constants/currencies.dart';
+import 'package:ikigabo/presentation/widgets/shimmer_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/bank_model.dart';
@@ -11,8 +12,10 @@ import '../../providers/bank_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
+import '../../widgets/page_with_banner.dart';
 import 'add_bank_screen.dart';
 import 'bank_detail_screen.dart';
+import '../../../core/services/ad_manager.dart';
 
 class BanksListScreen extends ConsumerWidget {
   const BanksListScreen({super.key});
@@ -63,6 +66,7 @@ class BanksListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          AdManager.showBankAd();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddBankScreen()),
@@ -119,10 +123,7 @@ class BanksListScreen extends ConsumerWidget {
                     SizedBox(height: 3.h),
                     Text(
                       l10n.bankBalance,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 10.sp, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -149,7 +150,7 @@ class BanksListScreen extends ConsumerWidget {
                 color: Colors.white,
               ),
             ),
-            loading: () => const CircularProgressIndicator(color: Colors.white),
+            loading: () => const ShimmerWidget(width: 120, height: 24),
             error: (e, s) => const DisplayCurrencyAmountWidget(
               amount: 0,
               style: TextStyle(
@@ -165,12 +166,26 @@ class BanksListScreen extends ConsumerWidget {
   }
 
   Widget _buildBanksList(BuildContext context, List<BankModel> banks) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: banks.length,
-      itemBuilder: (context, index) {
-        final bank = banks[index];
-        return _BankCard(bank: bank).animate().fadeIn(delay: (index * 50).ms);
+    return Consumer(
+      builder: (context, ref, child) {
+        final items = banks
+            .map(
+              (bank) => _BankCard(
+                bank: bank,
+              ).animate().fadeIn(delay: (banks.indexOf(bank) * 50).ms),
+            )
+            .toList();
+        final itemsWithBanner = BannerInjector.injectBanner(
+          items,
+          ref,
+          position: 1,
+        );
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: itemsWithBanner.length,
+          itemBuilder: (context, index) => itemsWithBanner[index],
+        );
       },
     );
   }
@@ -196,7 +211,9 @@ class BanksListScreen extends ConsumerWidget {
                 child: Icon(
                   AppIcons.bank,
                   size: 20,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
               ),
               const SizedBox(height: 16),
@@ -213,7 +230,9 @@ class BanksListScreen extends ConsumerWidget {
                 l10n.addFirstBank,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
               ),
             ],
@@ -224,9 +243,7 @@ class BanksListScreen extends ConsumerWidget {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+    return const Center(child: ShimmerList(itemCount: 5));
   }
 
   Widget _buildErrorState(String error, AppLocalizations l10n) {
@@ -356,9 +373,11 @@ class _BankCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
-    
+
     return Dismissible(
-      key: ValueKey('bank_${bank.id}_${bank.updatedAt?.millisecondsSinceEpoch ?? bank.createdAt.millisecondsSinceEpoch}'),
+      key: ValueKey(
+        'bank_${bank.id}_${bank.updatedAt?.millisecondsSinceEpoch ?? bank.createdAt.millisecondsSinceEpoch}',
+      ),
       background: _buildSwipeBackground(false),
       secondaryBackground: _buildSwipeBackground(true),
       confirmDismiss: (direction) async {
@@ -416,7 +435,9 @@ class _BankCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.textDark : Colors.black87,
+                              color: isDark
+                                  ? AppColors.textDark
+                                  : Colors.black87,
                             ),
                           ),
                         ),
@@ -452,7 +473,9 @@ class _BankCard extends ConsumerWidget {
                         bank.accountNumber!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : Colors.grey.shade600,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -507,9 +530,11 @@ class _BankCard extends ConsumerWidget {
               ),
               const SizedBox(width: 14),
               Icon(
-                AppIcons.back, 
-                color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600, 
-                size: 24
+                AppIcons.back,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : Colors.grey.shade600,
+                size: 24,
               ),
             ],
           ),
@@ -539,18 +564,24 @@ class _BankCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
-    
+
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
             title: Text(
               l10n.delete,
-              style: TextStyle(color: isDark ? AppColors.textDark : Colors.black87),
+              style: TextStyle(
+                color: isDark ? AppColors.textDark : Colors.black87,
+              ),
             ),
             content: Text(
               '${l10n.confirmDeleteAsset} "${bank.name}" ?',
-              style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : Colors.grey.shade600,
+              ),
             ),
             actions: [
               TextButton(
