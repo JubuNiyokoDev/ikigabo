@@ -578,7 +578,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
         if (availableSources.isEmpty) {
           return Container(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.r),
@@ -588,12 +588,12 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
             ),
             child: Row(
               children: [
-                Icon(AppIcons.warning, color: AppColors.warning, size: 20),
-                SizedBox(width: AppSizes.spacing12),
+                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(
-                    l10n.noMoneySourceAvailable + ' ' + l10n.createSourceFirst,
-                    style: TextStyle(
+                    '${l10n.noMoneySourceAvailable} ${l10n.createSourceFirst}',
+                    style: const TextStyle(
                       color: AppColors.warning,
                       fontSize: AppSizes.textSmall,
                     ),
@@ -617,7 +617,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
             ),
             SizedBox(height: 8.h),
             Container(
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceDark : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
@@ -638,8 +638,8 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                       _selectedSource = isSelected ? null : source;
                     }),
                     child: Container(
-                      padding: EdgeInsets.all(AppSizes.spacing12),
-                      margin: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(AppSizes.spacing12),
+                      margin: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.1)
@@ -691,7 +691,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                             ),
                           ),
                           if (isSelected)
-                            Icon(
+                            const Icon(
                               AppIcons.success,
                               color: AppColors.primary,
                               size: 20,
@@ -706,7 +706,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           ],
         );
       },
-      loading: () => Container(
+      loading: () => const SizedBox(
         height: 60,
         child: Center(child: CircularProgressIndicator()),
       ),
@@ -765,7 +765,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
             },
             activeColor: AppColors.primary,
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -130,7 +130,7 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppColors.secondary, AppColors.secondaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -760,7 +760,7 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             AppIcons.warning,
                             color: AppColors.warning,
                             size: 16,

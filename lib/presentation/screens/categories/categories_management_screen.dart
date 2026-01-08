@@ -22,7 +22,7 @@ class CategoriesManagementScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
       appBar: AppBar(
-        title: Text('Catégories'),
+        title: const Text('Catégories'),
         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
         foregroundColor: isDark ? AppColors.textDark : Colors.black87,
         elevation: 0,
@@ -98,18 +98,18 @@ class CategoriesManagementScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             'Aucune catégorie',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Ajoutez votre première catégorie',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondaryDark,
             ),
@@ -196,7 +196,7 @@ class CategoriesManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Supprimer catégorie'),
+        title: const Text('Supprimer catégorie'),
         content: Text('Confirmer la suppression de "${category.name}"?'),
         actions: [
           TextButton(

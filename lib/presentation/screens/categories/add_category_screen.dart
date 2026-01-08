@@ -178,9 +178,9 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _nameController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Ex: Restaurant, Essence...',
-              prefixIcon: const Icon(AppIcons.edit),
+              prefixIcon: Icon(AppIcons.edit),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {

@@ -85,7 +85,7 @@ class BanksListScreen extends ConsumerWidget {
       margin: EdgeInsets.all(14.w),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppColors.primary, AppColors.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -150,9 +150,9 @@ class BanksListScreen extends ConsumerWidget {
               ),
             ),
             loading: () => const CircularProgressIndicator(color: Colors.white),
-            error: (e, s) => DisplayCurrencyAmountWidget(
+            error: (e, s) => const DisplayCurrencyAmountWidget(
               amount: 0,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -238,7 +238,7 @@ class BanksListScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             l10n.error,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,

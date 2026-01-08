@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:isar/isar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
@@ -276,23 +275,23 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             children: [
               _buildNameField(isDark, l10n).animate().fadeIn(delay: 100.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildAccountNumberField(
                 isDark,
                 l10n,
               ).animate().fadeIn(delay: 150.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildBalanceField(isDark, l10n).animate().fadeIn(delay: 200.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               if (_showSourceSelector)
                 _buildSourceSelector(
                   isDark,
                   l10n,
                 ).animate().fadeIn(delay: 220.ms),
-              if (_showSourceSelector) SizedBox(height: AppSizes.spacing12),
+              if (_showSourceSelector) const SizedBox(height: AppSizes.spacing12),
               if (double.tryParse(_balanceController.text) != null &&
                   double.parse(_balanceController.text) > 0 &&
                   widget.bank == null)
@@ -303,25 +302,25 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
               if (double.tryParse(_balanceController.text) != null &&
                   double.parse(_balanceController.text) > 0 &&
                   widget.bank == null)
-                SizedBox(height: AppSizes.spacing12),
+                const SizedBox(height: AppSizes.spacing12),
               _buildCurrencySelector(
                 isDark,
                 l10n,
               ).animate().fadeIn(delay: 250.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildBankTypeSelector(
                 isDark,
                 l10n,
               ).animate().fadeIn(delay: 300.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildConditionalInterestFields(isDark, l10n),
               _buildDescriptionField(
                 isDark,
                 l10n,
               ).animate().fadeIn(delay: 400.ms),
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
               _buildActiveSwitch(isDark, l10n).animate().fadeIn(delay: 450.ms),
-              SizedBox(height: AppSizes.spacing16),
+              const SizedBox(height: AppSizes.spacing16),
               _buildSaveButton(l10n).animate().fadeIn(delay: 500.ms),
             ],
           ),
@@ -423,7 +422,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
@@ -487,7 +486,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
             color: isDark ? AppColors.textDark : Colors.black87,
           ),
         ),
-        SizedBox(height: AppSizes.spacing12),
+        const SizedBox(height: AppSizes.spacing12),
         Row(
           children: [
             Flexible(
@@ -500,7 +499,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                 isDark: isDark,
               ),
             ),
-            SizedBox(width: AppSizes.spacing12),
+            const SizedBox(width: AppSizes.spacing12),
             Flexible(
               child: _TypeButton(
                 label: l10n.paid,
@@ -525,7 +524,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
               key: const ValueKey('interest_fields'),
               children: [
                 _buildInterestFields(isDark, l10n),
-                SizedBox(height: AppSizes.spacing12),
+                const SizedBox(height: AppSizes.spacing12),
               ],
             )
           : const SizedBox.shrink(key: ValueKey('empty')),
@@ -535,7 +534,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   Widget _buildInterestFields(bool isDark, AppLocalizations l10n) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -548,7 +547,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
           Row(
             children: [
               Icon(AppIcons.warning, color: AppColors.warning, size: 20.sp),
-              SizedBox(width: AppSizes.spacing12),
+              const SizedBox(width: AppSizes.spacing12),
               Text(
                 l10n.feeConfiguration,
                 style: TextStyle(
@@ -559,7 +558,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
               ),
             ],
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           TextFormField(
             controller: _interestValueController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -599,7 +598,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
               return null;
             },
           ),
-          SizedBox(height: AppSizes.spacing12),
+          const SizedBox(height: AppSizes.spacing12),
           Row(
             children: [
               Expanded(
@@ -738,7 +737,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
 
   Widget _buildActiveSwitch(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -807,7 +806,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
         ),
         child: Text(
           widget.bank == null ? l10n.addBank : l10n.save,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppSizes.textMedium,
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -835,7 +834,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
 
         if (availableSources.isEmpty) {
           return Container(
-            padding: EdgeInsets.all(AppSizes.spacing12),
+            padding: const EdgeInsets.all(AppSizes.spacing12),
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16.r),
@@ -845,12 +844,12 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
             ),
             child: Row(
               children: [
-                Icon(AppIcons.warning, color: AppColors.warning, size: 20),
-                SizedBox(width: AppSizes.spacing12),
+                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(
-                    l10n.noMoneySourceAvailable + ' ' + l10n.createSourceFirst,
-                    style: TextStyle(
+                    '${l10n.noMoneySourceAvailable} ${l10n.createSourceFirst}',
+                    style: const TextStyle(
                       color: AppColors.warning,
                       fontSize: AppSizes.textSmall,
                     ),
@@ -872,9 +871,9 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                 color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-            SizedBox(height: AppSizes.spacing12),
+            const SizedBox(height: AppSizes.spacing12),
             Container(
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceDark : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
@@ -895,8 +894,8 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                       _selectedSource = isSelected ? null : source;
                     }),
                     child: Container(
-                      padding: EdgeInsets.all(AppSizes.spacing12),
-                      margin: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(AppSizes.spacing12),
+                      margin: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.1)
@@ -921,7 +920,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                               size: 18,
                             ),
                           ),
-                          SizedBox(width: AppSizes.spacing12),
+                          const SizedBox(width: AppSizes.spacing12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,7 +937,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                                 ),
                                 Text(
                                   '${source.amount.toStringAsFixed(0)} ${source.currency}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: AppSizes.textSmall,
                                     color: AppColors.success,
                                     fontWeight: FontWeight.w500,
@@ -948,7 +947,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                             ),
                           ),
                           if (isSelected)
-                            Icon(
+                            const Icon(
                               AppIcons.success,
                               color: AppColors.primary,
                               size: 20,
@@ -963,15 +962,15 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
           ],
         );
       },
-      loading: () => Container(
+      loading: () => const SizedBox(
         height: 60,
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (e, s) => Container(
-        padding: EdgeInsets.all(AppSizes.spacing12),
+        padding: const EdgeInsets.all(AppSizes.spacing12),
         child: Text(
           l10n.loadingError,
-          style: TextStyle(color: AppColors.error),
+          style: const TextStyle(color: AppColors.error),
         ),
       ),
     );
@@ -994,7 +993,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
 
   Widget _buildSkipSourceOption(bool isDark, AppLocalizations l10n) {
     return Container(
-      padding: EdgeInsets.all(AppSizes.spacing12),
+      padding: const EdgeInsets.all(AppSizes.spacing12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -1022,7 +1021,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
             },
             activeColor: AppColors.primary,
           ),
-          SizedBox(width: AppSizes.spacing12),
+          const SizedBox(width: AppSizes.spacing12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1035,7 +1034,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                     color: isDark ? AppColors.textDark : Colors.black87,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   l10n.moneyExistsInRealBank,
                   style: TextStyle(

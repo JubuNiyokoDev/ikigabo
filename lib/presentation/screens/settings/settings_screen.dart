@@ -129,7 +129,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             if (hasPinSaved) ...[
               ListTile(
-                leading: Icon(AppIcons.edit, color: AppColors.primary),
+                leading: const Icon(AppIcons.edit, color: AppColors.primary),
                 title: Text(
                   l10n.changePin,
                   style: TextStyle(
@@ -142,7 +142,7 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(AppIcons.delete, color: AppColors.error),
+                leading: const Icon(AppIcons.delete, color: AppColors.error),
                 title: Text(
                   l10n.disablePin,
                   style: const TextStyle(color: AppColors.error),
@@ -154,7 +154,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ] else ...[
               ListTile(
-                leading: Icon(AppIcons.add, color: AppColors.primary),
+                leading: const Icon(AppIcons.add, color: AppColors.primary),
                 title: Text(
                   l10n.setupPin,
                   style: TextStyle(
@@ -841,7 +841,7 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(AppIcons.warning, color: AppColors.error, size: 24),
+              const Icon(AppIcons.warning, color: AppColors.error, size: 24),
               const SizedBox(width: 8),
               Text(
                 l10n.dangerZone,

@@ -82,7 +82,7 @@ class NotificationService {
 
   Future<void> _createNotificationChannel() async {
     // Canal pour les vraies alarmes (avec son fort et insistant)
-    final androidChannel = AndroidNotificationChannel(
+    const androidChannel = AndroidNotificationChannel(
       'debt_reminders',
       'Rappels de Dettes',
       description: 'Alarmes sonores pour les échéances de dettes et rappels',
@@ -272,8 +272,9 @@ class NotificationService {
   }
 
   Future<void> scheduleBankFeeAlert(BankModel bank) async {
-    if (bank.bankType == BankType.free || bank.nextDeductionDate == null)
+    if (bank.bankType == BankType.free || bank.nextDeductionDate == null) {
       return;
+    }
 
     // Vérifier si les alertes frais bancaires sont activées
     if (_prefsService?.getBankFeesEnabled() != true) return;
@@ -383,7 +384,7 @@ class NotificationService {
         DateTime.now().millisecondsSinceEpoch % 100000,
         title,
         body,
-        NotificationDetails(
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             'debt_reminders',
             'Rappels de Dettes',
@@ -392,9 +393,9 @@ class NotificationService {
             priority: Priority.high,
             playSound: true,
             enableVibration: true,
-            color: const Color(0xFF6366F1),
+            color: Color(0xFF6366F1),
           ),
-          iOS: const DarwinNotificationDetails(
+          iOS: DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,

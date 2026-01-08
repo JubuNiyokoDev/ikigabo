@@ -120,7 +120,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
                         color: isDark ? AppColors.textDark : Colors.black87,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       l10n.loansAndBorrows,
                       style: TextStyle(
@@ -350,7 +350,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
           const SizedBox(height: 16),
           Text(
             l10n.error,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textLarge,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -360,7 +360,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
           Text(
             error,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppSizes.textMedium,
               color: AppColors.textSecondaryDark,
             ),
@@ -437,9 +437,9 @@ class _SummaryCard extends StatelessWidget {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                error: (e, s) => DisplayCurrencyAmountWidget(
+                error: (e, s) => const DisplayCurrencyAmountWidget(
                   amount: 0,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,

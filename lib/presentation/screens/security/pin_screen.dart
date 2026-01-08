@@ -119,7 +119,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(AppSizes.spacing20),
+          padding: const EdgeInsets.all(AppSizes.spacing20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height - 
@@ -136,7 +136,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                 width: 64.w,
                 height: 64.h,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.secondary],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -153,7 +153,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                 child: Icon(AppIcons.wallet, size: 28.sp, color: Colors.white),
               ).animate().scale(delay: 100.ms, duration: 400.ms),
 
-              SizedBox(height: AppSizes.spacing16),
+              const SizedBox(height: AppSizes.spacing16),
 
               // Title
               Text(
@@ -165,7 +165,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                 ),
               ).animate().fadeIn(delay: 200.ms),
 
-              SizedBox(height: AppSizes.spacing12),
+              const SizedBox(height: AppSizes.spacing12),
 
               Text(
                 _getSubtitle(l10n),
@@ -177,7 +177,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
               ).animate().fadeIn(delay: 300.ms),
 
               if (_hasError) ...[
-                SizedBox(height: AppSizes.spacing12),
+                const SizedBox(height: AppSizes.spacing12),
                 Text(
                   l10n.incorrectPin,
                   style: const TextStyle(color: AppColors.error, fontSize: 14),
@@ -271,7 +271,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
               // Numpad
               _buildNumpad(isDark),
 
-              SizedBox(height: AppSizes.spacing16),
+              const SizedBox(height: AppSizes.spacing16),
                 ],
               ),
             ),
@@ -303,11 +303,11 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     return Column(
       children: [
         _buildNumRow(['1', '2', '3'], isDark),
-        SizedBox(height: AppSizes.spacing16),
+        const SizedBox(height: AppSizes.spacing16),
         _buildNumRow(['4', '5', '6'], isDark),
-        SizedBox(height: AppSizes.spacing16),
+        const SizedBox(height: AppSizes.spacing16),
         _buildNumRow(['7', '8', '9'], isDark),
-        SizedBox(height: AppSizes.spacing16),
+        const SizedBox(height: AppSizes.spacing16),
         _buildNumRow(['', '0', 'delete'], isDark),
       ],
     ).animate().fadeIn(delay: 500.ms);
