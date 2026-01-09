@@ -16,6 +16,7 @@ import '../../providers/asset_provider.dart';
 import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
+import '../../widgets/loading_button.dart';
 
 class AddAssetScreen extends ConsumerStatefulWidget {
   final AssetModel? asset;
@@ -43,6 +44,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
   SourceModel? _selectedSource;
   bool _showSourceSelector = false;
   bool _skipSourceSelection = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -87,6 +89,8 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
 
   Future<void> _saveAsset() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      
       final purchasePrice = double.parse(_purchasePriceController.text);
 
       // Vérifier la source si prix d'achat > 0
@@ -94,6 +98,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
         if (_selectedSource == null) {
           final l10n = AppLocalizations.of(context)!;
           _showError(l10n.pleaseSelectSource);
+          setState(() => _isLoading = false);
           return;
         }
 
@@ -101,6 +106,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
         if (_selectedSource!.amount < purchasePrice) {
           final l10n = AppLocalizations.of(context)!;
           _showError('${l10n.insufficientBalance} ${_selectedSource!.name}');
+          setState(() => _isLoading = false);
           return;
         }
 
@@ -111,6 +117,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
           _showError(
             '${l10n.currencyMismatch}: ${_selectedSource!.currency} ≠ $assetCurrency',
           );
+          setState(() => _isLoading = false);
           return;
         }
       }
@@ -158,8 +165,14 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
               sourceType: tx.SourceType.source,
               sourceName: _selectedSource!.name,
             );
+          } else if (_skipSourceSelection || purchasePrice == 0) {
+            // Asset sans achat (déjà possédé, héritage, don, etc.)
+            await controller.addAssetWithoutPurchase(
+              asset: asset,
+              category: tx.IncomeCategory.gift, // Ou autre catégorie appropriée
+            );
           } else {
-            // Asset sans achat ou avec argent externe
+            // Asset simple sans transaction
             await controller.addAsset(asset);
           }
         } else {
@@ -167,6 +180,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
         }
 
         if (mounted) {
+          setState(() => _isLoading = false);
           Navigator.pop(context);
           final l10n = AppLocalizations.of(context)!;
           _showSuccess(
@@ -176,8 +190,11 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
           );
         }
       } catch (e) {
-        final l10n = AppLocalizations.of(context)!;
-        _showError('${l10n.error}: $e');
+        if (mounted) {
+          setState(() => _isLoading = false);
+          final l10n = AppLocalizations.of(context)!;
+          _showError('${l10n.error}: $e');
+        }
       }
     }
   }
@@ -625,42 +642,10 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
   }
 
   Widget _buildSaveButton(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      height: 44.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.accent, AppColors.accent.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _saveAsset,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-        ),
-        child: Text(
-          widget.asset == null ? l10n.addAsset : l10n.save,
-          style: const TextStyle(
-            fontSize: AppSizes.textMedium,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
+    return LoadingButton(
+      text: widget.asset == null ? l10n.addAsset : l10n.save,
+      onPressed: _saveAsset,
+      isLoading: _isLoading,
     );
   }
 

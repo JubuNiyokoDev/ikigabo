@@ -20,8 +20,10 @@ import 'presentation/screens/debts/debts_list_screen.dart';
 import 'presentation/screens/transactions/add_transaction_bottom_sheet.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/stats/stats_screen.dart';
+import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/providers/debt_provider.dart';
 import 'presentation/providers/integrated_notification_provider.dart';
+import 'presentation/providers/onboarding_provider.dart';
 import 'data/services/notification_service.dart';
 import 'core/services/real_alarm_service.dart';
 import 'presentation/widgets/shimmer_widget.dart';
@@ -105,28 +107,45 @@ class AppNavigator extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pinState = ref.watch(pinProvider);
+    final onboardingAsync = ref.watch(onboardingCompleteProvider);
 
-    switch (pinState) {
-      case PinState.loading:
-        return const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50)));
-      case PinState.notSet:
-        return PinScreen(
-          mode: PinMode.setup,
-          onSuccess: () {
-            // Le provider gère déjà le changement d'état
-          },
-        );
-      case PinState.required:
-        return PinScreen(
-          mode: PinMode.verify,
-          onSuccess: () {
-            // Le provider gère déjà le changement d'état
-          },
-        );
-      case PinState.authenticated:
-        return const MainScreen();
-    }
+    return onboardingAsync.when(
+      data: (onboardingComplete) {
+        // Si l'onboarding n'est pas complété, l'afficher
+        if (!onboardingComplete) {
+          return const OnboardingScreen();
+        }
+
+        // Sinon, procéder avec la logique PIN
+        final pinState = ref.watch(pinProvider);
+
+        switch (pinState) {
+          case PinState.loading:
+            return const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50)));
+          case PinState.notSet:
+            return PinScreen(
+              mode: PinMode.setup,
+              onSuccess: () {
+                // Le provider gère déjà le changement d'état
+              },
+            );
+          case PinState.required:
+            return PinScreen(
+              mode: PinMode.verify,
+              onSuccess: () {
+                // Le provider gère déjà le changement d'état
+              },
+            );
+          case PinState.authenticated:
+            return const MainScreen();
+        }
+      },
+      loading: () => const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50))),
+      error: (error, stackTrace) {
+        // En cas d'erreur, afficher l'onboarding par défaut
+        return const OnboardingScreen();
+      },
+    );
   }
 }
 

@@ -619,6 +619,37 @@ abstract class AppLocalizations {
   String get exportInProgress;
   String get assetExportInProgress;
   String get debtExportInProgress;
+
+  // Onboarding
+  String get onboardingTitle1;
+  String get onboardingDesc1;
+  String get onboardingTitle2;
+  String get onboardingDesc2;
+  String get onboardingTitle3;
+  String get onboardingDesc3;
+  String get skip;
+  String get next;
+  String get getStarted;
+
+  // About Section (nouvelles clés seulement)
+  String get termsAndConditions;
+  String get reportProblem;
+  String get rateThisApp;
+  String get shareThisApp;
+  String get moreApps;
+  String get appInfo;
+  String get legal;
+
+  // Nouvelles traductions pour settings
+  String get manageCategoriesSubtitle;
+  String get budgetsAndGoals;
+  String get manageFinancialGoals;
+  String get reportProblemSubtitle;
+  String get rateOnPlayStore;
+  String get shareWithFriends;
+  String get discoverOtherApps;
+  String get termsOfUse;
+  String get privacyPolicySubtitle;
 }
 
 class _AppLocalizationsDelegate

@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
+import '../../widgets/loading_button.dart';
 import '../../../core/services/ad_manager.dart';
 
 class AddSourceScreen extends ConsumerStatefulWidget {
@@ -36,6 +37,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   SourceModel? _selectedSource;
   bool _showSourceSelector = false;
   bool _skipSourceSelection = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -84,6 +86,8 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   Future<void> _saveSource() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      
       try {
         final controller = ref.read(sourceControllerProvider.notifier);
 
@@ -94,6 +98,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           if (amount > 0 && !_skipSourceSelection) {
             if (_selectedSource == null) {
               final l10n = AppLocalizations.of(context)!;
+              setState(() => _isLoading = false);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(l10n.pleaseSelectSource),
@@ -106,6 +111,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
             // Vérifier si la source a assez d'argent
             if (_selectedSource!.amount < amount) {
               final l10n = AppLocalizations.of(context)!;
+              setState(() => _isLoading = false);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -176,6 +182,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         }
 
         if (mounted) {
+          setState(() => _isLoading = false);
           Navigator.pop(context);
           final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -198,6 +205,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         }
       } catch (e) {
         if (mounted) {
+          setState(() => _isLoading = false);
           final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -512,42 +520,10 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   }
 
   Widget _buildSaveButton(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      height: 48.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _saveSource,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-        ),
-        child: Text(
-          widget.source == null ? l10n.newSource : l10n.save,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
+    return LoadingButton(
+      text: widget.source == null ? l10n.newSource : l10n.save,
+      onPressed: _saveSource,
+      isLoading: _isLoading,
     );
   }
 

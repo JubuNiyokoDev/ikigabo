@@ -1185,7 +1185,8 @@ class AppLocalizationsSw extends AppLocalizations {
   String get deleteDebt => 'Futa deni';
 
   @override
-  String get deleteDebtConfirmation => 'Una uhakika unataka kufuta deni hili na';
+  String get deleteDebtConfirmation =>
+      'Una uhakika unataka kufuta deni hili na';
 
   @override
   String get debtDeletedSuccess => 'Deni limefutwa kwa mafanikio';
@@ -1228,7 +1229,8 @@ class AppLocalizationsSw extends AppLocalizations {
   String get transactionAddedSuccess => 'Muamala umeongezwa kwa mafanikio';
 
   @override
-  String get noSourcesCreateFirst => 'Hakuna vyanzo vinapatikana. Unda kimoja kwanza.';
+  String get noSourcesCreateFirst =>
+      'Hakuna vyanzo vinapatikana. Unda kimoja kwanza.';
 
   @override
   String get addNote => 'Ongeza kumbuka...';
@@ -1285,4 +1287,92 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get debtExportInProgress => 'Uhamishaji wa madeni unaendelea...';
+
+  // Onboarding
+  @override
+  String get onboardingTitle1 => 'Karibu Ikigabo';
+
+  @override
+  String get onboardingDesc1 =>
+      'Simamia mali yako kwa urahisi: vyanzo vya mapato, benki, mali na madeni mahali pamoja.';
+
+  @override
+  String get onboardingTitle2 => 'Fuatilia fedha zako';
+
+  @override
+  String get onboardingDesc2 =>
+      'Rekodi shughuli zako, fuatilia mapato na matumizi yako kwa takwimu za kina.';
+
+  @override
+  String get onboardingTitle3 => 'Simamia madeni yako';
+
+  @override
+  String get onboardingDesc3 =>
+      'Fuatilia madeni yako, weka vikumbusho ili usisahau malipo.';
+
+  @override
+  String get onboardingTitle4 => 'Salama na faragha';
+
+  @override
+  String get onboardingDesc4 =>
+      'Data yako inabaki kwenye kifaa chako. Hifadhi na rejesha kwa usalama na msimbo wa PIN.';
+
+  @override
+  String get skip => 'Ruka';
+
+  @override
+  String get next => 'Ifuatayo';
+
+  @override
+  String get getStarted => 'Anza';
+
+  // About Section
+  @override
+  String get termsAndConditions => 'Masharti na Vigezo';
+
+  @override
+  String get reportProblem => 'Ripoti Tatizo';
+
+  @override
+  String get rateThisApp => 'Kadiria Programu';
+
+  @override
+  String get shareThisApp => 'Shiriki Programu';
+
+  @override
+  String get moreApps => 'Programu Zaidi';
+
+  @override
+  String get appInfo => 'Habari';
+
+  @override
+  String get legal => 'Kisheria';
+
+  // Nouvelles traductions pour settings
+  @override
+  String get manageCategoriesSubtitle => 'Simamia kategoria za miamala';
+
+  @override
+  String get budgetsAndGoals => 'Bajeti & Malengo';
+
+  @override
+  String get manageFinancialGoals => 'Simamia malengo yako ya kifedha';
+
+  @override
+  String get reportProblemSubtitle => 'Ripoti tatizo';
+
+  @override
+  String get rateOnPlayStore => 'Kadiria kwenye Play Store';
+
+  @override
+  String get shareWithFriends => 'Shiriki na marafiki';
+
+  @override
+  String get discoverOtherApps => 'Gundua programu zetu nyingine';
+
+  @override
+  String get termsOfUse => 'Masharti ya matumizi';
+
+  @override
+  String get privacyPolicySubtitle => 'Sera ya faragha';
 }

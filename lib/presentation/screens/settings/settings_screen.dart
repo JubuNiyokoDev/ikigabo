@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:ikigabo/presentation/providers/isar_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/currencies.dart';
@@ -27,6 +29,61 @@ import '../../../core/services/ad_manager.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible d\'ouvrir le lien: $url')),
+      );
+    }
+  }
+
+  Future<void> _shareApp() async {
+    await Share.share(
+      'Découvrez Ikigabo - Gestion de patrimoine personnel\n'
+      'https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo',
+      subject: 'Ikigabo App',
+    );
+  }
+
+  Future<void> _rateApp(BuildContext context) async {
+    await _launchUrl(
+      context,
+      'https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo',
+    );
+  }
+
+  Future<void> _reportProblem(BuildContext context) async {
+    try {
+      final uri = Uri(
+        scheme: 'mailto',
+        path: 'niyondikojoffreasjubu@gmail.com',
+        queryParameters: {
+          'subject': 'Problème Ikigabo',
+          'body': 'Décrivez votre problème...',
+        },
+      );
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw 'No email app found';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email: niyondikojoffreasjubu@gmail.com'),
+          duration: Duration(seconds: 5),
+        ),
+      );
+    }
+  }
 
   void _showLanguageSelector(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -482,7 +539,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdManager.showSettingsAd();
     });
-    
+
     final themeMode = ref.watch(themeProvider);
     final currentLocale = ref.watch(localeProvider);
     final displayCurrencyAsync = ref.watch(displayCurrencyProvider);
@@ -543,11 +600,11 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // Transactions
-            _buildSection('Transactions', isDark),
+            _buildSection(l10n.transactions, isDark),
             _buildSettingTile(
               icon: AppIcons.filter,
-              title: 'Catégories',
-              subtitle: 'Gérer les catégories de transactions',
+              title: l10n.category,
+              subtitle: l10n.manageCategoriesSubtitle,
               onTap: () {
                 Navigator.push(
                   context,
@@ -560,14 +617,12 @@ class SettingsScreen extends ConsumerWidget {
             ).animate().fadeIn(delay: 350.ms),
             _buildSettingTile(
               icon: AppIcons.chart,
-              title: 'Budgets & Objectifs',
-              subtitle: 'Gérer vos objectifs financiers',
+              title: l10n.budgetsAndGoals,
+              subtitle: l10n.manageFinancialGoals,
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const BudgetsScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const BudgetsScreen()),
                 );
               },
               isDark: isDark,
@@ -681,21 +736,70 @@ class SettingsScreen extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // À propos
-            _buildSection(l10n.about, isDark),
+            // Support
+            _buildSection(l10n.support, isDark),
+            _buildSettingTile(
+              icon: AppIcons.warning,
+              title: l10n.reportProblem,
+              subtitle: l10n.reportProblemSubtitle,
+              onTap: () => _reportProblem(context),
+              isDark: isDark,
+            ).animate().fadeIn(delay: 900.ms),
+            _buildSettingTile(
+              icon: AppIcons.success,
+              title: l10n.rateThisApp,
+              subtitle: l10n.rateOnPlayStore,
+              onTap: () => _rateApp(context),
+              isDark: isDark,
+            ).animate().fadeIn(delay: 920.ms),
+            _buildSettingTile(
+              icon: AppIcons.export,
+              title: l10n.shareThisApp,
+              subtitle: l10n.shareWithFriends,
+              onTap: _shareApp,
+              isDark: isDark,
+            ).animate().fadeIn(delay: 940.ms),
+            _buildSettingTile(
+              icon: AppIcons.menu,
+              title: l10n.moreApps,
+              subtitle: l10n.discoverOtherApps,
+              onTap: () => _launchUrl(
+                context,
+                'https://play.google.com/store/apps/dev?id=RundiNova',
+              ),
+              isDark: isDark,
+            ).animate().fadeIn(delay: 960.ms),
+
+            const SizedBox(height: 20),
+
+            // Légal
+            _buildSection(l10n.legal, isDark),
             _buildSettingTile(
               icon: AppIcons.info,
               title: l10n.version,
-              subtitle: '1.0.0',
+              subtitle: '1.0.0 (1)',
+              isDark: isDark,
+            ).animate().fadeIn(delay: 980.ms),
+            _buildSettingTile(
+              icon: AppIcons.note,
+              title: l10n.termsAndConditions,
+              subtitle: l10n.termsOfUse,
+              onTap: () => _launchUrl(
+                context,
+                'https://jubuniyokodev.github.io/ikigabo/terms.html',
+              ),
               isDark: isDark,
             ).animate().fadeIn(delay: 1000.ms),
             _buildSettingTile(
-              icon: AppIcons.contact,
-              title: l10n.support,
-              subtitle: l10n.contactUs,
-              onTap: () {},
+              icon: AppIcons.security,
+              title: l10n.privacyPolicy,
+              subtitle: l10n.privacyPolicySubtitle,
+              onTap: () => _launchUrl(
+                context,
+                'https://jubuniyokodev.github.io/ikigabo/privacy-policy.html',
+              ),
               isDark: isDark,
-            ).animate().fadeIn(delay: 900.ms),
+            ).animate().fadeIn(delay: 1020.ms),
 
             const SizedBox(height: 16),
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ikigabo/presentation/widgets/loading_button.dart';
 import 'package:isar/isar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
@@ -45,6 +46,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   SourceModel? _selectedSource;
   bool _showSourceSelector = false;
   bool _skipSourceSelection = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -88,26 +90,31 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   Future<void> _saveBank() async {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+
       // Pub récompensée pour création banque (fonctionnalité importante)
       if (widget.bank == null) {
         final rewardGranted = await AdManager.showRewardedForBankCreation();
         if (!rewardGranted) {
+          setState(() => _isLoading = false);
           _showError('Regardez la pub pour créer votre banque');
           return;
         }
       }
-      
+
       final amount = double.parse(_balanceController.text);
 
       // Vérifier la source si montant initial > 0
       if (amount > 0 && widget.bank == null && !_skipSourceSelection) {
         if (_selectedSource == null) {
+          setState(() => _isLoading = false);
           _showError(l10n.pleaseSelectSource);
           return;
         }
 
         // Vérifier si la source a assez d'argent
         if (_selectedSource!.amount < amount) {
+          setState(() => _isLoading = false);
           _showError('${l10n.insufficientBalance} ${_selectedSource!.name}');
           return;
         }
@@ -115,6 +122,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
         // Vérifier la compatibilité des devises
         final bankCurrency = _currency ?? 'BIF';
         if (_selectedSource!.currency != bankCurrency) {
+          setState(() => _isLoading = false);
           _showError(
             '${l10n.currencyMismatch}: ${_selectedSource!.currency} ≠ $bankCurrency',
           );
@@ -217,6 +225,7 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
         }
 
         if (mounted) {
+          setState(() => _isLoading = false);
           Navigator.pop(context);
           final l10n = AppLocalizations.of(context)!;
           _showSuccess(
@@ -224,13 +233,16 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                 ? l10n.bankAddedSuccess
                 : l10n.bankUpdatedSuccess,
           );
-          
+
           // Pub après action banque
           AdManager.showBankAd();
         }
       } catch (e) {
-        final l10n = AppLocalizations.of(context)!;
-        _showError('${l10n.error}: $e');
+        if (mounted) {
+          setState(() => _isLoading = false);
+          final l10n = AppLocalizations.of(context)!;
+          _showError('${l10n.error}: $e');
+        }
       }
     }
   }
@@ -304,7 +316,8 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
                   isDark,
                   l10n,
                 ).animate().fadeIn(delay: 220.ms),
-              if (_showSourceSelector) const SizedBox(height: AppSizes.spacing12),
+              if (_showSourceSelector)
+                const SizedBox(height: AppSizes.spacing12),
               if (double.tryParse(_balanceController.text) != null &&
                   double.parse(_balanceController.text) > 0 &&
                   widget.bank == null)
@@ -790,42 +803,10 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
   }
 
   Widget _buildSaveButton(AppLocalizations l10n) {
-    return Container(
-      width: double.infinity,
-      height: 48.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _saveBank,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-        ),
-        child: Text(
-          widget.bank == null ? l10n.addBank : l10n.save,
-          style: const TextStyle(
-            fontSize: AppSizes.textMedium,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
+    return LoadingButton(
+      text: widget.bank == null ? l10n.addBank : l10n.save,
+      onPressed: _saveBank,
+      isLoading: _isLoading,
     );
   }
 
@@ -857,7 +838,11 @@ class _AddBankScreenState extends ConsumerState<AddBankScreen> {
             ),
             child: Row(
               children: [
-                const Icon(AppIcons.warning, color: AppColors.warning, size: 20),
+                const Icon(
+                  AppIcons.warning,
+                  color: AppColors.warning,
+                  size: 20,
+                ),
                 const SizedBox(width: AppSizes.spacing12),
                 Expanded(
                   child: Text(

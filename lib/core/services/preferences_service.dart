@@ -17,6 +17,7 @@ class PreferencesService {
   static const String _autoBackupEnabledKey = 'auto_backup_enabled';
   static const String _lastBackupDateKey = 'last_backup_date';
   static const String _lowBalanceThresholdKey = 'low_balance_threshold';
+  static const String _onboardingCompletedKey = 'onboarding_completed';
 
   final SharedPreferences _prefs;
 
@@ -169,6 +170,14 @@ class PreferencesService {
 
   /// Sauvegarder le seuil de solde faible
   Future<bool> setLowBalanceThreshold(double threshold) => _prefs.setDouble(_lowBalanceThresholdKey, threshold);
+
+  // === ONBOARDING ===
+
+  /// Vérifier si l'onboarding est terminé
+  bool isOnboardingCompleted() => _prefs.getBool(_onboardingCompletedKey) ?? false;
+
+  /// Marquer l'onboarding comme terminé
+  Future<bool> setOnboardingCompleted(bool completed) => _prefs.setBool(_onboardingCompletedKey, completed);
 
   /// Méthodes génériques pour bool
   bool getBool(String key) => _prefs.getBool(key) ?? false;
