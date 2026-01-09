@@ -43,12 +43,20 @@ android {
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        
-        // Support pour pages mémoire 16KB
+
+        // Support pour pages mémoire 16KB (Android 15+)
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            debugSymbolLevel = "SYMBOL_TABLE"
         }
-        
+
+        // Activer l'alignement 16KB
+        packaging {
+            jniLibs {
+                useLegacyPackaging = false
+            }
+        }
+
         // Optimiser les ressources - syntaxe moderne
         resourceConfigurations += listOf("en", "fr")
         vectorDrawables.useSupportLibrary = true
@@ -85,4 +93,5 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("androidx.core:core-ktx:1.13.1")
 }

@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/backup_provider.dart';
 import '../../providers/biometric_provider.dart';
+import '../../../core/services/ad_manager.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -373,6 +374,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         await ref
             .read(backupControllerProvider.notifier)
             .applyImport(importResult.data!);
+        // Montrer rewarded pour import réussi
+        await AdManager.showRewardedForImportExport();
         _showSuccessDialog(l10n.dataImportedSuccess);
       }
     } catch (e) {
@@ -498,6 +501,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .saveBackupToStorage(backupData);
 
       if (mounted) {
+        // Montrer rewarded pour export réussi
+        await AdManager.showRewardedForImportExport();
         _showSuccessDialog(
           '${l10n.backupCreatedSuccess}\n\n${l10n.fileSavedIn}\n${l10n.downloadsIkigaboPath}',
         );

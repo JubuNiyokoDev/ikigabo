@@ -17,10 +17,10 @@ class AdsService {
 
     await UnityAds.init(
       gameId: _gameId,
-      testMode: true, // ⚠️ TRUE tant que l'app n'est pas publiée
+      testMode: false, // ✅ PRODUCTION MODE - Vraies publicités
       onComplete: () {
         _isInitialized = true;
-        print('✅ Unity Ads initialized');
+        print('✅ Unity Ads initialized (PRODUCTION)');
         // NE PAS charger automatiquement les ads
       },
       onFailed: (error, message) {

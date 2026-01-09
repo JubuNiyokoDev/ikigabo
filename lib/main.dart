@@ -33,11 +33,10 @@ void main() async {
   await RealAlarmService.initialize();
   await NotificationService().initialize();
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
+  // Configuration edge-to-edge compatible Android 15
+  // Ne plus utiliser setSystemUIOverlayStyle qui est déprécié
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
   );
 
   runApp(const ProviderScope(child: IkigaboApp()));

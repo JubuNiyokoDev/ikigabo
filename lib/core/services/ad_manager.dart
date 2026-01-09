@@ -122,4 +122,13 @@ class AdManager {
   static Future<bool> showRewardedForReports() async {
     return await showRewardedForImportantAction('Consultation rapports');
   }
+
+  // Nouvelles fonctionnalités riches
+  static Future<bool> showRewardedForImportExport() async {
+    return await showRewardedForImportantAction('Import/Export données');
+  }
+
+  static Future<bool> showRewardedForPinSetup() async {
+    return await showRewardedForImportantAction('Configuration PIN');
+  }
 }
