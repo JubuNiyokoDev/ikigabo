@@ -1190,7 +1190,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteDebt => 'Supprimer la dette';
 
   @override
-  String get deleteDebtConfirmation => 'Êtes-vous sûr de vouloir supprimer cette dette avec';
+  String get deleteDebtConfirmation =>
+      'Êtes-vous sûr de vouloir supprimer cette dette avec';
 
   @override
   String get debtDeletedSuccess => 'Dette supprimée avec succès';
@@ -1233,7 +1234,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionAddedSuccess => 'Transaction ajoutée avec succès';
 
   @override
-  String get noSourcesCreateFirst => 'Aucune source disponible. Créez-en une d\'abord.';
+  String get noSourcesCreateFirst =>
+      'Aucune source disponible. Créez-en une d\'abord.';
 
   @override
   String get addNote => 'Ajoutez une note...';
@@ -1290,4 +1292,86 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtExportInProgress => 'Export des dettes en cours...';
+
+  // Onboarding
+  @override
+  String get onboardingTitle1 => 'Bienvenue sur Ikigabo';
+
+  @override
+  String get onboardingDesc1 =>
+      'Gérez votre patrimoine facilement : sources de revenus, banques, actifs et dettes en un seul endroit.';
+
+  @override
+  String get onboardingTitle2 => 'Suivez vos finances';
+
+  @override
+  String get onboardingDesc2 =>
+      'Enregistrez vos transactions, suivez vos revenus et dépenses avec des statistiques détaillées.';
+
+  @override
+  String get onboardingTitle3 => 'Sécurisé et privé';
+
+  @override
+  String get onboardingDesc3 =>
+      'Vos données restent sur votre appareil. Sauvegardez et restaurez en toute sécurité avec un code PIN.';
+
+  @override
+  String get skip => 'Passer';
+
+  @override
+  String get next => 'Suivant';
+
+  @override
+  String get getStarted => 'Commencer';
+
+  // About Section
+  @override
+  String get termsAndConditions => 'Conditions d\'utilisation';
+
+  @override
+  String get reportProblem => 'Signaler un problème';
+
+  @override
+  String get rateThisApp => 'Évaluer l\'application';
+
+  @override
+  String get shareThisApp => 'Partager l\'application';
+
+  @override
+  String get moreApps => 'Plus d\'applications';
+
+  @override
+  String get appInfo => 'Informations';
+
+  @override
+  String get legal => 'Mentions légales';
+
+  // Nouvelles traductions manquantes
+
+  @override
+  String get manageCategoriesSubtitle => 'Gérer les catégories de transactions';
+
+  @override
+  String get budgetsAndGoals => 'Budgets & Objectifs';
+
+  @override
+  String get manageFinancialGoals => 'Gérer vos objectifs financiers';
+
+  @override
+  String get reportProblemSubtitle => 'Signaler un problème';
+
+  @override
+  String get rateOnPlayStore => 'Évaluer sur Play Store';
+
+  @override
+  String get shareWithFriends => 'Partager avec vos amis';
+
+  @override
+  String get discoverOtherApps => 'Découvrir nos autres apps';
+
+  @override
+  String get termsOfUse => 'Conditions d\'utilisation';
+
+  @override
+  String get privacyPolicySubtitle => 'Politique de confidentialité';
 }

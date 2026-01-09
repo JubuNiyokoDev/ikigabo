@@ -13,14 +13,14 @@ class AdManager {
   static const String _rewardedActionCount = 'rewarded_action_count';
 
   // Fréquences d'affichage (tous les X actions)
-  static const int _bankAdFrequency = 3;
-  static const int _sourceAdFrequency = 3;
-  static const int _debtAdFrequency = 3;
-  static const int _assetAdFrequency = 3;
-  static const int _settingsAdFrequency = 4;
-  static const int _dashboardAdFrequency = 8;
-  static const int _reportAdFrequency = 5;
-  static const int _rewardedAdFrequency = 10;
+  static const int _bankAdFrequency = 10;
+  static const int _sourceAdFrequency = 10;
+  static const int _debtAdFrequency = 10;
+  static const int _assetAdFrequency = 10;
+  static const int _settingsAdFrequency = 10;
+  static const int _dashboardAdFrequency = 10;
+  static const int _reportAdFrequency = 10;
+  static const int _rewardedAdFrequency = 15;
 
   // Banques (ajout/modification)
   static Future<void> showBankAd() async {
@@ -62,73 +62,120 @@ class AdManager {
     await _showRewardedForAction(_rewardedActionCount, _rewardedAdFrequency);
   }
 
-  // Logique commune pour interstitial
+  // Logique commune pour interstitial (simple et efficace)
   static Future<void> _showAdForAction(String countKey, int frequency) async {
     final prefs = await SharedPreferences.getInstance();
     final count = (prefs.getInt(countKey) ?? 0) + 1;
     await prefs.setInt(countKey, count);
-    
-    // Seulement afficher si la fréquence est atteinte
+
+    print('Action $countKey: $count/$frequency');
+
+    // Afficher ad si fréquence atteinte
     if (count % frequency == 0) {
-      await AdsService.showInterstitial();
+      print('Tentative d\'affichage interstitial pour $countKey');
+      try {
+        await AdsService.showInterstitial();
+        print('Interstitial affichée avec succès');
+      } catch (e) {
+        print('Erreur interstitial: $e');
+      }
     }
-    
-    // Incrémenter aussi le compteur rewarded
+
+    // Incrémenter compteur rewarded
     showAutoRewardedAd();
   }
 
-  // Logique commune pour rewarded
-  static Future<void> _showRewardedForAction(String countKey, int frequency) async {
+  // Logique commune pour rewarded automatique (simple)
+  static Future<void> _showRewardedForAction(
+    String countKey,
+    int frequency,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final count = (prefs.getInt(countKey) ?? 0) + 1;
     await prefs.setInt(countKey, count);
-    
+
+    print('Rewarded auto $countKey: $count/$frequency');
+
     if (count % frequency == 0) {
-      await AdsService.showRewarded(onReward: () {
-        print('Récompense automatique accordée!');
-      });
+      print('Tentative rewarded automatique');
+      try {
+        await AdsService.showRewarded(
+          onReward: () {
+            print('Récompense automatique accordée!');
+          },
+        );
+      } catch (e) {
+        print('Erreur rewarded auto: $e');
+      }
     }
   }
 
-  // Pub récompensée avant fonctionnalités importantes
+  // Pub récompensée pour fonctionnalités importantes (simple avec cooldown)
   static Future<bool> showRewardedForImportantAction(String actionName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastRewardedKey = 'last_rewarded_$actionName';
+    final lastRewarded = prefs.getInt(lastRewardedKey) ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // Cooldown 5 minutes
+    if (now - lastRewarded < 5 * 60 * 1000) {
+      print('Cooldown actif pour $actionName - Autorisation directe');
+      return true;
+    }
+
+    print('Tentative rewarded pour $actionName');
     bool rewardGranted = false;
-    
-    await AdsService.showRewarded(onReward: () {
-      rewardGranted = true;
-      print('Récompense accordée pour: $actionName');
-    });
-    
+
+    try {
+      await AdsService.showRewarded(
+        onReward: () {
+          rewardGranted = true;
+          prefs.setInt(lastRewardedKey, now);
+          print('Récompense accordée pour $actionName');
+        },
+      );
+
+      // Si pas de récompense après 5 sec, autoriser
+      if (!rewardGranted) {
+        await Future.delayed(const Duration(seconds: 5));
+        print('Timeout pour $actionName - Autorisation accordée');
+        return true;
+      }
+    } catch (e) {
+      print('Erreur rewarded $actionName: $e - Autorisation accordée');
+      return true;
+    }
+
     return rewardGranted;
   }
 
-  // Actions importantes qui nécessitent une pub récompensée
+  // Actions importantes qui nécessitent une pub récompensée (avec cooldown)
   static Future<bool> showRewardedForBankCreation() async {
-    return await showRewardedForImportantAction('Création banque');
+    return await showRewardedForImportantAction('bank_creation');
   }
 
   static Future<bool> showRewardedForLargeTransaction() async {
-    return await showRewardedForImportantAction('Transaction importante');
+    return await showRewardedForImportantAction('large_transaction');
   }
 
   static Future<bool> showRewardedForDebtCreation() async {
-    return await showRewardedForImportantAction('Création dette');
+    return await showRewardedForImportantAction('debt_creation');
   }
 
   static Future<bool> showRewardedForAssetCreation() async {
-    return await showRewardedForImportantAction('Création asset');
+    return await showRewardedForImportantAction('asset_creation');
   }
 
   static Future<bool> showRewardedForReports() async {
-    return await showRewardedForImportantAction('Consultation rapports');
+    return await showRewardedForImportantAction('reports_access');
   }
 
-  // Nouvelles fonctionnalités riches
+  // Nouvelles fonctionnalités riches (avec cooldown)
   static Future<bool> showRewardedForImportExport() async {
-    return await showRewardedForImportantAction('Import/Export données');
+    return await showRewardedForImportantAction('import_export');
   }
 
   static Future<bool> showRewardedForPinSetup() async {
-    return await showRewardedForImportantAction('Configuration PIN');
+    return await showRewardedForImportantAction('pin_setup');
   }
 }

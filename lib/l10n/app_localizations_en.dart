@@ -1183,7 +1183,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteDebt => 'Delete debt';
 
   @override
-  String get deleteDebtConfirmation => 'Are you sure you want to delete this debt with';
+  String get deleteDebtConfirmation =>
+      'Are you sure you want to delete this debt with';
 
   @override
   String get debtDeletedSuccess => 'Debt deleted successfully';
@@ -1283,4 +1284,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debtExportInProgress => 'Debt export in progress...';
+
+  // Onboarding
+  @override
+  String get onboardingTitle1 => 'Welcome to Ikigabo';
+
+  @override
+  String get onboardingDesc1 =>
+      'Manage your wealth easily: income sources, banks, assets and debts all in one place.';
+
+  @override
+  String get onboardingTitle2 => 'Track your finances';
+
+  @override
+  String get onboardingDesc2 =>
+      'Record your transactions, track your income and expenses with detailed statistics.';
+
+  @override
+  String get onboardingTitle3 => 'Manage your debts';
+
+  @override
+  String get onboardingDesc3 =>
+      'Track your receivables and debts, set reminders to never miss a payment.';
+
+  @override
+  String get onboardingTitle4 => 'Secure and private';
+
+  @override
+  String get onboardingDesc4 =>
+      'Your data stays on your device. Backup and restore securely with a PIN code.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get getStarted => 'Get Started';
+
+  // About Section
+  @override
+  String get termsAndConditions => 'Terms and Conditions';
+
+  @override
+  String get reportProblem => 'Report a Problem';
+
+  @override
+  String get rateThisApp => 'Rate this App';
+
+  @override
+  String get shareThisApp => 'Share this App';
+
+  @override
+  String get moreApps => 'More Apps';
+
+  @override
+  String get appInfo => 'App Info';
+
+  @override
+  String get legal => 'Legal';
+
+  // Nouvelles traductions pour settings
+  @override
+  String get manageCategoriesSubtitle => 'Manage transaction categories';
+
+  @override
+  String get budgetsAndGoals => 'Budgets & Goals';
+
+  @override
+  String get manageFinancialGoals => 'Manage your financial goals';
+
+  @override
+  String get reportProblemSubtitle => 'Report a problem';
+
+  @override
+  String get rateOnPlayStore => 'Rate on Play Store';
+
+  @override
+  String get shareWithFriends => 'Share with friends';
+
+  @override
+  String get discoverOtherApps => 'Discover our other apps';
+
+  @override
+  String get termsOfUse => 'Terms of use';
+
+  @override
+  String get privacyPolicySubtitle => 'Privacy policy';
 }

@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/services/dynamic_category_service.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/theme_provider.dart';
 
@@ -25,6 +26,8 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
   final _descriptionController = TextEditingController();
   
   late TransactionType _type;
+  String? _selectedCategoryKey;
+  final _categoryController = TextEditingController();
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
   void dispose() {
     _amountController.dispose();
     _descriptionController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -99,6 +103,24 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _categoryController,
+                  style: TextStyle(
+                    color: isDark ? AppColors.textDark : Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Catégorie',
+                    filled: true,
+                    fillColor: isDark ? AppColors.surfaceDark : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(AppIcons.money, color: AppColors.primary),
+                  ),
+                  onChanged: (value) => _selectedCategoryKey = value,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -176,6 +198,12 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       try {
+        final selectedCategory = CategoryMappingService.getCategoryFromSelection(
+          _type, 
+          _selectedCategoryKey, 
+          context
+        );
+        
         final updatedTransaction = TransactionModel(
           id: widget.transaction.id,
           type: _type,
@@ -191,8 +219,12 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
           createdAt: widget.transaction.createdAt,
           updatedAt: DateTime.now(),
           description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
-          incomeCategory: _type == TransactionType.income ? IncomeCategory.other : widget.transaction.incomeCategory,
-          expenseCategory: _type == TransactionType.expense ? ExpenseCategory.other : widget.transaction.expenseCategory,
+          incomeCategory: _type == TransactionType.income 
+              ? selectedCategory as IncomeCategory 
+              : widget.transaction.incomeCategory,
+          expenseCategory: _type == TransactionType.expense 
+              ? selectedCategory as ExpenseCategory 
+              : widget.transaction.expenseCategory,
         );
 
         await ref.read(transactionControllerProvider.notifier).updateTransaction(updatedTransaction);

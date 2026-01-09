@@ -10,7 +10,7 @@ import 'transaction_provider.dart';
 import 'currency_provider.dart';
 import '../../core/services/currency_conversion_service.dart';
 
-// Total wealth calculation based on transactions (Entrées - Sorties)
+// Total wealth calculation based on transactions only (Entrées - Sorties)
 final totalWealthProvider = FutureProvider<double>((ref) async {
   final displayCurrency = await ref.watch(displayCurrencyProvider.future);
   final repository = ref.watch(transactionRepositoryProvider);

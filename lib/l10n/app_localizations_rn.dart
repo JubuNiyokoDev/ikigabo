@@ -18,13 +18,13 @@ class AppLocalizationsRn extends AppLocalizations {
   String get language => 'Ururimi';
 
   @override
-  String get theme => 'Imiterere';
+  String get theme => 'Insiguro';
 
   @override
-  String get dark => 'Umwijima';
+  String get dark => 'Umwiza';
 
   @override
-  String get light => 'Urumuri';
+  String get light => 'Umuco';
 
   @override
   String get general => 'Rusange';
@@ -34,75 +34,75 @@ class AppLocalizationsRn extends AppLocalizations {
   String get banks => 'Amabanki';
 
   @override
-  String get addBank => 'Ongerako banki';
+  String get addBank => 'Ongera banki';
 
   @override
-  String get bankBalance => 'Amafaranga ya banki';
+  String get bankBalance => 'Amahera yo muri banki';
 
   @override
-  String get totalAmount => 'Ingano yose';
+  String get totalAmount => 'Amahera yose';
 
   @override
-  String get bankFees => 'Ikiguzi ca banki';
+  String get bankFees => 'Amahera banki icishako';
 
   @override
   String get save => 'Bika';
 
   // Assets
   @override
-  String get assets => 'Umutungo';
+  String get assets => 'Itunga';
 
   @override
-  String get addAsset => 'Ongerako umutungo';
+  String get addAsset => 'Ongera itunga';
 
   @override
-  String get convertibleAsset => 'Ibintu biguruka';
+  String get convertibleAsset => 'Itunga riguruka';
 
   @override
-  String get totalAssets => 'Umutungo wose';
+  String get totalAssets => 'Itunga ryose hamwe';
 
   // Dashboard
   @override
-  String get dashboard => 'Ikibanza';
+  String get dashboard => 'Incamake';
 
   @override
-  String get personalWealth => 'Umutungo wawe bwite';
+  String get personalWealth => 'Itunga ryawe bwite';
 
   @override
-  String get totalWealth => 'Umutungo wose';
+  String get totalWealth => 'Itunga ryose hamwe';
 
   @override
   String get monthlyGrowth => 'Iyongera rya buri kwezi';
 
   @override
-  String get weeklyActivity => 'Ibikorwa vya buri cyumweru';
+  String get weeklyActivity => 'Ibikorwa vya buri ndwi';
 
   @override
-  String get thisWeek => 'Iki cyumweru';
+  String get thisWeek => 'Iyi ndwi';
 
   @override
   String get income => 'Inyungu';
 
   @override
-  String get expense => 'Amafaranga asohoka';
+  String get expense => 'Amahera asohoka';
 
   @override
-  String get assetDistribution => 'Ikwirakwiza ry\'umutungo';
+  String get assetDistribution => 'Ikwirakwiza ry\'itunga';
 
   @override
-  String get debtsLoans => 'Imyenda & Inguzanyo';
+  String get debtsLoans => 'Amadeni & Inguzanyo';
 
   @override
-  String get lent => 'Byatanzwe';
+  String get lent => 'Vyatanzwe';
 
   @override
-  String get borrowed => 'Byakiriwe';
+  String get borrowed => 'Vyakiriwe';
 
   @override
   String get recentTransactions => 'Ibikorwa vya vuba';
 
   @override
-  String get seeAll => 'Reba vyose';
+  String get seeAll => 'Raba vyose';
 
   @override
   String get noRecentTransactions => 'Nta bikorwa vya vuba';
@@ -112,35 +112,35 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Quick Actions
   @override
-  String get goods => 'Umutungo';
+  String get goods => 'Itunga';
 
   @override
-  String get debts => 'Imyenda';
+  String get debts => 'Amadeni';
 
   // Banks
   @override
   String get noBanks => 'Nta banki';
 
   @override
-  String get addFirstBank => 'Ongerako banki yawe ya mbere';
+  String get addFirstBank => 'Ongera banki yawe ya mbere';
 
   @override
   String get error => 'Ikosa';
 
   @override
-  String get feesToDeduct => 'bigomba gukurwaho';
+  String get feesToDeduct => 'bivako';
 
   @override
   String get free => 'Ubuntu';
 
   @override
-  String get paid => 'Ikiguzi';
+  String get paid => 'Hari ikiguzi';
 
   @override
   String get fees => 'Ikiguzi';
 
   @override
-  String get toDeduct => 'Bigomba gukurwaho';
+  String get toDeduct => 'Bivako';
 
   @override
   String get month => 'Ukwezi';
@@ -154,7 +154,7 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Settings
   @override
-  String get chooseLanguage => 'Hitamo ururimi';
+  String get chooseLanguage => 'Hitamwo ururimi';
 
   @override
   String get defaultCurrency => 'Ifaranga rikoreshwa';
@@ -169,37 +169,37 @@ class AppLocalizationsRn extends AppLocalizations {
   String get changePinCode => 'Hindura kode yawe';
 
   @override
-  String get biometricAuth => 'Kwemeza hamwe n\'ibimenyetso vyo ku mubiri';
+  String get biometricAuth => 'Kwemeza hakoreshejwe ibimenyetso vy\'umubiri';
 
   @override
-  String get fingerprint => 'Igikumwe c\'urutoki';
+  String get fingerprint => 'Igikumwe';
 
   @override
-  String get manageNotifications => 'Cungera imenyesha n\'ibutsa';
+  String get manageNotifications => 'Cungera imenyesha n\'ivyibutsa';
 
   @override
   String get data => 'Amakuru';
 
   @override
-  String get autoBackup => 'Kopi y\'umutekano ikora bwayo';
+  String get autoBackup => 'Kubika vyikora';
 
   @override
-  String get enableBackup => 'Koresha kopi y\'umutekano';
+  String get enableBackup => 'Koresha kubika';
 
   @override
-  String get backupRestore => 'Kopi y\'umutekano & Kugarura';
+  String get backupRestore => 'Kubika & Kugarura';
 
   @override
-  String get manageBackups => 'Cungera kopi z\'umutekano';
+  String get manageBackups => 'Cungera ibyabitswe';
 
   @override
-  String get about => 'Ibirebana';
+  String get about => 'Ivyerekeye';
 
   @override
   String get version => 'Verisiyo';
 
   @override
-  String get help => 'Ubufasha';
+  String get help => 'Gufasha';
 
   @override
   String get helpCenter => 'Ikigo c\'ubufasha';
@@ -208,7 +208,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get privacy => 'Ibanga';
 
   @override
-  String get privacyPolicy => 'Politiki y\'ibanga';
+  String get privacyPolicy => 'Politike y\'ibanga';
 
   @override
   String get terms => 'Amabwiriza';
@@ -227,60 +227,60 @@ class AppLocalizationsRn extends AppLocalizations {
   String get euro => 'Euro';
 
   @override
-  String get tanzanianShilling => 'Ishilingi ry\'Tanzaniya';
+  String get tanzanianShilling => 'Ishilingi rya Tanzaniya';
 
   @override
-  String get kenyanShilling => 'Ishilingi ry\'Kenya';
+  String get kenyanShilling => 'Ishilingi rya Kenya';
 
   @override
-  String get ugandanShilling => 'Ishilingi ry\'Uganda';
+  String get ugandanShilling => 'Ishilingi rya Uganda';
 
   @override
-  String get rwandanFranc => 'Ifaranga ry\'u Rwanda';
+  String get rwandanFranc => 'Ifaranga ry\'Urwanda';
 
   @override
-  String get congoleseFranc => 'Ifaranga ry\'Kongo';
+  String get congoleseFranc => 'Ifaranga rya Kongo';
 
   // Main Screen
   @override
   String get management => 'Imicungire';
 
   @override
-  String get accessAllYourData => 'Shira amakuru yawe yose';
+  String get accessAllYourData => 'Raba amakuru yawe yose';
 
   // Add Bank Screen
   @override
-  String get newBank => 'Banki Nshasha';
+  String get newBank => 'Banki nshasha';
 
   @override
-  String get editBank => 'Hindura Banki';
+  String get editBank => 'Hindura banki';
 
   @override
-  String get bankName => 'Izina ry\'ibanki';
+  String get bankName => 'Izina rya banki';
 
   @override
-  String get bankNameHint => 'Urugero: CRDB Burundi';
+  String get bankNameHint => 'Akarorero: CRDB Burundi';
 
   @override
-  String get accountNumber => 'Nimero y\'akarito (ntabwo ari ngombwa)';
+  String get accountNumber => 'Nimero y\'ikarata (siyo ngombwa)';
 
   @override
-  String get accountNumberHint => 'Urugero: 1234567890';
+  String get accountNumberHint => 'Akarorero: 1234567890';
 
   @override
-  String get currentBalance => 'Amafaranga ariho ubu';
+  String get currentBalance => 'Amahera ariho ubu';
 
   @override
   String get currency => 'Ifaranga';
 
   @override
-  String get bankType => 'Ubwoko bw\'ibanki';
+  String get bankType => 'Ubwoko bwa banki';
 
   @override
-  String get feeConfiguration => 'Gushyiraho amafaranga y\'ubwishyu';
+  String get feeConfiguration => 'Gushiraho amahera y\'ubwishyu';
 
   @override
-  String get feeAmount => 'Amafaranga y\'ubwishyu';
+  String get feeAmount => 'Amahera y\'ubwishyu';
 
   @override
   String get type => 'Ubwoko';
@@ -289,7 +289,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get period => 'Igihe';
 
   @override
-  String get fixedAmount => 'Amafaranga ahamye';
+  String get fixedAmount => 'Amahera adahinduka';
 
   @override
   String get percentage => 'Ijanisha';
@@ -301,57 +301,57 @@ class AppLocalizationsRn extends AppLocalizations {
   String get annual => 'Buri mwaka';
 
   @override
-  String get description => 'Ibisobanuro (ntabwo ari ngombwa)';
+  String get description => 'Ibisobanuro (sivyo ngombwa)';
 
   @override
-  String get descriptionHint => 'Ongeraho ibisobanuro...';
+  String get descriptionHint => 'Ongera ibisobanuro...';
 
   @override
-  String get activeAccount => 'Akarito gakora';
+  String get activeAccount => 'Ikarata iriko irakora';
 
   @override
-  String get includeInCalculations => 'Gushyiramo mu kubara';
+  String get includeInCalculations => 'Gushiramwo mu kubara';
 
   @override
   String get bankNameRequired => 'Izina ni ngombwa';
 
   @override
-  String get invalidBalance => 'Amafaranga atemewe';
+  String get invalidBalance => 'Amahera atemewe';
 
   @override
-  String get balanceRequired => 'Amafaranga ni ngombwa';
+  String get balanceRequired => 'Amahera ni ngombwa';
 
   @override
   String get feesRequiredForPaidBank =>
-      'Amafaranga y\'ubwishyu ni ngombwa ku banki ishyura';
+      'Amahera y\'ubwishyu ni ngombwa ku banki yishyuza';
 
   @override
-  String get invalidAmount => 'Amafaranga atemewe';
+  String get invalidAmount => 'Amahera atemewe';
 
   @override
-  String get bankAddedSuccess => 'Banki yongewe neza';
+  String get bankAddedSuccess => 'Banki yiyongereye neza';
 
   @override
   String get bankUpdatedSuccess => 'Banki yahinduwe neza';
 
   // Add Source Screen
   @override
-  String get newSource => 'Isoko Nshasha';
+  String get newSource => 'Isoko nshasha';
 
   @override
-  String get editSource => 'Hindura Isoko';
+  String get editSource => 'Hindura isoko';
 
   @override
   String get sourceName => 'Izina ry\'isoko';
 
   @override
-  String get sourceNameHint => 'Urugero: Umufuka wanje';
+  String get sourceNameHint => 'Akarorero: Umupfuko wanje';
 
   @override
   String get sourceType => 'Ubwoko bw\'isoko';
 
   @override
-  String get amount => 'Amafaranga';
+  String get amount => 'Amahera';
 
   @override
   String get activeSource => 'Isoko rikora';
@@ -360,7 +360,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get sourceNameRequired => 'Izina ni ngombwa';
 
   @override
-  String get amountRequired => 'Amafaranga ni ngombwa';
+  String get amountRequired => 'Amahera ni ngombwa';
 
   @override
   String get sourceAddedSuccess => 'Isoko ryongewe neza';
@@ -370,7 +370,7 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Source Types
   @override
-  String get pocket => 'Umufuka';
+  String get pocket => 'Umupfuko';
 
   @override
   String get safe => 'Ikigega';
@@ -382,46 +382,45 @@ class AppLocalizationsRn extends AppLocalizations {
   String get debtReceived => 'Umwenda wakiriwe';
 
   @override
-  String get custom => 'Byahinduwe';
+  String get custom => 'Vyahinduwe';
 
   @override
-  String get cash => 'Amafaranga y\'intoki';
+  String get cash => 'Amahera y\'intoke';
 
   // Sources List Screen
   @override
-  String get mySources => 'Amasoko Yanje';
+  String get mySources => 'Amasoko yanje';
 
   @override
-  String get manageYourMoneySources => 'Cungera amasoko y\'amafaranga yawe';
+  String get manageYourMoneySources => 'Cungera amasoko y\'amahera yawe';
 
   @override
-  String get searchSource => 'Shakisha isoko...';
+  String get searchSource => 'Rondera isoko...';
 
   @override
   String get noSources => 'Nta masoko';
 
   @override
-  String get addFirstSource =>
-      'Ongerako isoko ryawe rya mbere\nkugira utangure';
+  String get addFirstSource => 'Ongera isoko ryawe rya mbere\nkugira utangure';
 
   @override
-  String get active => 'Gikora';
+  String get active => 'Bikora';
 
   @override
-  String get inactive => 'Ntigikora';
+  String get inactive => 'Ntibikora';
 
   // Assets
   @override
-  String get noAssets => 'Nta mutungo';
+  String get noAssets => 'Nta tunga';
 
   @override
-  String get addFirstAsset => 'Ongerako umutungo wawe wa mbere uguruka';
+  String get addFirstAsset => 'Ongera itunga ryawe rya mbere riguruka';
 
   @override
   String get profitLoss => 'Inyungu/Igihombo';
 
   @override
-  String get totalValue => 'Agaciro rusange';
+  String get totalValue => 'Agaciro kose';
 
   @override
   String get information => 'Amakuru';
@@ -430,71 +429,71 @@ class AppLocalizationsRn extends AppLocalizations {
   String get actions => 'Ibikorwa';
 
   @override
-  String get editAsset => 'Hindura umutungo';
+  String get editAsset => 'Hindura itunga';
 
   @override
-  String get deleteAsset => 'Siba umutungo';
+  String get deleteAsset => 'Futa itunga';
 
   @override
-  String get confirmDeleteAsset => 'Uremeza ko ushaka gusiba';
+  String get confirmDeleteAsset => 'Uremeza ko ushaka gufuta';
 
   @override
-  String get assetDeletedSuccessfully => 'Umutungo wasibwe neza';
+  String get assetDeletedSuccessfully => 'Itunga ryafuswe neza';
 
   @override
-  String get financialDetails => 'Ibisobanuro by\'amafaranga';
+  String get financialDetails => 'Ibisobanuro vy\'amahera';
 
   @override
-  String get status => 'Uko bimeze';
+  String get status => 'Uko vyifashe';
 
   @override
-  String get owned => 'Bifitwe';
+  String get owned => 'Ivyo utunze';
 
   @override
-  String get sold => 'Byacurujwe';
+  String get sold => 'Vyadandajwe';
 
   @override
-  String get lost => 'Byabuze';
+  String get lost => 'Vyatakaye';
 
   @override
-  String get donated => 'Byahawe';
+  String get donated => 'Vyahawe abandi';
 
   @override
-  String get revaluate => 'Subiramo agaciro';
+  String get revaluate => 'Subiramwo agaciro';
 
   @override
-  String get sell => 'Gucuruza';
+  String get sell => 'Kudandaza';
 
   @override
-  String get revaluateAsset => 'Subiramo agaciro k\'umutungo';
+  String get revaluateAsset => 'Subiramwo agaciro k\'itunga';
 
   @override
   String get newValue => 'Agaciro gashasha';
 
   @override
-  String get sellAsset => 'Gucuruza umutungo';
+  String get sellAsset => 'Dandaza itunga';
 
   @override
-  String get sellPrice => 'Igiciro co gucuruza';
+  String get sellPrice => 'Igiciro co kudandaza';
 
   @override
-  String get cancel => 'Kuraguza';
+  String get cancel => 'Kureka';
 
   @override
   String get confirm => 'Kwemeza';
 
   // Add Asset Screen
   @override
-  String get newAsset => 'Umutungo Mushasha';
+  String get newAsset => 'Itunga rishasha';
 
   @override
-  String get assetName => 'Izina ry\'umutungo';
+  String get assetName => 'Izina ry\'itunga';
 
   @override
-  String get assetNameHint => 'Urugero: Ihene, Ubutaka i Bujumbura';
+  String get assetNameHint => 'Akarorero: Ihene, Itongo i Bujumbura';
 
   @override
-  String get assetType => 'Ubwoko bw\'umutungo';
+  String get assetType => 'Ubwoko bw\'itunga';
 
   @override
   String get purchasePrice => 'Igiciro co kugura';
@@ -503,7 +502,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get currentValue => 'Agaciro k\'ubu';
 
   @override
-  String get quantity => 'Ingano (ntabwo ari ngombwa)';
+  String get quantity => 'Ingano (siyo ngombwa)';
 
   @override
   String get unit => 'Igipimo';
@@ -512,7 +511,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get purchaseDate => 'Itariki yo kugura';
 
   @override
-  String get location => 'Aho biherereye (ntabwo ari ngombwa)';
+  String get location => 'Aho biherereye (siyo ngombwa)';
 
   @override
   String get assetNameRequired => 'Izina ni ngombwa';
@@ -530,20 +529,20 @@ class AppLocalizationsRn extends AppLocalizations {
   String get invalidValue => 'Agaciro katemewe';
 
   @override
-  String get assetAddedSuccess => 'Umutungo wongewe neza';
+  String get assetAddedSuccess => 'Itunga ryongewe neza';
 
   @override
-  String get assetUpdatedSuccess => 'Umutungo wahinduwe neza';
+  String get assetUpdatedSuccess => 'Itunga ryahinduwe neza';
 
   // Asset Types
   @override
-  String get livestock => 'Amatungo';
+  String get livestock => 'Ibitungwa';
 
   @override
-  String get crop => 'Ibihingwa';
+  String get crop => 'Ibirimwa';
 
   @override
-  String get land => 'Ubutaka';
+  String get land => 'Itongo';
 
   @override
   String get vehicle => 'Ikinyabiziga';
@@ -559,19 +558,19 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Debts
   @override
-  String get myDebts => 'Imyenda Yanje';
+  String get myDebts => 'Amadeni yanje';
 
   @override
-  String get loansAndBorrows => 'Inguzanyo & Imyenda';
+  String get loansAndBorrows => 'Inguzanyo & Amadeni';
 
   @override
-  String get searchDebt => 'Shakisha umwenda...';
+  String get searchDebt => 'Rondera umwenda...';
 
   @override
-  String get overdueDebts => 'Imyenda yarenze igihe';
+  String get overdueDebts => 'Amadeni yarenze igihe';
 
   @override
-  String get upcomingDue => 'Igihe gishika';
+  String get upcomingDue => 'Igihe cimirije';
 
   @override
   String get all => 'Vyose';
@@ -580,13 +579,13 @@ class AppLocalizationsRn extends AppLocalizations {
   String get noDebts => 'Nta myenda';
 
   @override
-  String get addFirstDebt => 'Ongerako inguzanyo yawe ya mbere canke umwenda';
+  String get addFirstDebt => 'Ongera inguzanyo yawe ya mbere canke umwenda';
 
   @override
-  String get lentTo => 'Byatanzwe kuri';
+  String get lentTo => 'Vyatanzwe kuri';
 
   @override
-  String get borrowedFrom => 'Byakiriwe kuri';
+  String get borrowedFrom => 'Vyakiriwe kuri';
 
   @override
   String get overdue => 'Yarenze igihe';
@@ -596,10 +595,10 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Add Debt Screen
   @override
-  String get newDebt => 'Umwenda Mushasha';
+  String get newDebt => 'Umwenda mushasha';
 
   @override
-  String get editDebt => 'Hindura Umwenda';
+  String get editDebt => 'Hindura umwenda';
 
   @override
   String get debtType => 'Ubwoko bw\'umwenda';
@@ -611,7 +610,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get lenderName => 'Izina ry\'uwatanze';
 
   @override
-  String get contact => 'Aho amenyekana (ntabwo ari ngombwa)';
+  String get contact => 'Aho amenyekana (siyo ngombwa)';
 
   @override
   String get contactHint => 'Telefone canke imeri';
@@ -623,7 +622,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get dueDate => 'Itariki yo kwishyura';
 
   @override
-  String get dueDateOptional => 'Itariki yo kwishyura (ntabwo ari ngombwa)';
+  String get dueDateOptional => 'Itariki yo kwishyura (siyo ngombwa)';
 
   @override
   String get none => 'Nta na kimwe';
@@ -632,25 +631,25 @@ class AppLocalizationsRn extends AppLocalizations {
   String get withInterest => 'Hamwe n\'inyungu';
 
   @override
-  String get addInterestRate => 'Ongeraho igipimo c\'inyungu';
+  String get addInterestRate => 'Ongerako igipimo c\'inyungu';
 
   @override
   String get interestRate => 'Igipimo c\'inyungu (%)';
 
   @override
-  String get interestRateHint => 'Urugero: 5.5';
+  String get interestRateHint => 'Akarorero: 5.5';
 
   @override
   String get interestRateRequired => 'Igipimo c\'inyungu ni ngombwa';
 
   @override
-  String get collateral => 'Ingwate (ntabwo ari ngombwa)';
+  String get collateral => 'Ingwate (siyo ngombwa)';
 
   @override
-  String get collateralHint => 'Urugero: Impapuro z\'ubutaka';
+  String get collateralHint => 'Akarorero: Impapuro z\'itongo';
 
   @override
-  String get addDebt => 'Ongerako umwenda';
+  String get addDebt => 'Ongera umwenda';
 
   @override
   String get nameRequired => 'Izina ni ngombwa';
@@ -663,16 +662,16 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Statistics Screen
   @override
-  String get statistics => 'Imibare';
+  String get statistics => 'Ibiharuro';
 
   @override
-  String get analyzeYourFinances => 'Gusesengura amafaranga yawe';
+  String get analyzeYourFinances => 'Gusesengura amahera yawe';
 
   @override
-  String get week => 'Icyumweru';
+  String get week => 'Indwi';
 
   @override
-  String get balance => 'Uburinganire';
+  String get balance => 'Ubusumbane';
 
   @override
   String get entries => 'Ibinjira';
@@ -687,22 +686,22 @@ class AppLocalizationsRn extends AppLocalizations {
   String get noData => 'Nta makuru';
 
   @override
-  String get trend => 'Icyerekezo';
+  String get trend => 'Icerekezo';
 
   @override
   String get byCategory => 'Mu bwoko';
 
   @override
-  String get food => 'Ibiryo';
+  String get food => 'Ibiribwa';
 
   @override
-  String get transport => 'Ubwikorezi';
+  String get transport => 'Iyunguruza';
 
   @override
-  String get health => 'Ubuzima';
+  String get health => 'Amagara';
 
   @override
-  String get entertainment => 'Imyidagaduro';
+  String get entertainment => 'Kwinezereza';
 
   // Notifications Screen
 
@@ -710,7 +709,8 @@ class AppLocalizationsRn extends AppLocalizations {
   String get debtReminders => 'Ibutsa ry\'igihe co kwishyura';
 
   @override
-  String get debtRemindersSubtitle => 'Imenyesha mbere y\'itariki zo kwishyura';
+  String get debtRemindersSubtitle =>
+      'Imenyesha imbere y\'itariki zo kwishyura';
 
   @override
   String get overdueAlerts => 'Imenyesha y\'ubucuke';
@@ -719,16 +719,16 @@ class AppLocalizationsRn extends AppLocalizations {
   String get overdueAlertsSubtitle => 'Imenyesha ku myenda yarenze igihe';
 
   @override
-  String get bankFeesSubtitle => 'Ibutsa mbere yo gukuraho';
+  String get bankFeesSubtitle => 'Ibutsa imbere yo gukurako';
 
   @override
-  String get wealth => 'Umutungo';
+  String get wealth => 'Itunga';
 
   @override
-  String get wealthMilestones => 'Intera z\'umutungo';
+  String get wealthMilestones => 'Intera z\'itunga';
 
   @override
-  String get wealthMilestonesSubtitle => 'Kwishimira intera nshasha zagezweho';
+  String get wealthMilestonesSubtitle => 'Kwigina intera nshasha zagezweho';
 
   @override
   String get maintenance => 'Ubugenzuzi';
@@ -737,7 +737,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get backupReminders => 'Ibutsa ryo kubika';
 
   @override
-  String get backupRemindersSubtitle => 'Inama zo kubika buri cyumweru';
+  String get backupRemindersSubtitle => 'Inama zo kubika buri ndwi';
 
   @override
   String get manageYourApp => 'Cungera porogaramu yawe';
@@ -746,7 +746,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get dangerZone => 'Agace k\'akaga';
 
   @override
-  String get deleteAllData => 'Gusiba amakuru yose';
+  String get deleteAllData => 'Futa amakuru yose';
 
   @override
   String get support => 'Ubufasha';
@@ -769,22 +769,23 @@ class AppLocalizationsRn extends AppLocalizations {
 
   @override
   String get createPinDescription =>
-      'Kora kode y\'imibare 4 yo kurinda umufuka wawe';
+      'Kora kode y\'ibiharuro 4 yo gukingira umupfuko wawe';
 
   @override
-  String get confirmYourPin => 'Emeza kode yawe y\'imibare 4';
+  String get confirmYourPin => 'Emeza kode yawe y\'ibiharuro 4';
 
   @override
-  String get enterPinToContinue => 'Injiza kode yawe kugira ukomeze';
+  String get enterPinToContinue => 'Injiza kode yawe kugira ubandanye';
 
   @override
-  String get enterNewPinDescription => 'Injiza kode yawe nshasha y\'imibare 4';
+  String get enterNewPinDescription =>
+      'Injiza kode yawe nshasha y\'ibiharuro 4';
 
   @override
-  String get incorrectPin => 'Kode itari yo';
+  String get incorrectPin => 'Kode si yo';
 
   @override
-  String get skipForNow => 'Simbuka ubu';
+  String get skipForNow => 'Simba ubu';
 
   @override
   String get changePin => 'Hindura kode';
@@ -818,7 +819,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get importFromFile => 'Injiza amakuru kuva mu dosiye';
 
   @override
-  String get protectWithPassword => 'Rinda hamwe n\'ijambo ry\'ibanga';
+  String get protectWithPassword => 'Rinda ukoresheje ijambo ry\'ibanga';
 
   @override
   String get password => 'Ijambo ry\'ibanga';
@@ -834,20 +835,20 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Backup additional translations
   @override
-  String get selectBackupFile => 'Hitamo dosiye y\'ikigega cyawe:';
+  String get selectBackupFile => 'Hitamwo dosiye y\'ikigega cawe:';
 
   @override
   String get backupLocationHint =>
-      'Icyitonderwa: Ikigega cyawe kiri mu\nBikurikiranwa > Ikigabo';
+      'Icitonderwa: Ikigega cawe kiri mu\nBikurikiranwa > Ikigabo';
 
   @override
-  String get select => 'Hitamo';
+  String get select => 'Hitamwo';
 
   @override
-  String get selectJsonFileError => 'Nyamuneka hitamo dosiye .json';
+  String get selectJsonFileError => 'Nyamuneka hitamwo dosiye .json';
 
   @override
-  String get chooseBackup => 'Hitamo ikigega';
+  String get chooseBackup => 'Hitamwo ikigega';
 
   @override
   String get dataImportedSuccess => 'Amakuru yinjijwe neza';
@@ -884,66 +885,66 @@ class AppLocalizationsRn extends AppLocalizations {
   String get downloadsIkigaboPath => 'Bikurikiranwa/Ikigabo/';
 
   @override
-  String get success => 'Byagenze neza';
+  String get success => 'Vyagenze neza';
 
   @override
-  String get browseOtherFolder => 'Shakisha mu bindi busiko';
+  String get browseOtherFolder => 'Rondera mu bindi bubiko';
 
   @override
-  String get selectFile => 'Hitamo dosiye';
+  String get selectFile => 'Hitamwo dosiye';
 
   @override
   String get deleteAllDataConfirmation =>
-      'Iki gikorwa kizosiba burundu amakuru yawe yose (amabanki, amasoko, umutungo, imyenda, ibikorwa). Ntishobora gusubizwa inyuma.';
+      'Iki gikorwa kizofuta burundu amakuru yawe yose (amabanki, amasoko, itunga, Amadeni, ibikorwa). Ntishobora gusubizwa inyuma.';
 
   @override
-  String get delete => 'Siba';
+  String get delete => 'Futa';
 
   @override
-  String get allDataDeleted => 'Amakuru yose yasibwe';
+  String get allDataDeleted => 'Amakuru yose yafuswe';
 
   // Bank Creation
   @override
-  String get selectMoneySource => 'Aya mafaranga ava he?';
+  String get selectMoneySource => 'Aya amahera ava hehe?';
 
   @override
-  String get noMoneySourceAvailable => 'Nta soko ry\'amafaranga rihari.';
+  String get noMoneySourceAvailable => 'Nta soko ry\'amahera rihari.';
 
   @override
   String get createSourceFirst => 'Tangura ukore isoko.';
 
   @override
-  String get moneyAlreadyInAccount => 'Amafaranga asanzwe ari ku karito';
+  String get moneyAlreadyInAccount => 'Amahera asanzwe ari ku karata';
 
   @override
   String get moneyExistsInRealBank =>
-      'Aya mafaranga asanzwe ari ku karito kanje ka banki nyakuri';
+      'Aya amahera asanzwe ari ku karata kanje ka banki nyakuri';
 
   @override
-  String get transactionsCreated => 'Ibikorwa byakozwe';
+  String get transactionsCreated => 'Ibikorwa vyakozwe';
 
   @override
-  String get twoTransactionsCreated => 'Ibikorwa 2 byakozwe:';
+  String get twoTransactionsCreated => 'Ibikorwa 2 vyakozwe:';
 
   @override
   String get withdrawalFrom => 'Gusohora kuri';
 
   @override
-  String get depositTo => 'Gushyiramo kuri';
+  String get depositTo => 'Gushiramwo kuri';
 
   @override
   String get pleaseSelectSource =>
-      'Nyamuneka hitamo aho aya mafaranga y\'intangiriro ava';
+      'Nyamuneka hitamwo aho aya amahera y\'intangiriro ava';
 
   @override
-  String get insufficientBalance => 'Amafaranga ntahagije muri';
+  String get insufficientBalance => 'Amahera ntahagije muri';
 
   @override
-  String get currencyMismatch => 'Amafaranga atandukanye';
+  String get currencyMismatch => 'Amahera atandukanye';
 
   // Transaction Detail
   @override
-  String get transactionDetail => 'Ibisobanuro by\'ikikorwa';
+  String get transactionDetail => 'Ibisobanuro vy\'ikikorwa';
 
   @override
   String get informations => 'Amakuru';
@@ -980,14 +981,14 @@ class AppLocalizationsRn extends AppLocalizations {
   String get transactionsWillAppear => 'Ibikorwa vyawe bizogaragara hano';
 
   @override
-  String get deleteTransaction => 'Gusiba ikikorwa';
+  String get deleteTransaction => 'Futa ikikorwa';
 
   @override
   String get confirmDeleteTransaction =>
-      'Uremeza ko ushaka gusiba iki kikorwa?';
+      'Uremeza ko ushaka gufuta iki kikorwa?';
 
   @override
-  String get transactionDeleted => 'Ikikorwa gisibwe';
+  String get transactionDeleted => 'Ikikorwa cifuswe';
 
   @override
   String get editTransactionSoon => 'Guhindura ibikorwa kizoba kihari vuba';
@@ -1000,49 +1001,49 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Edit Transaction
   @override
-  String get editTransaction => 'Guhindura Ikikorwa';
+  String get editTransaction => 'Hindura ikikorwa';
 
   @override
-  String get transactionUpdated => 'Ikikorwa cyahinduwe neza';
+  String get transactionUpdated => 'Ikikorwa cahinduwe neza';
 
   // Days of week (short)
   @override
-  String get mondayShort => 'Kw';
+  String get mondayShort => 'Mbe';
 
   @override
-  String get tuesdayShort => 'Wa';
+  String get tuesdayShort => 'Kab';
 
   @override
-  String get wednesdayShort => 'Mu';
+  String get wednesdayShort => 'Gat';
 
   @override
-  String get thursdayShort => 'Ka';
+  String get thursdayShort => 'Kan';
 
   @override
-  String get fridayShort => 'Ga';
+  String get fridayShort => 'Gat';
 
   @override
-  String get saturdayShort => 'Cu';
+  String get saturdayShort => 'Wug';
 
   @override
-  String get sundayShort => 'Cy';
+  String get sundayShort => 'Wim';
 
   // Debt warnings
   @override
-  String debtsOverdue(int count) => 'Imyenda $count yarenze igihe';
+  String debtsOverdue(int count) => 'Amadeni $count yarenze igihe';
 
   @override
   String debtsDueSoon(int count) => 'Igihe $count gishika vuba';
 
   // Bank Detail Screen
   @override
-  String get currentBalanceLabel => 'Amafaranga Ariho Ubu';
+  String get currentBalanceLabel => 'Amahera ariho ubu';
 
   @override
-  String get inactiveAccount => 'Akarito Ntigakora';
+  String get inactiveAccount => 'Ikarata ntigakora';
 
   @override
-  String get bankTypeLabel => 'Ubwoko bw\'ibanki';
+  String get bankTypeLabel => 'Ubwoko bwa banki';
 
   @override
   String get freeBank => 'Ubuntu';
@@ -1057,13 +1058,13 @@ class AppLocalizationsRn extends AppLocalizations {
   String get descriptionLabel => 'Ibisobanuro';
 
   @override
-  String get createdOn => 'Byakozwe ku';
+  String get createdOn => 'Vyakozwe ku';
 
   @override
-  String get bankFeesLabel => 'Ikiguzi ca Banki';
+  String get bankFeesLabel => 'Ikiguzi ca banki';
 
   @override
-  String get feeAmountLabel => 'Amafaranga y\'ubwishyu';
+  String get feeAmountLabel => 'Amahera y\'ubwishyu';
 
   @override
   String get calculatedFees => 'Ikiguzi kibarwa';
@@ -1078,69 +1079,69 @@ class AppLocalizationsRn extends AppLocalizations {
   String get annualFreq => 'Buri mwaka';
 
   @override
-  String get nextDeduction => 'Ikurikira gukurwaho';
+  String get nextDeduction => 'Izokurwako ikurikira';
 
   @override
   String get actionsLabel => 'Ibikorwa';
 
   @override
-  String get deleteBank => 'Siba banki';
+  String get deleteBank => 'Futa banki';
 
   @override
-  String get deleteBankTitle => 'Gusiba banki';
+  String get deleteBankTitle => 'Gufuta banki';
 
   @override
-  String get deleteBankConfirmation => 'Uremeza ko ushaka gusiba';
+  String get deleteBankConfirmation => 'Uremeza ko ushaka gufuta';
 
   @override
   String get thisActionIsIrreversible =>
       '? Iki gikorwa ntikishobora gusubizwa inyuma.';
 
   @override
-  String get bankDeletedSuccess => 'Banki yasibwe neza';
+  String get bankDeletedSuccess => 'Banki yafuswe neza';
 
   @override
-  String get assetAlreadyOwned => 'Umutungo usanzwe ufitwe';
+  String get assetAlreadyOwned => 'Itunga usanzwe ufise';
 
   @override
-  String get assetWasAlreadyOwned => 'Uyu mutungo wasanzwe ufitwe';
+  String get assetWasAlreadyOwned => 'Iri tunga warusanzwe urifise';
 
   // Additional translations
   @override
-  String get liabilities => 'Imyenda';
+  String get liabilities => 'Amadeni';
 
   @override
-  String get locationHint => 'Urugero: Bujumbura, Gitega';
+  String get locationHint => 'Akarorero: Bujumbura, Gitega';
 
   @override
   String get unitHint => 'ibice, kg';
 
   @override
-  String get personNameHint => 'Urugero: Jean Doe';
+  String get personNameHint => 'Akarorero: Jean Doe';
 
   @override
-  String get debtGivenSourceHint => 'Isoko ry\'amafaranga';
+  String get debtGivenSourceHint => 'Isoko ry\'amahera';
 
   @override
-  String get debtReceivedSourceHint => 'Intego y\'amafaranga';
+  String get debtReceivedSourceHint => 'Intego y\'amahera';
 
   @override
-  String get externalMoney => 'Amafaranga y\'inyuma';
+  String get externalMoney => 'Amahera yo hanze';
 
   @override
   String get noCurrencySourceAvailable => 'Nta soko rihari muri';
 
   @override
-  String get remainingAmount => 'Amafaranga asigaye';
+  String get remainingAmount => 'Amahera asigaye';
 
   @override
   String get progression => 'Iterambere';
 
   @override
-  String get paidLabel => 'Byishyuwe';
+  String get paidLabel => 'Vyishyuwe';
 
   @override
-  String get totalLabel => 'Byose';
+  String get totalLabel => 'Vyose';
 
   @override
   String get informationsLabel => 'Amakuru';
@@ -1167,10 +1168,10 @@ class AppLocalizationsRn extends AppLocalizations {
   String get interestRateLabel => 'Igipimo c\'inyungu';
 
   @override
-  String get interestAmountLabel => 'Amafaranga y\'inyungu';
+  String get interestAmountLabel => 'Amahera y\'inyungu';
 
   @override
-  String get totalWithInterestLabel => 'Byose hamwe n\'inyungu';
+  String get totalWithInterestLabel => 'Vyose hamwe n\'inyungu';
 
   @override
   String get paymentHistoryLabel => 'Amateka y\'ubwishyu';
@@ -1182,31 +1183,31 @@ class AppLocalizationsRn extends AppLocalizations {
   String get recordPayment => 'Andika ubwishyu';
 
   @override
-  String get deleteDebt => 'Siba umwenda';
+  String get deleteDebt => 'Futa umwenda';
 
   @override
-  String get deleteDebtConfirmation => 'Uremeza ko ushaka gusiba uyu mwenda na';
+  String get deleteDebtConfirmation => 'Uremeza ko ushaka gufuta uyu mwenda na';
 
   @override
-  String get debtDeletedSuccess => 'Umwenda wasibwe neza';
+  String get debtDeletedSuccess => 'Umwenda wafuswe neza';
 
   @override
   String get recordPaymentTitle => 'Andika ubwishyu';
 
   @override
-  String get remainingAmountLabel => 'Amafaranga asigaye';
+  String get remainingAmountLabel => 'Amahera asigaye';
 
   @override
-  String get paymentAmount => 'Amafaranga y\'ubwishyu';
+  String get paymentAmount => 'Amahera y\'ubwishyu';
 
   @override
-  String get whereToReceiveMoney => 'Aho ugomba gushyira amafaranga yakiriwe?';
+  String get whereToReceiveMoney => 'Aho ugomba gushira amahera yakiriwe?';
 
   @override
-  String get whereToTakeMoney => 'Aho ugomba gufata amafaranga?';
+  String get whereToTakeMoney => 'Aho ugomba gufata amahera?';
 
   @override
-  String get externalMoneyLabel => 'Amafaranga y\'inyuma';
+  String get externalMoneyLabel => 'Amahera yo hanze';
 
   @override
   String get paymentRecorded => 'Ubwishyu bwanditswe';
@@ -1219,25 +1220,25 @@ class AppLocalizationsRn extends AppLocalizations {
 
   // Transaction Creation
   @override
-  String get newTransaction => 'Ikikorwa Gishasha';
+  String get newTransaction => 'Ikikorwa gishasha';
 
   @override
-  String get addIncomeOrExpense => 'Ongerako inyungu canke amafaranga asohoka';
+  String get addIncomeOrExpense => 'Ongera inyungu canke amahera asohoka';
 
   @override
-  String get transactionAddedSuccess => 'Ikikorwa cyongewe neza';
+  String get transactionAddedSuccess => 'Ikikorwa congewe neza';
 
   @override
   String get noSourcesCreateFirst => 'Nta masoko ariho. Tangura ukore rimwe.';
 
   @override
-  String get addNote => 'Ongeraho inyandiko...';
+  String get addNote => 'Ongera inyandiko...';
 
   @override
   String get salary => 'Umushahara';
 
   @override
-  String get sale => 'Igurisha';
+  String get sale => 'Idandaza';
 
   @override
   String get gift => 'Impano';
@@ -1259,7 +1260,7 @@ class AppLocalizationsRn extends AppLocalizations {
   String get debtReminder => 'Ibutsa ry\'umwenda';
 
   @override
-  String get selectReminderDateTime => 'Hitamo itariki n\'isaha';
+  String get selectReminderDateTime => 'Hitamwo itariki n\'isaha';
 
   // PDF Export
   @override
@@ -1269,20 +1270,108 @@ class AppLocalizationsRn extends AppLocalizations {
   String get fullReport => 'Raporo yuzuye';
 
   @override
-  String get allFinancialData => 'Amakuru yose y\'amafaranga';
+  String get allFinancialData => 'Amakuru yose y\'amahera';
 
   @override
-  String get assetReport => 'Raporo y\'umutungo';
+  String get assetReport => 'Raporo y\'itunga';
 
   @override
-  String get debtReport => 'Raporo y\'imyenda';
+  String get debtReport => 'Raporo y\'Amadeni';
 
   @override
-  String get exportInProgress => 'Gusohora biragenda...';
+  String get exportInProgress => 'Gusohora biriko biragenda...';
 
   @override
-  String get assetExportInProgress => 'Gusohora umutungo biragenda...';
+  String get assetExportInProgress => 'Gusohora itunga biriko biragenda...';
 
   @override
-  String get debtExportInProgress => 'Gusohora imyenda biragenda...';
+  String get debtExportInProgress => 'Gusohora Amadeni biriko biragenda...';
+
+  // Onboarding
+  @override
+  String get onboardingTitle1 => 'Murakaza neza kuri Ikigabo';
+
+  @override
+  String get onboardingDesc1 =>
+      'Gucunga itunga ryawe vyoroshe: Inkomoko y\'amahera, amabanki, itunga n\'Amadeni ahantu hamwe.';
+
+  @override
+  String get onboardingTitle2 => 'Gukurikirana amahera yawe';
+
+  @override
+  String get onboardingDesc2 =>
+      'Andika ibikorwa vyawe, kwitondera amahera yinjira n\'asohoka hamwe n\'ibiharuro birambuye.';
+
+  @override
+  String get onboardingTitle3 => 'Gucunga Amadeni yawe';
+
+  @override
+  String get onboardingDesc3 =>
+      'Kwitondera Amadeni n\'ideni, shiraho ivyibutso kugira utibagira kwishyura.';
+
+  @override
+  String get onboardingTitle4 => 'Irabitswe kandi irakingiwe';
+
+  @override
+  String get onboardingDesc4 =>
+      'Amakuru yawe aguma kuri telefone yawe. Bika kandi ugarure mu mutekano hamwe na code PIN.';
+
+  @override
+  String get skip => 'Simba';
+
+  @override
+  String get next => 'Bandanya';
+
+  @override
+  String get getStarted => 'Tangura';
+
+  // About Section
+  @override
+  String get termsAndConditions => 'Amabwiriza yo gukoresha';
+
+  @override
+  String get reportProblem => 'Menyesha ikibazo';
+
+  @override
+  String get rateThisApp => 'Tanga iciyumviro';
+
+  @override
+  String get shareThisApp => 'Sangiza porogaramu';
+
+  @override
+  String get moreApps => 'Izindi porogaramu';
+
+  @override
+  String get appInfo => 'Amakuru';
+
+  @override
+  String get legal => 'Amategeko';
+
+  // Nouvelles traductions pour settings
+  @override
+  String get manageCategoriesSubtitle => 'Cungera ubwoko bw\'ibikorwa';
+
+  @override
+  String get budgetsAndGoals => 'Ingengo & Intego';
+
+  @override
+  String get manageFinancialGoals => 'Cungera intego zawe z\'amahera';
+
+  @override
+  String get reportProblemSubtitle => 'Menyesha ikibazo';
+
+  @override
+  String get rateOnPlayStore => 'Tanga iciyumviro kuri Play Store';
+
+  @override
+  String get shareWithFriends => 'Sangiza n\'incuti';
+
+  @override
+  String get discoverOtherApps => 'Menya izindi porogaramu zacu';
+
+  @override
+  String get termsOfUse => 'Amabwiriza yo gukoresha';
+
+  @override
+  String get privacyPolicySubtitle => 'Politike y\'ibanga';
 }

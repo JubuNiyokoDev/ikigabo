@@ -16,6 +16,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/debt_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/source_provider.dart';
+import '../../widgets/loading_button.dart';
 
 class AddDebtScreen extends ConsumerStatefulWidget {
   final DebtModel? debt;
@@ -42,6 +43,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
   bool _hasInterest = false;
   bool _hasReminder = false;
   DateTime? _reminderDateTime;
+  bool _isLoading = false;
 
   // Sélecteur de source
   int? _selectedSourceId;
@@ -96,6 +98,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
   Future<void> _saveDebt() async {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       final debt = DebtModel(
         id: widget.debt?.id ?? Isar.autoIncrement,
         type: _debtType,
@@ -132,6 +135,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
           
           // Vérifier qu'une source est sélectionnée ou que c'est de l'argent externe
           if (!_isExternalMoney && (_selectedSourceId == null || _selectedSourceName == null)) {
+            setState(() => _isLoading = false);
             _showError(l10n.pleaseSelectSource);
             return;
           }
@@ -152,12 +156,14 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             
             // Vérifier la devise
             if (selectedSource.currency != _currency) {
+              setState(() => _isLoading = false);
               _showError('${l10n.currencyMismatch}: ${selectedSource.currency} ≠ $_currency');
               return;
             }
             
             // Vérifier le solde suffisant
             if (selectedSource.amount < amount) {
+              setState(() => _isLoading = false);
               _showError('${l10n.insufficientBalance} ${selectedSource.name}');
               return;
             }
@@ -166,9 +172,10 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
           // Pour une nouvelle dette, utiliser la méthode appropriée selon le type
           if (_debtType == DebtType.given) {
             if (_isExternalMoney) {
-              // TODO: Implémenter addDebtGivenExternal si nécessaire
-              _showError(l10n.restoreFeatureComingSoon);
-              return;
+              await controller.addDebtGivenExternal(
+                debt: debt,
+                category: tx.IncomeCategory.gift,
+              );
             } else {
               await controller.addDebtGiven(
                 debt: debt,
@@ -179,9 +186,10 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
             }
           } else {
             if (_isExternalMoney) {
-              // TODO: Implémenter addDebtReceivedExternal si nécessaire
-              _showError(l10n.restoreFeatureComingSoon);
-              return;
+              await controller.addDebtReceivedExternal(
+                debt: debt,
+                category: tx.IncomeCategory.gift,
+              );
             } else {
               await controller.addDebtReceived(
                 debt: debt,
@@ -196,6 +204,7 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
         }
 
         if (mounted) {
+          setState(() => _isLoading = false);
           Navigator.pop(context);
           _showSuccess(
             widget.debt == null
@@ -204,7 +213,10 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
           );
         }
       } catch (e) {
-        _showError('${l10n.error}: $e');
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showError('${l10n.error}: $e');
+        }
       }
     }
   }
@@ -993,46 +1005,11 @@ class _AddDebtScreenState extends ConsumerState<AddDebtScreen> {
 
   Widget _buildSaveButton() {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      width: double.infinity,
-      height: 48.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: _debtType == DebtType.given
-              ? [AppColors.success, AppColors.success.withValues(alpha: 0.8)]
-              : [AppColors.error, AppColors.error.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: (_debtType == DebtType.given
-                ? AppColors.success
-                : AppColors.error).withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _saveDebt,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-        ),
-        child: Text(
-          widget.debt == null ? l10n.addDebt : l10n.save,
-          style: const TextStyle(
-            fontSize: AppSizes.textMedium,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
+    return LoadingButton(
+      text: widget.debt == null ? l10n.addDebt : l10n.save,
+      onPressed: _saveDebt,
+      isLoading: _isLoading,
+      backgroundColor: _debtType == DebtType.given ? AppColors.success : AppColors.error,
     );
   }
 }

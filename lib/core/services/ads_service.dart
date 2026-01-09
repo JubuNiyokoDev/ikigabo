@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
+import 'package:flutter/services.dart';
 
 class AdsService {
   // 🔑 IDs UNITY
@@ -17,11 +18,10 @@ class AdsService {
 
     await UnityAds.init(
       gameId: _gameId,
-      testMode: false, // ✅ PRODUCTION MODE - Vraies publicités
+      testMode: false,
       onComplete: () {
         _isInitialized = true;
         print('✅ Unity Ads initialized (PRODUCTION)');
-        // NE PAS charger automatiquement les ads
       },
       onFailed: (error, message) {
         print('❌ Unity Ads init failed: $error - $message');
@@ -29,10 +29,10 @@ class AdsService {
     );
   }
 
-  // 🔹 LOAD INTERSTITIAL (seulement quand nécessaire)
+  // 🔹 LOAD INTERSTITIAL
   static Future<void> loadInterstitial() async {
     if (!_isInitialized) await initialize();
-    if (_isInterstitialLoaded) return; // Éviter de recharger si déjà chargé
+    if (_isInterstitialLoaded) return;
 
     await UnityAds.load(
       placementId: _interstitialAdUnitId,
@@ -47,15 +47,13 @@ class AdsService {
     );
   }
 
-  // 🔹 SHOW INTERSTITIAL (seulement sur demande explicite)
+  // 🔹 SHOW INTERSTITIAL
   static Future<void> showInterstitial() async {
     if (!_isInitialized) await initialize();
 
-    // Charger si pas encore fait
     if (!_isInterstitialLoaded) {
       await loadInterstitial();
-      // Attendre un peu que l'ad se charge
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 500));
     }
 
     if (!_isInterstitialLoaded) {
@@ -66,11 +64,10 @@ class AdsService {
     UnityAds.showVideoAd(
       placementId: _interstitialAdUnitId,
       onStart: (placementId) => print('▶ Interstitial started'),
-      onClick: (placementId) => print('🖱 Interstitial clicked'),
+      onClick: (placementId) => print('🖱 Interstitial clicked - Revenue!'),
       onComplete: (placementId) {
         print('✅ Interstitial completed');
         _isInterstitialLoaded = false;
-        // NE PAS recharger automatiquement
       },
       onFailed: (placementId, error, message) {
         print('❌ Interstitial failed: $error - $message');
@@ -79,10 +76,10 @@ class AdsService {
     );
   }
 
-  // 🔹 LOAD REWARDED (seulement quand nécessaire)
+  // 🔹 LOAD REWARDED
   static Future<void> loadRewarded() async {
     if (!_isInitialized) await initialize();
-    if (_isRewardedLoaded) return; // Éviter de recharger si déjà chargé
+    if (_isRewardedLoaded) return;
 
     await UnityAds.load(
       placementId: _rewardedAdUnitId,
@@ -97,15 +94,13 @@ class AdsService {
     );
   }
 
-  // 🔹 SHOW REWARDED (seulement sur demande explicite)
+  // 🔹 SHOW REWARDED
   static Future<void> showRewarded({required VoidCallback onReward}) async {
     if (!_isInitialized) await initialize();
 
-    // Charger si pas encore fait
     if (!_isRewardedLoaded) {
       await loadRewarded();
-      // Attendre un peu que l'ad se charge
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 500));
     }
 
     if (!_isRewardedLoaded) {
@@ -119,7 +114,6 @@ class AdsService {
         print('🎁 Reward granted');
         onReward();
         _isRewardedLoaded = false;
-        // NE PAS recharger automatiquement
       },
       onFailed: (placementId, error, message) {
         print('❌ Rewarded failed: $error - $message');
@@ -128,7 +122,6 @@ class AdsService {
     );
   }
 
-  // 🔹 Vérifier si les ads sont prêtes
   static bool get isInterstitialReady => _isInterstitialLoaded;
   static bool get isRewardedReady => _isRewardedLoaded;
 }

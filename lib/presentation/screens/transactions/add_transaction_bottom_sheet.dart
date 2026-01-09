@@ -10,7 +10,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/currencies.dart';
-import '../../../core/constants/default_categories.dart';
+import '../../../core/services/dynamic_categories_service.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/transaction_provider.dart';
@@ -18,6 +18,7 @@ import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../../core/services/ads_service.dart';
+import '../../../core/services/dynamic_category_service.dart';
 
 class AddTransactionBottomSheet extends ConsumerStatefulWidget {
   const AddTransactionBottomSheet({super.key});
@@ -34,12 +35,10 @@ class _AddTransactionBottomSheetState
   final _descriptionController = TextEditingController();
 
   TransactionType _type = TransactionType.expense;
-  final IncomeCategory _incomeCategory = IncomeCategory.salary;
-  final ExpenseCategory _expenseCategory = ExpenseCategory.food;
   int? _selectedSourceId;
   SourceType? _selectedSourceType;
   String _selectedCurrency = 'BIF';
-  int? _selectedCategoryId;
+  String? _selectedCategoryKey; // Changé de int? à String?
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -52,7 +51,7 @@ class _AddTransactionBottomSheetState
   Future<void> _saveTransaction() async {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
-      if (_selectedCategoryId == null) {
+      if (_selectedCategoryKey == null) {
         _showError('Veuillez sélectionner une catégorie');
         return;
       }
@@ -76,34 +75,35 @@ class _AddTransactionBottomSheetState
       // Convertir l'ID négatif en ID positif pour les banques/assets/dettes
       int actualSourceId = _selectedSourceId!;
       if (_selectedSourceId! < 0) {
-        if (_selectedSourceType == SourceType.bank) {
-          actualSourceId = -_selectedSourceId!; // Convertir en positif
-        } else if (_selectedSourceType == SourceType.asset) {
-          actualSourceId = (-_selectedSourceId!) - 1000000; // Retirer l'offset
-        } else if (_selectedSourceType == SourceType.debt) {
-          if (_selectedSourceId! <= -3000000) {
-            actualSourceId = (-_selectedSourceId!) - 3000000; // Dette reçue
-          } else {
-            actualSourceId = (-_selectedSourceId!) - 2000000; // Dette donnée
-          }
-        }
+        actualSourceId = -_selectedSourceId!; // Convertir en positif pour les banques
       }
+
+      // Déterminer les catégories selon la sélection
+      final selectedCategory = CategoryMappingService.getCategoryFromSelection(
+        _type, 
+        _selectedCategoryKey, 
+        context
+      );
 
       final transaction = TransactionModel(
         type: _type,
-        incomeCategory: _incomeCategory,
-        expenseCategory: _expenseCategory,
+        incomeCategory: _type == TransactionType.income 
+            ? selectedCategory as IncomeCategory 
+            : IncomeCategory.other,
+        expenseCategory: _type == TransactionType.expense 
+            ? selectedCategory as ExpenseCategory 
+            : ExpenseCategory.other,
         amount: double.parse(_amountController.text),
         currency: _selectedCurrency,
         // Pour les entrées, la destination est targetSourceId
         sourceId: _type == TransactionType.income ? 0 : actualSourceId,
         sourceType: _type == TransactionType.income
             ? SourceType.external
-            : SourceType.source,
+            : (_selectedSourceType ?? SourceType.source),
         sourceName: _type == TransactionType.income ? 'Externe' : null,
         targetSourceId: _type == TransactionType.income ? actualSourceId : null,
         targetSourceType: _type == TransactionType.income
-            ? SourceType.source
+            ? (_selectedSourceType ?? SourceType.source)
             : null,
         targetSourceName: _type == TransactionType.income ? null : null,
         date: _selectedDate,
@@ -281,7 +281,10 @@ class _AddTransactionBottomSheetState
             icon: AppIcons.income,
             color: AppColors.success,
             isSelected: _type == TransactionType.income,
-            onTap: () => setState(() => _type = TransactionType.income),
+            onTap: () => setState(() {
+              _type = TransactionType.income;
+              _selectedCategoryKey = null; // Reset category selection
+            }),
             isDark: isDark,
           ),
         ),
@@ -292,7 +295,10 @@ class _AddTransactionBottomSheetState
             icon: AppIcons.expense,
             color: AppColors.error,
             isSelected: _type == TransactionType.expense,
-            onTap: () => setState(() => _type = TransactionType.expense),
+            onTap: () => setState(() {
+              _type = TransactionType.expense;
+              _selectedCategoryKey = null; // Reset category selection
+            }),
             isDark: isDark,
           ),
         ),
@@ -800,13 +806,13 @@ class _AddTransactionBottomSheetState
   List<CategoryModel> _getDefaultCategories() {
     if (_type == TransactionType.income) {
       return [
-        ...DefaultCategories.incomeCategories,
-        ...DefaultCategories.bothCategories,
+        ...DynamicCategoriesService.getIncomeCategories(context),
+        ...DynamicCategoriesService.getOtherCategories(context),
       ];
     } else {
       return [
-        ...DefaultCategories.expenseCategories,
-        ...DefaultCategories.bothCategories,
+        ...DynamicCategoriesService.getExpenseCategories(context),
+        ...DynamicCategoriesService.getOtherCategories(context),
       ];
     }
   }
@@ -836,20 +842,12 @@ class _AddTransactionBottomSheetState
             final categoryKey = isDefault
                 ? category.name
                 : category.id.toString();
-            final isSelected = isDefault
-                ? _selectedCategoryId.toString() == category.name
-                : _selectedCategoryId == category.id;
+            final isSelected = _selectedCategoryKey == categoryKey;
             final color = Color(int.parse('0xFF${category.color}'));
 
             return GestureDetector(
               onTap: () => setState(() {
-                if (isDefault) {
-                  _selectedCategoryId = isSelected
-                      ? null
-                      : category.name.hashCode;
-                } else {
-                  _selectedCategoryId = isSelected ? null : category.id;
-                }
+                _selectedCategoryKey = isSelected ? null : categoryKey;
               }),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
@@ -892,6 +890,110 @@ class _AddTransactionBottomSheetState
         ),
       ],
     );
+  }
+
+  IncomeCategory _mapToIncomeCategory(String categoryKey) {
+    switch (categoryKey.toLowerCase()) {
+      // Salaire / Salary
+      case 'salaire':
+      case 'salary':
+      case 'umushahara':
+      case 'mshahara':
+        return IncomeCategory.salary;
+      // Vente / Sale
+      case 'vente':
+      case 'sale':
+      case 'kugurisha':
+      case 'mauzo':
+        return IncomeCategory.sale;
+      // Cadeau / Gift
+      case 'cadeau':
+      case 'gift':
+      case 'impano':
+      case 'zawadi':
+        return IncomeCategory.gift;
+      // Investissement / Investment
+      case 'investissement':
+      case 'investment':
+      case 'ishoramari':
+      case 'uwekezaji':
+        return IncomeCategory.investment;
+      // Dette reçue
+      case 'dette reçue':
+      case 'debt received':
+      case 'ideni ryakiriwe':
+      case 'deni lililopokelewa':
+        return IncomeCategory.debtReceived;
+      // Autre / Other
+      case 'autre':
+      case 'other':
+      case 'ikindi':
+      case 'nyingine':
+        return IncomeCategory.other;
+      default:
+        return IncomeCategory.other;
+    }
+  }
+
+  ExpenseCategory _mapToExpenseCategory(String categoryKey) {
+    switch (categoryKey.toLowerCase()) {
+      // Alimentation / Food
+      case 'alimentation':
+      case 'food':
+      case 'ibiryo':
+      case 'chakula':
+        return ExpenseCategory.food;
+      // Transport
+      case 'transport':
+      case 'ubwikorezi':
+      case 'usafiri':
+        return ExpenseCategory.transport;
+      // Santé / Health
+      case 'santé':
+      case 'health':
+      case 'ubuzima':
+      case 'afya':
+        return ExpenseCategory.health;
+      // Éducation / Education
+      case 'éducation':
+      case 'education':
+      case 'uburezi':
+      case 'elimu':
+        return ExpenseCategory.education;
+      // Divertissement / Entertainment
+      case 'divertissement':
+      case 'entertainment':
+      case 'imyidagaduro':
+      case 'burudani':
+        return ExpenseCategory.entertainment;
+      // Shopping / Achat
+      case 'shopping':
+      case 'achat':
+      case 'purchase':
+      case 'kugura':
+      case 'ununuzi':
+        return ExpenseCategory.purchase;
+      // Services / Utilities
+      case 'services':
+      case 'utilities':
+      case 'serivisi':
+      case 'huduma':
+        return ExpenseCategory.utilities;
+      // Retrait / Withdrawal
+      case 'retrait':
+      case 'withdrawal':
+      case 'gukura':
+      case 'kutoa':
+        return ExpenseCategory.withdrawal;
+      // Autre / Other
+      case 'autre':
+      case 'other':
+      case 'ikindi':
+      case 'nyingine':
+        return ExpenseCategory.other;
+      default:
+        return ExpenseCategory.other;
+    }
   }
 }
 

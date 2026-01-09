@@ -209,6 +209,29 @@ class DebtController extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<void> addDebtGivenExternal({
+    required DebtModel debt,
+    required tx.IncomeCategory category,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      // Pour l'argent externe, on crée juste la dette sans transaction de source
+      await _repository.isar.writeTxn(() async {
+        await _repository.isar.debtModels.put(debt);
+      });
+      
+      // Programmer la notification si activée
+      if (debt.hasReminder && debt.reminderDateTime != null) {
+        await _notificationService.scheduleDebtReminder(debt);
+      }
+      
+      state = const AsyncValue.data(null);
+      _invalidateAll();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
   Future<void> addDebtReceived({
     required DebtModel debt,
     required int targetId,
@@ -223,6 +246,29 @@ class DebtController extends StateNotifier<AsyncValue<void>> {
         targetType: targetType,
         targetName: targetName,
       );
+      
+      // Programmer la notification si activée
+      if (debt.hasReminder && debt.reminderDateTime != null) {
+        await _notificationService.scheduleDebtReminder(debt);
+      }
+      
+      state = const AsyncValue.data(null);
+      _invalidateAll();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> addDebtReceivedExternal({
+    required DebtModel debt,
+    required tx.IncomeCategory category,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      // Pour l'argent externe, on crée juste la dette sans transaction de source
+      await _repository.isar.writeTxn(() async {
+        await _repository.isar.debtModels.put(debt);
+      });
       
       // Programmer la notification si activée
       if (debt.hasReminder && debt.reminderDateTime != null) {
