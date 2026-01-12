@@ -1374,4 +1374,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get privacyPolicySubtitle => 'Politique de confidentialité';
+
+  // Auto Backup
+  @override
+  String get autoBackupEnabled => 'Sauvegarde automatique activée';
+
+  @override
+  String get dailyAutoBackup => 'Sauvegarde quotidienne automatique';
+
+  @override
+  String get lastBackup => 'Dernière sauvegarde';
+
+  @override
+  String get backingUp => 'Sauvegarde...';
+
+  @override
+  String get manualBackup => 'Sauvegarder';
+
+  @override
+  String get importData => 'Importer';
+
+  @override
+  String get backupSaved => 'Sauvegarde créée avec succès';
+
+  @override
+  String get importSuccess => 'Données importées avec succès';
+
+  @override
+  String get pdfExported => 'PDF exporté avec succès';
+
+  @override
+  String get exportingPdf => 'Export PDF en cours...';
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 import '../models/source_model.dart' as src;
 import '../models/transaction_model.dart' as tx;
 import '../models/debt_model.dart';
@@ -113,10 +114,15 @@ class BackupService {
   // Save backup using Storage Access Framework (SAF)
   Future<String> saveBackupToStorage(String backupData) async {
     try {
+      // Créer un nom de fichier lisible : ikigabo_backup_25-Jan-2026_14h30.json
+      final now = DateTime.now();
+      final dateFormat = DateFormat('dd-MMM-yyyy_HH\'h\'mm');
+      final readableDate = dateFormat.format(now);
+
       // Utiliser file_picker pour choisir l'emplacement
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Sauvegarder la sauvegarde Ikigabo',
-        fileName: 'ikigabo_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+        fileName: 'ikigabo_backup_$readableDate.json',
         type: FileType.custom,
         allowedExtensions: ['json'],
         bytes: utf8.encode(backupData), // Fournir les bytes directement
@@ -130,6 +136,26 @@ class BackupService {
       return outputFile;
     } catch (e) {
       throw Exception('Erreur lors de la sauvegarde: $e');
+    }
+  }
+
+  // Import backup from file picker
+  Future<String?> loadBackupFromStorage() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        dialogTitle: 'Sélectionner une sauvegarde Ikigabo',
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        return await file.readAsString();
+      }
+      
+      return null;
+    } catch (e) {
+      throw Exception('Erreur lors du chargement: $e');
     }
   }
 

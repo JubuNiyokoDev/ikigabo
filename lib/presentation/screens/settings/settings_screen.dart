@@ -26,6 +26,7 @@ import '../categories/categories_management_screen.dart';
 import '../budgets/budgets_screen.dart';
 import '../security/pin_screen.dart';
 import '../../../core/services/ad_manager.dart';
+import '../../providers/auto_backup_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -701,22 +702,25 @@ class SettingsScreen extends ConsumerWidget {
             _buildSection(l10n.data, isDark),
             Consumer(
               builder: (context, ref, child) {
-                final prefsService = ref
-                    .watch(preferencesServiceProvider)
-                    .value;
-                final isEnabled = prefsService?.isAutoBackupEnabled() ?? true;
+                final autoBackupState = ref.watch(autoBackupProvider);
 
                 return _buildSettingTile(
                   icon: AppIcons.backup,
                   title: l10n.autoBackup,
                   subtitle: l10n.enableBackup,
-                  trailing: Switch(
-                    value: isEnabled,
-                    onChanged: (value) {
-                      prefsService?.setAutoBackupEnabled(value);
-                    },
-                    activeTrackColor: AppColors.primary,
-                  ),
+                  trailing: autoBackupState.isBackingUp
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Switch(
+                          value: autoBackupState.isEnabled,
+                          onChanged: (value) {
+                            ref.read(autoBackupProvider.notifier).toggleAutoBackup(value);
+                          },
+                          activeTrackColor: AppColors.primary,
+                        ),
                   isDark: isDark,
                 );
               },

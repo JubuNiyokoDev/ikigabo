@@ -1372,4 +1372,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySubtitle => 'Privacy policy';
+
+  // Auto Backup
+  @override
+  String get autoBackupEnabled => 'Auto backup enabled';
+
+  @override
+  String get dailyAutoBackup => 'Daily automatic backup';
+
+  @override
+  String get lastBackup => 'Last backup';
+
+  @override
+  String get backingUp => 'Backing up...';
+
+  @override
+  String get manualBackup => 'Backup';
+
+  @override
+  String get importData => 'Import';
+
+  @override
+  String get backupSaved => 'Backup created successfully';
+
+  @override
+  String get importSuccess => 'Data imported successfully';
+
+  @override
+  String get pdfExported => 'PDF exported successfully';
+
+  @override
+  String get exportingPdf => 'Exporting PDF...';
 }

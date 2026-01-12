@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ikigabo/core/services/ad_manager.dart';
 import 'package:ikigabo/data/models/category_model.dart';
@@ -20,16 +19,16 @@ import '../../providers/category_provider.dart';
 import '../../../core/services/ads_service.dart';
 import '../../../core/services/dynamic_category_service.dart';
 
-class AddTransactionBottomSheet extends ConsumerStatefulWidget {
-  const AddTransactionBottomSheet({super.key});
+class AddTransactionScreen extends ConsumerStatefulWidget {
+  const AddTransactionScreen({super.key});
 
   @override
-  ConsumerState<AddTransactionBottomSheet> createState() =>
-      _AddTransactionBottomSheetState();
+  ConsumerState<AddTransactionScreen> createState() =>
+      _AddTransactionScreenState();
 }
 
-class _AddTransactionBottomSheetState
-    extends ConsumerState<AddTransactionBottomSheet> {
+class _AddTransactionScreenState
+    extends ConsumerState<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -38,8 +37,9 @@ class _AddTransactionBottomSheetState
   int? _selectedSourceId;
   SourceType? _selectedSourceType;
   String _selectedCurrency = 'BIF';
-  String? _selectedCategoryKey; // Changé de int? à String?
+  String? _selectedCategoryKey;
   DateTime _selectedDate = DateTime.now();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -61,12 +61,15 @@ class _AddTransactionBottomSheetState
         return;
       }
 
+      setState(() => _isLoading = true);
+
       final amount = double.parse(_amountController.text);
 
       // Pub récompensée pour transactions importantes (> 50000)
       if (amount > 50000) {
         final rewardGranted = await AdManager.showRewardedForLargeTransaction();
         if (!rewardGranted) {
+          setState(() => _isLoading = false);
           _showError('Regardez la pub pour cette transaction importante');
           return;
         }
@@ -118,6 +121,7 @@ class _AddTransactionBottomSheetState
         await controller.addTransaction(transaction);
 
         if (mounted) {
+          setState(() => _isLoading = false);
           Navigator.pop(context);
           _showSuccess(l10n.transactionAddedSuccess);
 
@@ -125,7 +129,10 @@ class _AddTransactionBottomSheetState
           _showAdIfNeeded();
         }
       } catch (e) {
-        _showError('${l10n.error}: $e');
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showError('${l10n.error}: $e');
+        }
       }
     }
   }
@@ -168,108 +175,67 @@ class _AddTransactionBottomSheetState
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
     final l10n = AppLocalizations.of(context)!;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final safeAreaTop = MediaQuery.of(context).padding.top;
-    final maxHeight = screenHeight - safeAreaTop - 80; // Laisser 80px en haut
 
-    return Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.backgroundDark : Colors.grey[50],
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildHeader(isDark),
-          Flexible(
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(AppSizes.spacing12),
-                children: [
-                  _buildTypeSelector(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildAmountField(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildCurrencySelector(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildCategorySelector(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildSourceSelector(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildDatePicker(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildDescriptionField(isDark, l10n),
-                  const SizedBox(height: AppSizes.spacing12),
-                  _buildSaveButton(l10n),
-                  SizedBox(
-                    height: MediaQuery.of(context).viewInsets.bottom + 16,
-                  ),
-                ],
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            AppIcons.back,
+            color: isDark ? AppColors.textDark : AppColors.textPrimary,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 36.w,
+              height: 36.h,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(AppIcons.add, color: AppColors.primary, size: 18.sp),
+            ),
+            SizedBox(width: 12.w),
+            Text(
+              l10n.newTransaction,
+              style: TextStyle(
+                fontSize: AppSizes.textMedium,
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.textDark : Colors.black87,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSizes.spacing12),
+          children: [
+            _buildTypeSelector(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildAmountField(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildCurrencySelector(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildCategorySelector(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildSourceSelector(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildDatePicker(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildDescriptionField(isDark, l10n),
+            const SizedBox(height: AppSizes.spacing12),
+            _buildSaveButton(l10n),
+            SizedBox(height: 16.h),
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildHeader(bool isDark) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacing12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36.w,
-            height: 36.h,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(AppIcons.add, color: AppColors.primary, size: 18.sp),
-          ),
-          const SizedBox(width: AppSizes.spacing12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.newTransaction,
-                  style: TextStyle(
-                    fontSize: AppSizes.textMedium,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? AppColors.textDark : Colors.black87,
-                  ),
-                ),
-                Text(
-                  l10n.addIncomeOrExpense,
-                  style: TextStyle(
-                    fontSize: AppSizes.textSmall,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(
-              AppIcons.close,
-              color: isDark ? AppColors.textDark : Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    ).animate().slideY(begin: -0.2, duration: 300.ms);
   }
 
   Widget _buildTypeSelector(bool isDark, AppLocalizations l10n) {
@@ -502,7 +468,7 @@ class _AddTransactionBottomSheetState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l10n.source,
+              _type == TransactionType.income ? l10n.destination : l10n.source,
               style: TextStyle(
                 fontSize: AppSizes.textSmall,
                 fontWeight: FontWeight.w600,
@@ -737,22 +703,32 @@ class _AddTransactionBottomSheetState
         ],
       ),
       child: ElevatedButton(
-        onPressed: _saveTransaction,
+        onPressed: _isLoading ? null : _saveTransaction,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
+          disabledBackgroundColor: Colors.transparent,
         ),
-        child: Text(
-          l10n.save,
-          style: const TextStyle(
-            fontSize: AppSizes.textMedium,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
+        child: _isLoading
+            ? SizedBox(
+                width: 20.w,
+                height: 20.h,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                l10n.save,
+                style: const TextStyle(
+                  fontSize: AppSizes.textMedium,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }

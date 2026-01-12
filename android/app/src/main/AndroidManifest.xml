@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <application
+        android:pageSizeCompat="enabled"
         android:label="ikigabo"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
@@ -40,7 +41,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-            
+
         <!-- Unity Ads Configuration -->
         <meta-data
             android:name="unity.ads.gameId"

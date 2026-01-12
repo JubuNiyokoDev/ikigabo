@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android local files
+local.properties
+settings.gradle
+/android/gradle/
+/android/build/
+
+# Platform folders
+/ios/
+/linux/
+/macos/
+/web/
+/windows/
+
+# Tools
+bundletool.jar

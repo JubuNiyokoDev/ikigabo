@@ -1374,4 +1374,35 @@ class AppLocalizationsRn extends AppLocalizations {
 
   @override
   String get privacyPolicySubtitle => 'Politike y\'ibanga';
+
+  // Auto Backup
+  @override
+  String get autoBackupEnabled => 'Kubika vyikora';
+
+  @override
+  String get dailyAutoBackup => 'Kubika kwa buri munsi';
+
+  @override
+  String get lastBackup => 'Kubika kwanyuma';
+
+  @override
+  String get backingUp => 'Kubika...';
+
+  @override
+  String get manualBackup => 'kubika manuel';
+
+  @override
+  String get importData => 'Injiza';
+
+  @override
+  String get backupSaved => 'Kubika kwakozwe neza';
+
+  @override
+  String get importSuccess => 'Amakuru yinjijwe neza';
+
+  @override
+  String get pdfExported => 'PDF yasohowe neza';
+
+  @override
+  String get exportingPdf => 'Gusohora PDF...';
 }

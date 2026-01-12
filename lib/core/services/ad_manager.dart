@@ -178,4 +178,12 @@ class AdManager {
   static Future<bool> showRewardedForPinSetup() async {
     return await showRewardedForImportantAction('pin_setup');
   }
+
+  static Future<bool> showRewardedForAutoBackup() async {
+    return await showRewardedForImportantAction('auto_backup');
+  }
+
+  static Future<bool> showRewardedForPdfExport() async {
+    return await showRewardedForImportantAction('pdf_export');
+  }
 }

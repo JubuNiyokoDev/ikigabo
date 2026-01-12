@@ -650,6 +650,18 @@ abstract class AppLocalizations {
   String get discoverOtherApps;
   String get termsOfUse;
   String get privacyPolicySubtitle;
+
+  // Auto Backup
+  String get autoBackupEnabled;
+  String get dailyAutoBackup;
+  String get lastBackup;
+  String get backingUp;
+  String get manualBackup;
+  String get importData;
+  String get backupSaved;
+  String get importSuccess;
+  String get pdfExported;
+  String get exportingPdf;
 }
 
 class _AppLocalizationsDelegate

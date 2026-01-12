@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
 import '../models/asset_model.dart';
 import '../models/debt_model.dart';
@@ -12,7 +14,7 @@ import '../../core/utils/currency_formatter.dart';
 import '../../core/constants/currencies.dart';
 
 class PdfExportService {
-  static Future<void> exportFinancialReport({
+  static Future<String> exportFinancialReport({
     required List<TransactionModel> transactions,
     required List<AssetModel> assets,
     required List<DebtModel> debts,
@@ -46,7 +48,11 @@ class PdfExportService {
       ),
     );
 
-    await _savePdf(pdf, 'rapport_financier_${DateTime.now().millisecondsSinceEpoch}');
+    // Créer un nom de fichier lisible : rapport_financier_25-Jan-2026_14h30.pdf
+    final now = DateTime.now();
+    final dateFormat = DateFormat('dd-MMM-yyyy_HH\'h\'mm');
+    final readableDate = dateFormat.format(now);
+    return await _savePdf(pdf, 'rapport_financier_$readableDate');
   }
 
   static pw.Widget _buildHeader(String title, String period) {
@@ -398,18 +404,28 @@ class PdfExportService {
     }
   }
 
-  static Future<void> _savePdf(pw.Document pdf, String filename) async {
-    final output = await getApplicationDocumentsDirectory();
-    final file = File('${output.path}/$filename.pdf');
-    await file.writeAsBytes(await pdf.save());
-    
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      text: 'Rapport financier Ikigabo',
-    );
+  static Future<String> _savePdf(pw.Document pdf, String filename) async {
+    try {
+      // Utiliser file_picker pour choisir l'emplacement
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Sauvegarder le rapport PDF',
+        fileName: '$filename.pdf',
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        bytes: Uint8List.fromList(await pdf.save()),
+      );
+
+      if (outputFile == null) {
+        throw Exception('Sauvegarde annulée par l\'utilisateur');
+      }
+
+      return outputFile;
+    } catch (e) {
+      throw Exception('Erreur lors de la sauvegarde PDF: $e');
+    }
   }
 
-  static Future<void> exportAssetReport(List<AssetModel> assets) async {
+  static Future<String> exportAssetReport(List<AssetModel> assets) async {
     final pdf = pw.Document();
     final totalValue = assets.fold(0.0, (sum, asset) => sum + asset.totalValue);
     
@@ -427,12 +443,16 @@ class PdfExportService {
       ),
     );
 
-    await _savePdf(pdf, 'rapport_actifs_${DateTime.now().millisecondsSinceEpoch}');
+    // Créer un nom de fichier lisible pour le rapport d'actifs
+    final now1 = DateTime.now();
+    final dateFormat1 = DateFormat('dd-MMM-yyyy_HH\'h\'mm');
+    final readableDate1 = dateFormat1.format(now1);
+    return await _savePdf(pdf, 'rapport_actifs_$readableDate1');
   }
 
-  static Future<void> exportDebtReport(List<DebtModel> debts) async {
+  static Future<String> exportDebtReport(List<DebtModel> debts) async {
     final pdf = pw.Document();
-    
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -447,6 +467,10 @@ class PdfExportService {
       ),
     );
 
-    await _savePdf(pdf, 'rapport_dettes_${DateTime.now().millisecondsSinceEpoch}');
+    // Créer un nom de fichier lisible pour le rapport de dettes
+    final now2 = DateTime.now();
+    final dateFormat2 = DateFormat('dd-MMM-yyyy_HH\'h\'mm');
+    final readableDate2 = dateFormat2.format(now2);
+    return await _savePdf(pdf, 'rapport_dettes_$readableDate2');
   }
 }

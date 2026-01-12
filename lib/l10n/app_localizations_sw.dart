@@ -1375,4 +1375,35 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get privacyPolicySubtitle => 'Sera ya faragha';
+
+  // Auto Backup
+  @override
+  String get autoBackupEnabled => 'Hifadhi otomatiki imewashwa';
+
+  @override
+  String get dailyAutoBackup => 'Hifadhi ya kila siku';
+
+  @override
+  String get lastBackup => 'Hifadhi ya mwisho';
+
+  @override
+  String get backingUp => 'Inahifadhi...';
+
+  @override
+  String get manualBackup => 'Hifadhi';
+
+  @override
+  String get importData => 'Ingiza';
+
+  @override
+  String get backupSaved => 'Hifadhi imetengenezwa';
+
+  @override
+  String get importSuccess => 'Data imeingizwa';
+
+  @override
+  String get pdfExported => 'PDF imetolewa';
+
+  @override
+  String get exportingPdf => 'Inatoa PDF...';
 }

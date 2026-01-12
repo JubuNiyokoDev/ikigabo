@@ -15,8 +15,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.ikigabo.ikigabo"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 36
+    ndkVersion = "29.0.14206865"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -24,9 +24,12 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
+}
+
 
     signingConfigs {
         create("release") {
@@ -46,19 +49,23 @@ android {
 
         // Support pour pages mémoire 16KB (Android 15+)
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            abiFilters.clear()
+            abiFilters += listOf("arm64-v8a")
             debugSymbolLevel = "SYMBOL_TABLE"
         }
 
-        // Activer l'alignement 16KB
-        packaging {
-            jniLibs {
-                useLegacyPackaging = false
-            }
-        }
+        // Activer l'alignement 16KB natif
+        // externalNativeBuild {
+        //    cmake {
+        //        arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
+        //    }
+        //}
 
-        // Optimiser les ressources - syntaxe moderne
-        resourceConfigurations += listOf("en", "fr")
+        // Optimiser les ressources
+        androidResources {
+    localeFilters += listOf("en", "fr", "rw", "sw")
+}
+
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -73,6 +80,16 @@ android {
             )
         }
     }
+
+    // Configuration pour 16KB page size
+   packaging {
+    jniLibs {
+        useLegacyPackaging = true
+    }
+    resources {
+        excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+}
 
     bundle {
         language {
@@ -94,4 +111,6 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

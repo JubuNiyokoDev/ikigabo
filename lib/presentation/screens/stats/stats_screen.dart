@@ -714,7 +714,17 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     final periods = ['Semaine', 'Mois', 'Année', 'Tout'];
     final period = periods[_selectedPeriod];
     
-    ref.read(exportFinancialReportProvider(period));
+    ref.read(pdfExportProvider.notifier).exportFinancialReport(
+      transactions: [],
+      assets: [],
+      debts: [],
+      banks: [],
+      sources: [],
+      totalWealth: 0,
+      totalIncome: 0,
+      totalExpense: 0,
+      period: period,
+    );
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -726,7 +736,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   void _exportAssetReport() {
     final l10n = AppLocalizations.of(context)!;
-    ref.read(exportAssetReportProvider);
+    ref.read(pdfExportProvider.notifier).exportAssetReport([]);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -738,7 +748,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   void _exportDebtReport() {
     final l10n = AppLocalizations.of(context)!;
-    ref.read(exportDebtReportProvider);
+    ref.read(pdfExportProvider.notifier).exportDebtReport([]);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

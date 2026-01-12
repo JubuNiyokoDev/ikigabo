@@ -62,8 +62,11 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
               placementId: 'Banner_Android',
               onLoad: (placementId) => print('Banner chargé: $placementId'),
               onClick: (placementId) => print('Banner cliqué: $placementId'),
-              onFailed: (placementId, error, message) =>
-                  print('Banner erreur: $error - $message'),
+              onFailed: (placementId, error, message) {
+                // Ignorer les erreurs noFill (normales)
+                if (error.toString().contains('noFill')) return;
+                print('Banner erreur: $error - $message');
+              },
             ),
           ),
         );

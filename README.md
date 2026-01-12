@@ -5,12 +5,14 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 ## 🎯 Fonctionnalités Principales
 
 ### 📊 Dashboard Complet
+
 - Vue d'ensemble du patrimoine total (actifs et passifs)
 - Graphiques animés de l'activité hebdomadaire
 - Liste des transactions récentes
 - Statistiques des entrées/sorties
 
 ### 💵 Gestion des Sources d'Argent
+
 - Argent en poche
 - Comptes bancaires multiples
 - Caisses personnelles
@@ -19,6 +21,7 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Sources personnalisées illimitées
 
 ### 🏦 Gestion Avancée des Banques
+
 - Banques gratuites ou payantes
 - Calcul automatique des frais
 - Frais mensuels ou annuels
@@ -26,12 +29,14 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Déduction automatique programmée
 
 ### 📥📤 Transactions Complètes
+
 - **Entrées**: Salaire, Vente, Don, Dette reçue, etc.
 - **Sorties**: Achats, Retraits, Dons, Dettes données, etc.
 - Catégories personnalisables
 - Historique complet avec recherche
 
 ### 🐐 Gestion des Biens & Actifs
+
 - Bétail (chèvres, porcs, etc.)
 - Récoltes agricoles
 - Terrains
@@ -40,24 +45,28 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Bijoux
 
 ### 🤝 Gestion des Dettes
+
 - Dettes données (créances)
 - Dettes reçues (passifs)
 - Suivi des paiements partiels
 - Calcul automatique des montants restants
 
 ### 🔒 Sécurité Renforcée
+
 - Code PIN obligatoire au démarrage
 - Support biométrique (empreinte)
 - Mot de passe optionnel
 - Verrouillage automatique
 
 ### 🌍 Multilingue
+
 - 🇧🇮 Kirundi (pur)
 - 🇫🇷 Français
 - 🇬🇧 English
 - 🇹🇿 Kiswahili
 
 ### 📱 UI/UX Professionnelle
+
 - Dark mode magnifique
 - Animations fluides
 - Transitions professionnelles
@@ -74,22 +83,26 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 ## 🚀 Installation
 
 ### Prérequis
+
 - Flutter SDK (≥ 3.10.0)
 - Dart SDK (≥ 3.10.0)
 
 ### Étapes
 
 1. **Installer les dépendances**
+
 ```bash
 flutter pub get
 ```
 
 2. **Générer les fichiers Isar**
+
 ```bash
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 3. **Lancer l'application**
+
 ```bash
 flutter run
 ```
@@ -108,6 +121,7 @@ lib/
 ## 🎨 Captures d'écran
 
 L'application utilise un design moderne dark mode avec :
+
 - Dashboard avec graphiques
 - Écran PIN sécurisé
 - Navigation fluide

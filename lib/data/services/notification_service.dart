@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import '../models/debt_model.dart';
 import '../models/bank_model.dart';
@@ -37,8 +36,6 @@ class NotificationService {
 
     // Initialiser PreferencesService
     _prefsService = await PreferencesService.init();
-
-    await AndroidAlarmManager.initialize();
 
     // Configuration Android - utiliser l'icône du launcher
     const androidSettings = AndroidInitializationSettings(
@@ -121,14 +118,17 @@ class NotificationService {
     }
   }
 
-  Future<void> scheduleDebtReminder(DebtModel debt) async {
-    if (debt.reminderDateTime == null) return;
+  Future<String> scheduleDebtReminder(DebtModel debt) async {
+    if (debt.reminderDateTime == null) {
+      return 'Aucune alarme à programmer';
+    }
 
-    // Vérifier si les rappels de dettes sont activés
-    if (_prefsService?.getDebtRemindersEnabled() != true) return;
+    if (_prefsService?.getDebtRemindersEnabled() != true) {
+      return 'Rappels de dettes désactivés dans les paramètres';
+    }
 
     if (debt.reminderDateTime!.isBefore(DateTime.now())) {
-      return;
+      return 'Impossible de programmer une alarme dans le passé';
     }
 
     final title = debt.type == DebtType.given
@@ -140,26 +140,31 @@ class NotificationService {
         : 'Payer ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} à ${debt.personName}';
 
     try {
-      await RealAlarmService.scheduleRealAlarm(
+      final result = await RealAlarmService.scheduleRealAlarm(
         id: debt.id,
         dateTime: debt.reminderDateTime!,
         title: title,
         message: message,
       );
+      
+      if (result.success) {
+        _addNotification(
+          NotificationItem(
+            id: 'debt_${debt.id}_reminder',
+            title: 'Rappel programmé',
+            body: message,
+            type: NotificationType.debtReminder,
+            relatedId: debt.id,
+            scheduledDate: debt.reminderDateTime!,
+          ),
+        );
+        return 'Alarme programmée avec succès';
+      } else {
+        return result.error ?? 'Échec programmation alarme';
+      }
     } catch (e) {
-      print('Erreur programmation alarme: $e');
+      return 'Erreur: $e';
     }
-
-    _addNotification(
-      NotificationItem(
-        id: 'debt_${debt.id}_reminder',
-        title: 'Rappel programmé',
-        body: message,
-        type: NotificationType.debtReminder,
-        relatedId: debt.id,
-        scheduledDate: debt.reminderDateTime!,
-      ),
-    );
   }
 
   Future<void> scheduleBudgetAlert(BudgetModel budget) async {
@@ -227,6 +232,53 @@ class NotificationService {
             body: '${bank.name}: ${bank.balance} ${bank.currency}',
             type: NotificationType.lowBalance,
             relatedId: bank.id,
+            scheduledDate: DateTime.now(),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> checkOverdueDebts(List<DebtModel> debts) async {
+    if (_prefsService?.getOverdueAlertsEnabled() != true) return;
+
+    final now = DateTime.now();
+    for (final debt in debts) {
+      if (debt.dueDate != null && debt.dueDate!.isBefore(now) && debt.status != DebtStatus.fullyPaid) {
+        final daysPastDue = now.difference(debt.dueDate!).inDays;
+        _addNotification(
+          NotificationItem(
+            id: 'debt_${debt.id}_overdue',
+            title: 'Dette en retard',
+            body: '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (${daysPastDue} jours de retard)',
+            type: NotificationType.debtOverdue,
+            relatedId: debt.id,
+            scheduledDate: DateTime.now(),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> checkUpcomingDebts(List<DebtModel> debts) async {
+    if (_prefsService?.getDebtRemindersEnabled() != true) return;
+
+    final now = DateTime.now();
+    final in3Days = now.add(const Duration(days: 3));
+    
+    for (final debt in debts) {
+      if (debt.dueDate != null && 
+          debt.dueDate!.isAfter(now) && 
+          debt.dueDate!.isBefore(in3Days) && 
+          debt.status != DebtStatus.fullyPaid) {
+        final daysUntilDue = debt.dueDate!.difference(now).inDays;
+        _addNotification(
+          NotificationItem(
+            id: 'debt_${debt.id}_due_soon',
+            title: 'Échéance proche',
+            body: '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (dans ${daysUntilDue} jours)',
+            type: NotificationType.debtReminder,
+            relatedId: debt.id,
             scheduledDate: DateTime.now(),
           ),
         );
@@ -394,13 +446,13 @@ class NotificationService {
 
   int getOverdueDebtsCount() {
     return _notifications
-        .where((n) => n.type == NotificationType.debtOverdue)
+        .where((n) => n.type == NotificationType.debtOverdue && !n.isRead)
         .length;
   }
 
   int getDueSoonCount() {
     return _notifications
-        .where((n) => n.type == NotificationType.debtReminder)
+        .where((n) => n.type == NotificationType.debtReminder && !n.isRead)
         .length;
   }
 

@@ -17,7 +17,7 @@ import 'presentation/screens/sources/sources_list_screen.dart';
 import 'presentation/screens/banks/banks_list_screen.dart';
 import 'presentation/screens/assets/assets_list_screen.dart';
 import 'presentation/screens/debts/debts_list_screen.dart';
-import 'presentation/screens/transactions/add_transaction_bottom_sheet.dart';
+import 'presentation/screens/transactions/add_transaction_screen.dart';
 import 'presentation/screens/settings/settings_screen.dart';
 import 'presentation/screens/stats/stats_screen.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
@@ -25,6 +25,7 @@ import 'presentation/providers/debt_provider.dart';
 import 'presentation/providers/integrated_notification_provider.dart';
 import 'presentation/providers/onboarding_provider.dart';
 import 'data/services/notification_service.dart';
+import 'data/services/auto_backup_service.dart';
 import 'core/services/real_alarm_service.dart';
 import 'presentation/widgets/shimmer_widget.dart';
 
@@ -34,12 +35,13 @@ void main() async {
   // Initialiser les services d'alarme et notifications
   await RealAlarmService.initialize();
   await NotificationService().initialize();
+  
+  // Initialiser l'auto-backup
+  await AutoBackupService.initialize();
 
   // Configuration edge-to-edge compatible Android 15
   // Ne plus utiliser setSystemUIOverlayStyle qui est déprécié
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge,
-  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(const ProviderScope(child: IkigaboApp()));
 }
@@ -121,7 +123,9 @@ class AppNavigator extends ConsumerWidget {
 
         switch (pinState) {
           case PinState.loading:
-            return const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50)));
+            return const Scaffold(
+              body: Center(child: ShimmerWidget(width: 50, height: 50)),
+            );
           case PinState.notSet:
             return PinScreen(
               mode: PinMode.setup,
@@ -140,7 +144,9 @@ class AppNavigator extends ConsumerWidget {
             return const MainScreen();
         }
       },
-      loading: () => const Scaffold(body: Center(child: ShimmerWidget(width: 50, height: 50))),
+      loading: () => const Scaffold(
+        body: Center(child: ShimmerWidget(width: 50, height: 50)),
+      ),
       error: (error, stackTrace) {
         // En cas d'erreur, afficher l'onboarding par défaut
         return const OnboardingScreen();
@@ -181,11 +187,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   void _onNavTap(int index) {
     if (index == 2) {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => const AddTransactionBottomSheet(),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AddTransactionScreen(),
+        ),
       );
     } else {
       setState(() => _currentIndex = index);
