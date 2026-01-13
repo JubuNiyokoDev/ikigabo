@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../../data/models/transaction_model.dart' as tx;
 import '../../data/models/source_model.dart';
 import '../../data/models/bank_model.dart';

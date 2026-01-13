@@ -32,11 +32,7 @@ const SecurityModelSchema = CollectionSchema(
       name: r'failedAttempts',
       type: IsarType.long,
     ),
-    r'isLocked': PropertySchema(
-      id: 3,
-      name: r'isLocked',
-      type: IsarType.bool,
-    ),
+    r'isLocked': PropertySchema(id: 3, name: r'isLocked', type: IsarType.bool),
     r'lastFailedLogin': PropertySchema(
       id: 4,
       name: r'lastFailedLogin',
@@ -62,11 +58,7 @@ const SecurityModelSchema = CollectionSchema(
       name: r'passwordHash',
       type: IsarType.string,
     ),
-    r'pinHash': PropertySchema(
-      id: 9,
-      name: r'pinHash',
-      type: IsarType.string,
-    ),
+    r'pinHash': PropertySchema(id: 9, name: r'pinHash', type: IsarType.string),
     r'remainingLockMinutes': PropertySchema(
       id: 10,
       name: r'remainingLockMinutes',
@@ -82,11 +74,7 @@ const SecurityModelSchema = CollectionSchema(
       name: r'requireSecurityOnTransaction',
       type: IsarType.bool,
     ),
-    r'salt': PropertySchema(
-      id: 13,
-      name: r'salt',
-      type: IsarType.string,
-    ),
+    r'salt': PropertySchema(id: 13, name: r'salt', type: IsarType.string),
     r'securityType': PropertySchema(
       id: 14,
       name: r'securityType',
@@ -97,8 +85,9 @@ const SecurityModelSchema = CollectionSchema(
       id: 15,
       name: r'updatedAt',
       type: IsarType.dateTime,
-    )
+    ),
   },
+
   estimateSize: _securityModelEstimateSize,
   serialize: _securityModelSerialize,
   deserialize: _securityModelDeserialize,
@@ -107,10 +96,11 @@ const SecurityModelSchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _securityModelGetId,
   getLinks: _securityModelGetLinks,
   attach: _securityModelAttach,
-  version: '3.1.0+1',
+  version: '3.3.0',
 );
 
 int _securityModelEstimateSize(
@@ -184,8 +174,10 @@ SecurityModel _securityModelDeserialize(
     requireSecurityOnStart: reader.readBoolOrNull(offsets[11]) ?? true,
     requireSecurityOnTransaction: reader.readBoolOrNull(offsets[12]) ?? false,
     salt: reader.readStringOrNull(offsets[13]),
-    securityType: _SecurityModelsecurityTypeValueEnumMap[
-            reader.readByteOrNull(offsets[14])] ??
+    securityType:
+        _SecurityModelsecurityTypeValueEnumMap[reader.readByteOrNull(
+          offsets[14],
+        )] ??
         SecurityType.none,
     updatedAt: reader.readDateTimeOrNull(offsets[15]),
   );
@@ -228,9 +220,11 @@ P _securityModelDeserializeProp<P>(
     case 13:
       return (reader.readStringOrNull(offset)) as P;
     case 14:
-      return (_SecurityModelsecurityTypeValueEnumMap[
-              reader.readByteOrNull(offset)] ??
-          SecurityType.none) as P;
+      return (_SecurityModelsecurityTypeValueEnumMap[reader.readByteOrNull(
+                offset,
+              )] ??
+              SecurityType.none)
+          as P;
     case 15:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
@@ -260,7 +254,10 @@ List<IsarLinkBase<dynamic>> _securityModelGetLinks(SecurityModel object) {
 }
 
 void _securityModelAttach(
-    IsarCollection<dynamic> col, Id id, SecurityModel object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  SecurityModel object,
+) {
   object.id = id;
 }
 
@@ -276,17 +273,16 @@ extension SecurityModelQueryWhereSort
 extension SecurityModelQueryWhere
     on QueryBuilder<SecurityModel, SecurityModel, QWhereClause> {
   QueryBuilder<SecurityModel, SecurityModel, QAfterWhereClause> idEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -309,8 +305,9 @@ extension SecurityModelQueryWhere
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -319,8 +316,9 @@ extension SecurityModelQueryWhere
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -335,12 +333,14 @@ extension SecurityModelQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -348,148 +348,144 @@ extension SecurityModelQueryWhere
 extension SecurityModelQueryFilter
     on QueryBuilder<SecurityModel, SecurityModel, QFilterCondition> {
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      biometricEnabledEqualTo(bool value) {
+  biometricEnabledEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'biometricEnabled',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'biometricEnabled', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      createdAtEqualTo(DateTime value) {
+  createdAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'createdAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'createdAt', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      createdAtGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  createdAtGreaterThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'createdAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      createdAtLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  createdAtLessThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'createdAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      createdAtBetween(
+  createdAtBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'createdAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'createdAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      failedAttemptsEqualTo(int value) {
+  failedAttemptsEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'failedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'failedAttempts', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      failedAttemptsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  failedAttemptsGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'failedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'failedAttempts',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      failedAttemptsLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  failedAttemptsLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'failedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'failedAttempts',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      failedAttemptsBetween(
+  failedAttemptsBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'failedAttempts',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'failedAttempts',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -498,11 +494,13 @@ extension SecurityModelQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -513,370 +511,370 @@ extension SecurityModelQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      isLockedEqualTo(bool value) {
+  isLockedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isLocked',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isLocked', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginIsNull() {
+  lastFailedLoginIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lastFailedLogin',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lastFailedLogin'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginIsNotNull() {
+  lastFailedLoginIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lastFailedLogin',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lastFailedLogin'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginEqualTo(DateTime? value) {
+  lastFailedLoginEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lastFailedLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastFailedLogin', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lastFailedLoginGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lastFailedLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastFailedLogin',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lastFailedLoginLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lastFailedLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastFailedLogin',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastFailedLoginBetween(
+  lastFailedLoginBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lastFailedLogin',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastFailedLogin',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginIsNull() {
+  lastSuccessfulLoginIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lastSuccessfulLogin',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lastSuccessfulLogin'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginIsNotNull() {
+  lastSuccessfulLoginIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lastSuccessfulLogin',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lastSuccessfulLogin'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginEqualTo(DateTime? value) {
+  lastSuccessfulLoginEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lastSuccessfulLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastSuccessfulLogin', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lastSuccessfulLoginGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lastSuccessfulLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastSuccessfulLogin',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lastSuccessfulLoginLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lastSuccessfulLogin',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastSuccessfulLogin',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lastSuccessfulLoginBetween(
+  lastSuccessfulLoginBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lastSuccessfulLogin',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastSuccessfulLogin',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilIsNull() {
+  lockedUntilIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lockedUntil',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lockedUntil'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilIsNotNull() {
+  lockedUntilIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lockedUntil',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lockedUntil'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilEqualTo(DateTime? value) {
+  lockedUntilEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lockedUntil',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lockedUntil', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lockedUntilGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lockedUntil',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lockedUntil',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  lockedUntilLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lockedUntil',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lockedUntil',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      lockedUntilBetween(
+  lockedUntilBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lockedUntil',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lockedUntil',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      maxFailedAttemptsEqualTo(int value) {
+  maxFailedAttemptsEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'maxFailedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'maxFailedAttempts', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      maxFailedAttemptsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  maxFailedAttemptsGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'maxFailedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'maxFailedAttempts',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      maxFailedAttemptsLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  maxFailedAttemptsLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'maxFailedAttempts',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'maxFailedAttempts',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      maxFailedAttemptsBetween(
+  maxFailedAttemptsBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'maxFailedAttempts',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'maxFailedAttempts',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashIsNull() {
+  passwordHashIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'passwordHash',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'passwordHash'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashIsNotNull() {
+  passwordHashIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'passwordHash',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'passwordHash'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  passwordHashEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashLessThan(
+  passwordHashGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashBetween(
+  passwordHashLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  passwordHashBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -884,153 +882,158 @@ extension SecurityModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'passwordHash',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'passwordHash',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  passwordHashStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  passwordHashEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashContains(String value, {bool caseSensitive = true}) {
+  passwordHashContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'passwordHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'passwordHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashMatches(String pattern, {bool caseSensitive = true}) {
+  passwordHashMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'passwordHash',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'passwordHash',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashIsEmpty() {
+  passwordHashIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'passwordHash',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'passwordHash', value: ''),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      passwordHashIsNotEmpty() {
+  passwordHashIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'passwordHash',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'passwordHash', value: ''),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashIsNull() {
+  pinHashIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'pinHash',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'pinHash'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashIsNotNull() {
+  pinHashIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'pinHash',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'pinHash'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  pinHashEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashLessThan(
+  pinHashGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashBetween(
+  pinHashLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  pinHashBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1038,178 +1041,186 @@ extension SecurityModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'pinHash',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'pinHash',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  pinHashStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  pinHashEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashContains(String value, {bool caseSensitive = true}) {
+  pinHashContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'pinHash',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'pinHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashMatches(String pattern, {bool caseSensitive = true}) {
+  pinHashMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'pinHash',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'pinHash',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashIsEmpty() {
+  pinHashIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pinHash',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'pinHash', value: ''),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      pinHashIsNotEmpty() {
+  pinHashIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'pinHash',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'pinHash', value: ''),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      remainingLockMinutesEqualTo(int value) {
+  remainingLockMinutesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'remainingLockMinutes',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'remainingLockMinutes',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      remainingLockMinutesGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  remainingLockMinutesGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'remainingLockMinutes',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'remainingLockMinutes',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      remainingLockMinutesLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  remainingLockMinutesLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'remainingLockMinutes',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'remainingLockMinutes',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      remainingLockMinutesBetween(
+  remainingLockMinutesBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'remainingLockMinutes',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'remainingLockMinutes',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      requireSecurityOnStartEqualTo(bool value) {
+  requireSecurityOnStartEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'requireSecurityOnStart',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'requireSecurityOnStart',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      requireSecurityOnTransactionEqualTo(bool value) {
+  requireSecurityOnTransactionEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'requireSecurityOnTransaction',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'requireSecurityOnTransaction',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltIsNull() {
+  saltIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'salt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'salt'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltIsNotNull() {
+  saltIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'salt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'salt'),
+      );
     });
   }
 
@@ -1218,43 +1229,49 @@ extension SecurityModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltGreaterThan(
+  saltGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltLessThan(
+  saltLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -1266,215 +1283,216 @@ extension SecurityModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'salt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'salt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  saltStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  saltEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltContains(String value, {bool caseSensitive = true}) {
+  saltContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'salt',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'salt',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition> saltMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'salt',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'salt',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      saltIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'salt',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      securityTypeEqualTo(SecurityType value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'securityType',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      securityTypeGreaterThan(
-    SecurityType value, {
-    bool include = false,
+    String pattern, {
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'securityType',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'salt',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      securityTypeLessThan(
-    SecurityType value, {
-    bool include = false,
-  }) {
+  saltIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'securityType',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'salt', value: ''),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      securityTypeBetween(
+  saltIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'salt', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  securityTypeEqualTo(SecurityType value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'securityType', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  securityTypeGreaterThan(SecurityType value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'securityType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  securityTypeLessThan(SecurityType value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'securityType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
+  securityTypeBetween(
     SecurityType lower,
     SecurityType upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'securityType',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'securityType',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtIsNull() {
+  updatedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'updatedAt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'updatedAt'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtIsNotNull() {
+  updatedAtIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'updatedAt',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'updatedAt'),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtEqualTo(DateTime? value) {
+  updatedAtEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'updatedAt', value: value),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  updatedAtGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
+  updatedAtLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterFilterCondition>
-      updatedAtBetween(
+  updatedAtBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'updatedAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'updatedAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -1488,14 +1506,14 @@ extension SecurityModelQueryLinks
 extension SecurityModelQuerySortBy
     on QueryBuilder<SecurityModel, SecurityModel, QSortBy> {
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByBiometricEnabled() {
+  sortByBiometricEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricEnabled', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByBiometricEnabledDesc() {
+  sortByBiometricEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricEnabled', Sort.desc);
     });
@@ -1508,21 +1526,21 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByCreatedAtDesc() {
+  sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByFailedAttempts() {
+  sortByFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'failedAttempts', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByFailedAttemptsDesc() {
+  sortByFailedAttemptsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'failedAttempts', Sort.desc);
     });
@@ -1535,35 +1553,35 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByIsLockedDesc() {
+  sortByIsLockedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLocked', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByLastFailedLogin() {
+  sortByLastFailedLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastFailedLogin', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByLastFailedLoginDesc() {
+  sortByLastFailedLoginDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastFailedLogin', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByLastSuccessfulLogin() {
+  sortByLastSuccessfulLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSuccessfulLogin', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByLastSuccessfulLoginDesc() {
+  sortByLastSuccessfulLoginDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSuccessfulLogin', Sort.desc);
     });
@@ -1576,35 +1594,35 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByLockedUntilDesc() {
+  sortByLockedUntilDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lockedUntil', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByMaxFailedAttempts() {
+  sortByMaxFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxFailedAttempts', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByMaxFailedAttemptsDesc() {
+  sortByMaxFailedAttemptsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxFailedAttempts', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByPasswordHash() {
+  sortByPasswordHash() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passwordHash', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByPasswordHashDesc() {
+  sortByPasswordHashDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passwordHash', Sort.desc);
     });
@@ -1623,42 +1641,42 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRemainingLockMinutes() {
+  sortByRemainingLockMinutes() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remainingLockMinutes', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRemainingLockMinutesDesc() {
+  sortByRemainingLockMinutesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remainingLockMinutes', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRequireSecurityOnStart() {
+  sortByRequireSecurityOnStart() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnStart', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRequireSecurityOnStartDesc() {
+  sortByRequireSecurityOnStartDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnStart', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRequireSecurityOnTransaction() {
+  sortByRequireSecurityOnTransaction() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnTransaction', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByRequireSecurityOnTransactionDesc() {
+  sortByRequireSecurityOnTransactionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnTransaction', Sort.desc);
     });
@@ -1677,14 +1695,14 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortBySecurityType() {
+  sortBySecurityType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'securityType', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortBySecurityTypeDesc() {
+  sortBySecurityTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'securityType', Sort.desc);
     });
@@ -1697,7 +1715,7 @@ extension SecurityModelQuerySortBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      sortByUpdatedAtDesc() {
+  sortByUpdatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
@@ -1707,14 +1725,14 @@ extension SecurityModelQuerySortBy
 extension SecurityModelQuerySortThenBy
     on QueryBuilder<SecurityModel, SecurityModel, QSortThenBy> {
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByBiometricEnabled() {
+  thenByBiometricEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricEnabled', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByBiometricEnabledDesc() {
+  thenByBiometricEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricEnabled', Sort.desc);
     });
@@ -1727,21 +1745,21 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByCreatedAtDesc() {
+  thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByFailedAttempts() {
+  thenByFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'failedAttempts', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByFailedAttemptsDesc() {
+  thenByFailedAttemptsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'failedAttempts', Sort.desc);
     });
@@ -1766,35 +1784,35 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByIsLockedDesc() {
+  thenByIsLockedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLocked', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByLastFailedLogin() {
+  thenByLastFailedLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastFailedLogin', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByLastFailedLoginDesc() {
+  thenByLastFailedLoginDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastFailedLogin', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByLastSuccessfulLogin() {
+  thenByLastSuccessfulLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSuccessfulLogin', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByLastSuccessfulLoginDesc() {
+  thenByLastSuccessfulLoginDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastSuccessfulLogin', Sort.desc);
     });
@@ -1807,35 +1825,35 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByLockedUntilDesc() {
+  thenByLockedUntilDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lockedUntil', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByMaxFailedAttempts() {
+  thenByMaxFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxFailedAttempts', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByMaxFailedAttemptsDesc() {
+  thenByMaxFailedAttemptsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'maxFailedAttempts', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByPasswordHash() {
+  thenByPasswordHash() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passwordHash', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByPasswordHashDesc() {
+  thenByPasswordHashDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passwordHash', Sort.desc);
     });
@@ -1854,42 +1872,42 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRemainingLockMinutes() {
+  thenByRemainingLockMinutes() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remainingLockMinutes', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRemainingLockMinutesDesc() {
+  thenByRemainingLockMinutesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'remainingLockMinutes', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRequireSecurityOnStart() {
+  thenByRequireSecurityOnStart() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnStart', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRequireSecurityOnStartDesc() {
+  thenByRequireSecurityOnStartDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnStart', Sort.desc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRequireSecurityOnTransaction() {
+  thenByRequireSecurityOnTransaction() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnTransaction', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByRequireSecurityOnTransactionDesc() {
+  thenByRequireSecurityOnTransactionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'requireSecurityOnTransaction', Sort.desc);
     });
@@ -1908,14 +1926,14 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenBySecurityType() {
+  thenBySecurityType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'securityType', Sort.asc);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenBySecurityTypeDesc() {
+  thenBySecurityTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'securityType', Sort.desc);
     });
@@ -1928,7 +1946,7 @@ extension SecurityModelQuerySortThenBy
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QAfterSortBy>
-      thenByUpdatedAtDesc() {
+  thenByUpdatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
@@ -1938,7 +1956,7 @@ extension SecurityModelQuerySortThenBy
 extension SecurityModelQueryWhereDistinct
     on QueryBuilder<SecurityModel, SecurityModel, QDistinct> {
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByBiometricEnabled() {
+  distinctByBiometricEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'biometricEnabled');
     });
@@ -1951,7 +1969,7 @@ extension SecurityModelQueryWhereDistinct
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByFailedAttempts() {
+  distinctByFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'failedAttempts');
     });
@@ -1964,77 +1982,80 @@ extension SecurityModelQueryWhereDistinct
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByLastFailedLogin() {
+  distinctByLastFailedLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastFailedLogin');
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByLastSuccessfulLogin() {
+  distinctByLastSuccessfulLogin() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastSuccessfulLogin');
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByLockedUntil() {
+  distinctByLockedUntil() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lockedUntil');
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByMaxFailedAttempts() {
+  distinctByMaxFailedAttempts() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'maxFailedAttempts');
     });
   }
 
-  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctByPasswordHash(
-      {bool caseSensitive = true}) {
+  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctByPasswordHash({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'passwordHash', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctByPinHash(
-      {bool caseSensitive = true}) {
+  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctByPinHash({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pinHash', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByRemainingLockMinutes() {
+  distinctByRemainingLockMinutes() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'remainingLockMinutes');
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByRequireSecurityOnStart() {
+  distinctByRequireSecurityOnStart() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'requireSecurityOnStart');
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctByRequireSecurityOnTransaction() {
+  distinctByRequireSecurityOnTransaction() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'requireSecurityOnTransaction');
     });
   }
 
-  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctBySalt(
-      {bool caseSensitive = true}) {
+  QueryBuilder<SecurityModel, SecurityModel, QDistinct> distinctBySalt({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'salt', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<SecurityModel, SecurityModel, QDistinct>
-      distinctBySecurityType() {
+  distinctBySecurityType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'securityType');
     });
@@ -2056,7 +2077,7 @@ extension SecurityModelQueryProperty
   }
 
   QueryBuilder<SecurityModel, bool, QQueryOperations>
-      biometricEnabledProperty() {
+  biometricEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'biometricEnabled');
     });
@@ -2081,35 +2102,35 @@ extension SecurityModelQueryProperty
   }
 
   QueryBuilder<SecurityModel, DateTime?, QQueryOperations>
-      lastFailedLoginProperty() {
+  lastFailedLoginProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastFailedLogin');
     });
   }
 
   QueryBuilder<SecurityModel, DateTime?, QQueryOperations>
-      lastSuccessfulLoginProperty() {
+  lastSuccessfulLoginProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastSuccessfulLogin');
     });
   }
 
   QueryBuilder<SecurityModel, DateTime?, QQueryOperations>
-      lockedUntilProperty() {
+  lockedUntilProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lockedUntil');
     });
   }
 
   QueryBuilder<SecurityModel, int, QQueryOperations>
-      maxFailedAttemptsProperty() {
+  maxFailedAttemptsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'maxFailedAttempts');
     });
   }
 
   QueryBuilder<SecurityModel, String?, QQueryOperations>
-      passwordHashProperty() {
+  passwordHashProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'passwordHash');
     });
@@ -2122,21 +2143,21 @@ extension SecurityModelQueryProperty
   }
 
   QueryBuilder<SecurityModel, int, QQueryOperations>
-      remainingLockMinutesProperty() {
+  remainingLockMinutesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'remainingLockMinutes');
     });
   }
 
   QueryBuilder<SecurityModel, bool, QQueryOperations>
-      requireSecurityOnStartProperty() {
+  requireSecurityOnStartProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'requireSecurityOnStart');
     });
   }
 
   QueryBuilder<SecurityModel, bool, QQueryOperations>
-      requireSecurityOnTransactionProperty() {
+  requireSecurityOnTransactionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'requireSecurityOnTransaction');
     });
@@ -2149,7 +2170,7 @@ extension SecurityModelQueryProperty
   }
 
   QueryBuilder<SecurityModel, SecurityType, QQueryOperations>
-      securityTypeProperty() {
+  securityTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'securityType');
     });

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jubuniyokodev.github.io/ikigabo/sitemap.xml
+
+# Optimisations SEO
+Crawl-delay: 1
+
+# Pages importantes
+Allow: /index.html
+Allow: /privacy-policy.html
+Allow: /terms.html
+
+# Assets
+Allow: /assets/images/
+Allow: /assets/icons/

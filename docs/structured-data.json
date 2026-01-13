@@ -1,0 +1,76 @@
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Ikigabo",
+  "alternateName": [
+    "Ikigabo - Personal Wealth Management",
+    "Ikigabo - Gestion de Patrimoine Personnel",
+    "Ikigabo - Menya Amahera",
+    "Ikigabo - Usimamizi wa Mali"
+  ],
+  "description": "Complete personal wealth management mobile application. Manage finances, livestock, crops, debts securely. 100% offline, multilingual support.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Android",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Niyondiko Joffre",
+    "email": "niyondikojoffreasjubu@gmail.com",
+    "jobTitle": "Full Stack Developer"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ikigabo",
+    "url": "https://jubuniyokodev.github.io/ikigabo/"
+  },
+  "downloadUrl": "https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo",
+  "screenshot": [
+    "https://jubuniyokodev.github.io/ikigabo/assets/images/public/dahsbaorad_dark.jpg",
+    "https://jubuniyokodev.github.io/ikigabo/assets/images/public/new_transaction_page_light.jpg",
+    "https://jubuniyokodev.github.io/ikigabo/assets/images/public/pin_page_dark.jpg"
+  ],
+  "featureList": [
+    "100% Offline functionality",
+    "Multilingual support (Kirundi, French, English, Kiswahili)",
+    "Livestock management",
+    "Crop management", 
+    "Debt tracking",
+    "Secure PIN and biometric protection",
+    "Financial reporting",
+    "Personal wealth tracking"
+  ],
+  "inLanguage": ["rn", "fr", "en", "sw"],
+  "availableLanguage": [
+    {
+      "@type": "Language",
+      "name": "Kirundi",
+      "alternateName": "rn"
+    },
+    {
+      "@type": "Language", 
+      "name": "French",
+      "alternateName": "fr"
+    },
+    {
+      "@type": "Language",
+      "name": "English", 
+      "alternateName": "en"
+    },
+    {
+      "@type": "Language",
+      "name": "Kiswahili",
+      "alternateName": "sw"
+    }
+  ],
+  "targetAudience": {
+    "@type": "Audience",
+    "geographicArea": {
+      "@type": "Country",
+      "name": "Burundi"
+    }
+  }
+}

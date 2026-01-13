@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../../core/services/currency_conversion_service.dart';
 import '../../core/constants/currencies.dart';
 

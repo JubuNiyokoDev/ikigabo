@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ikigabo/data/models/debt_model.dart';
 import 'package:ikigabo/data/models/source_model.dart';
 import 'package:ikigabo/presentation/providers/currency_provider.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';

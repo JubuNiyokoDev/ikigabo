@@ -1,5 +1,5 @@
 import 'package:ikigabo/data/models/source_model.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../models/bank_model.dart';
 import '../models/transaction_model.dart' as tx;
 import 'transaction_repository.dart';

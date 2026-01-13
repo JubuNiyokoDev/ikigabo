@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../models/source_model.dart';
 import '../models/bank_model.dart';
 import '../models/transaction_model.dart' as tx;

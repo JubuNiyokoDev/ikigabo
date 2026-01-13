@@ -1,192 +1,701 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ikigabo - Gestion de Patrimoine Personnel</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ikigabo - Gestion de Patrimoine Personnel | 100% Offline</title>
+    <meta name="description" content="Ikigabo - Complete personal wealth management mobile app. Manage finances, livestock, crops, debts securely. 100% offline, multilingual (Kirundi, French, English, Kiswahili). | Application complète de gestion de patrimoine personnel. Gérez finances, bétail, récoltes, dettes en sécurité. 100% offline, multilingue.">
+    <meta name="keywords" content="gestion patrimoine, finances personnelles, Burundi, offline, bétail, récoltes, dettes, sécurisé, ikigabo, personal finance management, wealth management, livestock management, crops, debts, secure, offline app, menya amahera, ubwiyunge, inyama, ibihingwa, imyenda, umutekano, usoro wa fedha, mifugo, mazao, deni, usalama, application hors ligne, gestion hors ligne, app ya usalama, ubucuruzi, ubworozi, ubuhinzi, amahera yose, ikigega, ubwoba, umutungo, patrimoine personnel, gestion financière, application mobile, sécurisée, multilingue, kirundi, français, english, kiswahili">
+    <link rel="canonical" href="https://jubuniyokodev.github.io/ikigabo/">
+    <link rel="icon" href="../assets/images/ikigabo.png">
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="7K-DfAx44rHLkSWDCLs-uFm7phEpNJ3giupKzMN-gJ4" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Ikigabo - Gestion de Patrimoine Personnel">
+    <meta property="og:description" content="App mobile complète pour gérer votre patrimoine. 100% offline, sécurisée, multilingue.">
+    <meta property="og:image" content="https://jubuniyokodev.github.io/ikigabo/assets/images/public/dahsbaorad_dark.jpg">
+    <meta property="og:url" content="https://jubuniyokodev.github.io/ikigabo/">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.6;
-        color: #333;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-      }
-      header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 0;
-      }
-      .hero {
-        text-align: center;
-      }
-      .hero h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-      }
-      .hero p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-      }
-      .btn {
-        display: inline-block;
-        background: #ff6b6b;
-        color: white;
-        padding: 12px 30px;
-        text-decoration: none;
-        border-radius: 25px;
-        font-weight: bold;
-        transition: transform 0.3s;
-      }
-      .btn:hover {
-        transform: translateY(-2px);
-      }
-      .features {
-        padding: 4rem 0;
-        background: #f8f9fa;
-      }
-      .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-      }
-      .feature {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        text-align: center;
-      }
-      .feature h3 {
-        color: #667eea;
-        margin-bottom: 1rem;
-      }
-      .download {
-        padding: 4rem 0;
-        text-align: center;
-      }
-      footer {
-        background: #333;
-        color: white;
-        padding: 2rem 0;
-        text-align: center;
-      }
-      .nav {
-        margin-top: 1rem;
-      }
-      .nav a {
-        color: white;
-        text-decoration: none;
-        margin: 0 15px;
-      }
-      .nav a:hover {
-        text-decoration: underline;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-green: #4CAF50;
+            --accent-blue: #2196F3;
+            --accent-red: #F44336;
+            --accent-orange: #FF9800;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+        
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-green);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+        
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+        
+        .hero-feature {
+            background: var(--bg-secondary);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .hero-feature .material-icons {
+            color: var(--accent-green);
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--bg-secondary);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        /* App Preview */
+        .app-preview {
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .preview-card {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .preview-card img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        .preview-card-content {
+            padding: 1.5rem;
+        }
+        
+        .preview-card h3 {
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-primary);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-icon .material-icons {
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .feature-card h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Developer Section */
+        .developer {
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .dev-card {
+            background: var(--bg-secondary);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: var(--shadow);
+        }
+        
+        .dev-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 4px solid var(--accent-green);
+        }
+        
+        .dev-name {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .dev-title {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .dev-contact {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--bg-primary);
+            padding: 3rem 0 1rem;
+            border-top: 1px solid var(--bg-secondary);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: var(--accent-green);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
-  </head>
-  <body>
-    <header>
-      <div class="container">
-        <div class="hero">
-          <h1>💰 Ikigabo</h1>
-          <p>Application complète de gestion de patrimoine personnel</p>
-          <p>100% Offline • Sécurisée • Multilingue</p>
-          <div class="nav">
-            <a href="#features">Fonctionnalités</a>
-            <a href="privacy-policy.html">Politique de Confidentialité</a>
-            <a href="terms.html">Conditions d'Utilisation</a>
-            <a href="#contact">Contact</a>
-          </div>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">
+                    <img src="../assets/images/ikigabo.png" alt="Ikigabo">
+                    Ikigabo
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#features">Fonctionnalités</a></li>
+                    <li><a href="#preview">Aperçu</a></li>
+                    <li><a href="#developer">Développeur</a></li>
+                    <li><a href="privacy-policy.html">Confidentialité</a></li>
+                </ul>
+            </nav>
         </div>
-      </div>
     </header>
 
-    <section class="features" id="features">
-      <div class="container">
-        <h2 style="text-align: center; margin-bottom: 2rem">
-          🎯 Fonctionnalités Principales
-        </h2>
-        <div class="features-grid">
-          <div class="feature">
-            <h3>📊 Dashboard Complet</h3>
-            <p>
-              Vue d'ensemble de votre patrimoine avec graphiques animés et
-              statistiques détaillées.
-            </p>
-          </div>
-          <div class="feature">
-            <h3>💵 Sources d'Argent</h3>
-            <p>
-              Gérez vos comptes bancaires, argent en poche, caisses personnelles
-              et biens convertibles.
-            </p>
-          </div>
-          <div class="feature">
-            <h3>🐐 Gestion des Actifs</h3>
-            <p>
-              Suivez vos biens : bétail, récoltes, terrains, véhicules,
-              équipements et bijoux.
-            </p>
-          </div>
-          <div class="feature">
-            <h3>🤝 Suivi des Dettes</h3>
-            <p>
-              Gérez les dettes données et reçues avec suivi des paiements
-              partiels.
-            </p>
-          </div>
-          <div class="feature">
-            <h3>🔒 Sécurité Renforcée</h3>
-            <p>
-              Protection par PIN, support biométrique et chiffrement des
-              données.
-            </p>
-          </div>
-          <div class="feature">
-            <h3>🌍 Multilingue</h3>
-            <p>Disponible en Kirundi, Français, English et Kiswahili.</p>
-          </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1><span class="material-icons" style="vertical-align: middle; margin-right: 10px; color: #4CAF50;">account_balance_wallet</span>Ikigabo</h1>
+            <p class="hero-subtitle">Application complète de gestion de patrimoine personnel</p>
+            
+            <div class="hero-features">
+                <div class="hero-feature">
+                    <span class="material-icons">offline_bolt</span>
+                    <span>100% Offline</span>
+                </div>
+                <div class="hero-feature">
+                    <span class="material-icons">security</span>
+                    <span>Sécurisée</span>
+                </div>
+                <div class="hero-feature">
+                    <span class="material-icons">language</span>
+                    <span>Multilingue</span>
+                </div>
+                <div class="hero-feature">
+                    <span class="material-icons">pets</span>
+                    <span>Gestion Bétail</span>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo" class="btn btn-primary">
+                    <span class="material-icons">get_app</span>
+                    Télécharger sur Play Store
+                </a>
+                <a href="#preview" class="btn btn-secondary">
+                    <span class="material-icons">visibility</span>
+                    Voir l'aperçu
+                </a>
+            </div>
         </div>
-      </div>
     </section>
 
-    <section class="download">
-      <div class="container">
-        <h2>📱 Télécharger Ikigabo</h2>
-        <p>Bientôt disponible sur Google Play Store</p>
-        <a href="#" class="btn">🚀 Télécharger sur Play Store</a>
-      </div>
+    <!-- App Preview -->
+    <section class="app-preview" id="preview">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll"><span class="material-icons" style="vertical-align: middle; margin-right: 10px;">phone_android</span>Aperçu de l'Application</h2>
+            
+            <div class="preview-grid">
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/dahsbaorad_dark.jpg" alt="Dashboard Ikigabo">
+                    <div class="preview-card-content">
+                        <h3>Dashboard Complet</h3>
+                        <p>Vue d'ensemble de votre patrimoine avec graphiques animés et statistiques en temps réel.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/new_transaction_page_light.jpg" alt="Nouvelle Transaction">
+                    <div class="preview-card-content">
+                        <h3>Transactions Rapides</h3>
+                        <p>Enregistrez vos transactions en quelques secondes avec catégories intelligentes.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/pin_page_dark.jpg" alt="Sécurité PIN">
+                    <div class="preview-card-content">
+                        <h3>Sécurité Renforcée</h3>
+                        <p>Protection par PIN, empreinte digitale et chiffrement des données.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/stats_page_dark.jpg" alt="Statistiques">
+                    <div class="preview-card-content">
+                        <h3>Analyses Détaillées</h3>
+                        <p>Graphiques et rapports pour comprendre vos habitudes financières.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/transactions_list_light.jpg" alt="Liste Transactions">
+                    <div class="preview-card-content">
+                        <h3>Historique Complet</h3>
+                        <p>Toutes vos transactions organisées et facilement consultables.</p>
+                    </div>
+                </div>
+                
+                <div class="preview-card animate-on-scroll">
+                    <img src="../assets/images/public/settings_light.jpg" alt="Paramètres">
+                    <div class="preview-card-content">
+                        <h3>Personnalisation</h3>
+                        <p>Adaptez l'application à vos besoins et préférences.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <footer id="contact">
-      <div class="container">
-        <p>
-          &copy; 2024 Ikigabo. Développé avec ❤️ pour la gestion de patrimoine
-          personnel.
-        </p>
-        <p>
-          Contact:
-          <a
-            href="mailto:niyondikojoffreasjubu@gmail.com"
-            style="color: #667eea"
-            >niyondikojoffreasjubu@gmail.com</a
-          >
-        </p>
-        <p>
-          <a href="https://github.com/jubuniyoko/ikigabo" style="color: #667eea"
-            >Code source sur GitHub</a
-          >
-        </p>
-      </div>
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll"><span class="material-icons" style="vertical-align: middle; margin-right: 10px;">star</span>Fonctionnalités Principales</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">dashboard</span>
+                    </div>
+                    <h3>Dashboard Intelligent</h3>
+                    <p>Vue d'ensemble complète de votre patrimoine avec graphiques animés, statistiques détaillées et indicateurs de performance en temps réel.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">account_balance_wallet</span>
+                    </div>
+                    <h3>Sources d'Argent Multiples</h3>
+                    <p>Gérez votre argent en poche, comptes bancaires, caisses personnelles et biens convertibles en un seul endroit.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">pets</span>
+                    </div>
+                    <h3>Gestion du Bétail</h3>
+                    <p>Suivez votre cheptel (chèvres, porcs, vaches) avec calcul automatique de la valeur et suivi de la reproduction.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">agriculture</span>
+                    </div>
+                    <h3>Suivi des Récoltes</h3>
+                    <p>Gérez vos cultures agricoles, calculez la rentabilité par saison et optimisez vos investissements.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">handshake</span>
+                    </div>
+                    <h3>Gestion des Dettes</h3>
+                    <p>Suivez les dettes données et reçues avec paiements partiels, échéances et calculs automatiques des montants restants.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">security</span>
+                    </div>
+                    <h3>Sécurité Maximale</h3>
+                    <p>Protection par code PIN, support biométrique, chiffrement des données et verrouillage automatique.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">offline_bolt</span>
+                    </div>
+                    <h3>100% Offline</h3>
+                    <p>Fonctionne partout au Burundi, même sans connexion internet. Vos données restent sur votre appareil.</p>
+                </div>
+                
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <span class="material-icons">language</span>
+                    </div>
+                    <h3>Multilingue</h3>
+                    <p>Interface disponible en Kirundi (pur), Français, English et Kiswahili pour tous les Burundais.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Developer -->
+    <section class="developer" id="developer">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll">👨‍💻 Développeur</h2>
+            
+            <div class="dev-card animate-on-scroll">
+                <img src="../assets/images/devs/jubu.jpg" alt="Niyondiko Joffre" class="dev-avatar">
+                <h3 class="dev-name">Niyondiko Joffre</h3>
+                <p class="dev-title">Full Stack Developer</p>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Développeur passionné, spécialisé dans les applications mobiles Flutter et les solutions fintech pour l'Afrique.
+                </p>
+                <a href="mailto:niyondikojoffreasjubu@gmail.com" class="dev-contact">
+                    <span class="material-icons" style="vertical-align: middle;">email</span>
+                    niyondikojoffreasjubu@gmail.com
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Ikigabo</h3>
+                    <p style="color: var(--text-secondary);">
+                        Application complète de gestion de patrimoine personnel, conçue spécialement pour les besoins des Burundais.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Liens Utiles</h3>
+                    <a href="privacy-policy.html">Politique de Confidentialité</a>
+                    <a href="terms.html">Conditions d'Utilisation</a>
+                    <a href="https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo">Play Store</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <a href="mailto:niyondikojoffreasjubu@gmail.com">Email Support</a>
+                    <a href="https://github.com/jubuniyoko/ikigabo">Code Source</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Ikigabo. Développé avec <span class="material-icons" style="vertical-align: middle; color: #F44336; font-size: 1rem;">favorite</span> pour la gestion de patrimoine personnel au Burundi.</p>
+            </div>
+        </div>
     </footer>
-  </body>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animate on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Header background on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(26, 26, 26, 0.95)';
+            } else {
+                header.style.background = 'var(--bg-primary)';
+            }
+        });
+    </script>
+</body>
 </html>

@@ -2,7 +2,7 @@ name: ikigabo
 description: "Application de gestion de patrimoine personnel - Offline First"
 publish_to: "none"
 
-version: 1.0.3+22
+version: 1.0.3+24
 
 environment:
   sdk: ^3.10.3
@@ -17,8 +17,8 @@ dependencies:
   flutter_riverpod: ^2.6.1
 
   # Database
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  isar_community: ^3.3.0
+  isar_community_flutter_libs: ^3.3.0
   path_provider: ^2.1.5
 
   # Security
@@ -71,7 +71,7 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.13
-  isar_generator: ^3.1.0+1
+  isar_community_generator: ^3.3.0
 
   # Splash Screen & App Icon
   flutter_native_splash: ^2.4.1
