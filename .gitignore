@@ -73,3 +73,5 @@ windows/
 # Tools
 ############################
 bundletool.jar
+build/
+gradle/
