@@ -39,8 +39,7 @@ void main() async {
   // Initialiser l'auto-backup
   await AutoBackupService.initialize();
 
-  // Configuration edge-to-edge compatible Android 15
-  // Ne plus utiliser setSystemUIOverlayStyle qui est déprécié
+  // Configuration edge-to-edge moderne pour Android 15+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(const ProviderScope(child: IkigaboApp()));
@@ -200,13 +199,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: _buildBottomNav(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Adaptation pour tablettes et foldables
+        final isTablet = constraints.maxWidth > 600;
+        
+        return Scaffold(
+          body: _screens[_currentIndex],
+          bottomNavigationBar: _buildBottomNav(isTablet),
+        );
+      },
     );
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav([bool isTablet = false]) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
