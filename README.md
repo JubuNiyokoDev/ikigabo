@@ -127,13 +127,6 @@ L'application utilise un design moderne dark mode avec :
 - Navigation fluide
 - Animations professionnelles
 
-## Fonctionnalités à Venir
-
-- [ ] Traductions complètes (Kirundi, EN, SW)
-- [ ] Écrans Assets et Debts
-- [ ] Notifications d'échéances
-- [ ] Export PDF
-
 ## Support & Contact
 
 **Développeur**: Niyondiko Joffre  
