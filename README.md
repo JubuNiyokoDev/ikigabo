@@ -1,17 +1,17 @@
-# 💰 Ikigabo - Gestion de Patrimoine Personnel
+# Ikigabo - Gestion de Patrimoine Personnel
 
 Application mobile de gestion de patrimoine personnel complète et professionnelle, 100% offline.
 
-## 🎯 Fonctionnalités Principales
+## Fonctionnalités Principales
 
-### 📊 Dashboard Complet
+### Dashboard Complet
 
 - Vue d'ensemble du patrimoine total (actifs et passifs)
 - Graphiques animés de l'activité hebdomadaire
 - Liste des transactions récentes
 - Statistiques des entrées/sorties
 
-### 💵 Gestion des Sources d'Argent
+### Gestion des Sources d'Argent
 
 - Argent en poche
 - Comptes bancaires multiples
@@ -20,7 +20,7 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Dettes données et reçues
 - Sources personnalisées illimitées
 
-### 🏦 Gestion Avancée des Banques
+### Gestion Avancée des Banques
 
 - Banques gratuites ou payantes
 - Calcul automatique des frais
@@ -28,14 +28,14 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Montant fixe ou pourcentage
 - Déduction automatique programmée
 
-### 📥📤 Transactions Complètes
+### Transactions Complètes
 
 - **Entrées**: Salaire, Vente, Don, Dette reçue, etc.
 - **Sorties**: Achats, Retraits, Dons, Dettes données, etc.
 - Catégories personnalisables
 - Historique complet avec recherche
 
-### 🐐 Gestion des Biens & Actifs
+### Gestion des Biens & Actifs
 
 - Bétail (chèvres, porcs, etc.)
 - Récoltes agricoles
@@ -44,35 +44,35 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - Équipements
 - Bijoux
 
-### 🤝 Gestion des Dettes
+### Gestion des Dettes
 
 - Dettes données (créances)
 - Dettes reçues (passifs)
 - Suivi des paiements partiels
 - Calcul automatique des montants restants
 
-### 🔒 Sécurité Renforcée
+### Sécurité Renforcée
 
 - Code PIN obligatoire au démarrage
 - Support biométrique (empreinte)
 - Mot de passe optionnel
 - Verrouillage automatique
 
-### 🌍 Multilingue
+### Multilingue
 
-- 🇧🇮 Kirundi (pur)
-- 🇫🇷 Français
-- 🇬🇧 English
-- 🇹🇿 Kiswahili
+- Kirundi (pur)
+- Français
+- English
+- Kiswahili
 
-### 📱 UI/UX Professionnelle
+### UI/UX Professionnelle
 
 - Dark mode magnifique
 - Animations fluides
 - Transitions professionnelles
 - Responsive 100%
 
-## 🛠 Technologies Utilisées
+## Technologies Utilisées
 
 - **Flutter** - Framework UI
 - **Isar Database** - Base de données offline
@@ -80,7 +80,7 @@ Application mobile de gestion de patrimoine personnel complète et professionnel
 - **fl_chart** - Graphiques
 - **flutter_animate** - Animations
 
-## 🚀 Installation
+## Installation
 
 ### Prérequis
 
@@ -107,7 +107,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 lib/
@@ -118,7 +118,7 @@ lib/
 └── l10n/          # Traductions
 ```
 
-## 🎨 Captures d'écran
+## Captures d'écran
 
 L'application utilise un design moderne dark mode avec :
 
@@ -127,13 +127,21 @@ L'application utilise un design moderne dark mode avec :
 - Navigation fluide
 - Animations professionnelles
 
-## 📝 Fonctionnalités à Venir
+## Fonctionnalités à Venir
 
 - [ ] Traductions complètes (Kirundi, EN, SW)
 - [ ] Écrans Assets et Debts
 - [ ] Notifications d'échéances
 - [ ] Export PDF
 
+## Support & Contact
+
+**Développeur**: Niyondiko Joffre  
+**Email**: niyondikojoffreasjubu@gmail.com  
+**Téléphone**: +257 68 49 73 72 | +257 61 89 59 40  
+
+**Offrir un café**: Contactez-nous aux numéros ci-dessus pour soutenir le développement de l'application.
+
 ---
 
-**Développé avec ❤️ pour la gestion de patrimoine personnel**
+**Développé avec passion pour la gestion de patrimoine personnel au Burundi**
