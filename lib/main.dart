@@ -35,7 +35,7 @@ void main() async {
   // Initialiser les services d'alarme et notifications
   await RealAlarmService.initialize();
   await NotificationService().initialize();
-  
+
   // Initialiser l'auto-backup
   await AutoBackupService.initialize();
 
@@ -188,9 +188,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const AddTransactionScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
       );
     } else {
       setState(() => _currentIndex = index);
@@ -203,7 +201,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       builder: (context, constraints) {
         // Adaptation pour tablettes et foldables
         final isTablet = constraints.maxWidth > 600;
-        
+
         return Scaffold(
           body: _screens[_currentIndex],
           bottomNavigationBar: _buildBottomNav(isTablet),

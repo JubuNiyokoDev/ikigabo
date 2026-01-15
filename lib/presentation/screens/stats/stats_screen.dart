@@ -7,6 +7,10 @@ import '../../../core/constants/app_icons.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/transaction_provider.dart'
     hide thisMonthIncomeProvider, thisMonthExpenseProvider;
+import '../../providers/asset_provider.dart';
+import '../../providers/debt_provider.dart';
+import '../../providers/bank_provider.dart';
+import '../../providers/source_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../providers/stats_provider.dart'
     hide totalIncomeProvider, totalExpenseProvider;
@@ -709,20 +713,37 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  void _exportFullReport() {
+  void _exportFullReport() async {
     final l10n = AppLocalizations.of(context)!;
     final periods = ['Semaine', 'Mois', 'Année', 'Tout'];
     final period = periods[_selectedPeriod];
     
+    // Récupérer les vraies données depuis les streams
+    final transactionsAsync = ref.read(transactionsStreamProvider);
+    final assetsAsync = ref.read(assetsStreamProvider);
+    final debtsAsync = ref.read(debtsStreamProvider);
+    final banksAsync = ref.read(banksStreamProvider);
+    final sourcesAsync = ref.read(sourcesStreamProvider);
+    final totalWealthAsync = ref.read(totalWealthProvider);
+    
+    final transactions = transactionsAsync.value ?? [];
+    final assets = assetsAsync.value ?? [];
+    final debts = debtsAsync.value ?? [];
+    final banks = banksAsync.value ?? [];
+    final sources = sourcesAsync.value ?? [];
+    final totalWealth = totalWealthAsync.value ?? 0;
+    final totalIncome = _getIncomeForPeriod().value ?? 0;
+    final totalExpense = _getExpenseForPeriod().value ?? 0;
+    
     ref.read(pdfExportProvider.notifier).exportFinancialReport(
-      transactions: [],
-      assets: [],
-      debts: [],
-      banks: [],
-      sources: [],
-      totalWealth: 0,
-      totalIncome: 0,
-      totalExpense: 0,
+      transactions: transactions,
+      assets: assets,
+      debts: debts,
+      banks: banks,
+      sources: sources,
+      totalWealth: totalWealth,
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
       period: period,
     );
     
@@ -734,9 +755,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  void _exportAssetReport() {
+  void _exportAssetReport() async {
     final l10n = AppLocalizations.of(context)!;
-    ref.read(pdfExportProvider.notifier).exportAssetReport([]);
+    final assetsAsync = ref.read(assetsStreamProvider);
+    final assets = assetsAsync.value ?? [];
+    
+    ref.read(pdfExportProvider.notifier).exportAssetReport(assets);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -746,9 +770,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  void _exportDebtReport() {
+  void _exportDebtReport() async {
     final l10n = AppLocalizations.of(context)!;
-    ref.read(pdfExportProvider.notifier).exportDebtReport([]);
+    final debtsAsync = ref.read(debtsStreamProvider);
+    final debts = debtsAsync.value ?? [];
+    
+    ref.read(pdfExportProvider.notifier).exportDebtReport(debts);
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
