@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import '../providers/banner_provider.dart';
+import 'admob_banner_widget.dart';
+import 'dart:math';
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
@@ -16,10 +18,15 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
+  final Random _random = Random();
+  late bool _useUnityBanner;
 
   @override
   void initState() {
     super.initState();
+    // Alternance 50/50 entre Unity et AdMob
+    _useUnityBanner = _random.nextBool();
+    
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -58,16 +65,18 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
           offset: Offset(0, _slideAnimation.value * 80.h),
           child: Opacity(
             opacity: _fadeAnimation.value,
-            child: UnityBannerAd(
-              placementId: 'Banner_Android',
-              onLoad: (placementId) => print('Banner chargé: $placementId'),
-              onClick: (placementId) => print('Banner cliqué: $placementId'),
-              onFailed: (placementId, error, message) {
-                // Ignorer les erreurs noFill (normales)
-                if (error.toString().contains('noFill')) return;
-                print('Banner erreur: $error - $message');
-              },
-            ),
+            child: _useUnityBanner
+                ? UnityBannerAd(
+                    placementId: 'Banner_Android',
+                    onLoad: (placementId) => print('Unity Banner chargé: $placementId'),
+                    onClick: (placementId) => print('Unity Banner cliqué: $placementId'),
+                    onFailed: (placementId, error, message) {
+                      // Ignorer les erreurs noFill (normales)
+                      if (error.toString().contains('noFill')) return;
+                      print('Unity Banner erreur: $error - $message');
+                    },
+                  )
+                : const AdMobBannerWidget(),
           ),
         );
       },

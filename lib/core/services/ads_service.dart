@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:flutter/services.dart';
+import 'admob_service.dart';
+import 'dart:math';
 
 class AdsService {
   // 🔑 IDs UNITY
@@ -11,11 +13,13 @@ class AdsService {
   static bool _isInitialized = false;
   static bool _isInterstitialLoaded = false;
   static bool _isRewardedLoaded = false;
+  static final Random _random = Random();
 
-  // 🔹 INIT UNITY ADS
+  // 🔹 INIT BOTH ADS
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
+    // Init Unity
     await UnityAds.init(
       gameId: _gameId,
       testMode: false,
@@ -27,6 +31,41 @@ class AdsService {
         print('❌ Unity Ads init failed: $error - $message');
       },
     );
+
+    // Init AdMob
+    await AdMobService.initialize();
+  }
+
+  // 🔹 SHOW INTERSTITIAL (ALTERNANCE 50/50)
+  static Future<void> showInterstitial() async {
+    if (!_isInitialized) await initialize();
+
+    // Alternance 50/50 entre Unity et AdMob
+    final useUnity = _random.nextBool();
+    
+    if (useUnity) {
+      print('🎯 Tentative Unity Interstitial');
+      await _showUnityInterstitial();
+    } else {
+      print('🎯 Tentative AdMob Interstitial');
+      await AdMobService.showInterstitial();
+    }
+  }
+
+  // 🔹 SHOW REWARDED (ALTERNANCE 50/50)
+  static Future<void> showRewarded({required VoidCallback onReward}) async {
+    if (!_isInitialized) await initialize();
+
+    // Alternance 50/50 entre Unity et AdMob
+    final useUnity = _random.nextBool();
+    
+    if (useUnity) {
+      print('🎯 Tentative Unity Rewarded');
+      await _showUnityRewarded(onReward: onReward);
+    } else {
+      print('🎯 Tentative AdMob Rewarded');
+      await AdMobService.showRewarded(onReward: onReward);
+    }
   }
 
   // 🔹 LOAD INTERSTITIAL
@@ -47,9 +86,8 @@ class AdsService {
     );
   }
 
-  // 🔹 SHOW INTERSTITIAL
-  static Future<void> showInterstitial() async {
-    if (!_isInitialized) await initialize();
+  // 🔹 UNITY INTERSTITIAL (PRIVATE)
+  static Future<void> _showUnityInterstitial() async {
 
     if (!_isInterstitialLoaded) {
       await loadInterstitial();
@@ -57,20 +95,21 @@ class AdsService {
     }
 
     if (!_isInterstitialLoaded) {
-      print('⚠️ Interstitial not ready');
+      print('⚠️ Unity Interstitial not ready');
       return;
     }
 
     UnityAds.showVideoAd(
       placementId: _interstitialAdUnitId,
-      onStart: (placementId) => print('▶ Interstitial started'),
-      onClick: (placementId) => print('🖱 Interstitial clicked - Revenue!'),
+      onStart: (placementId) => print('▶ Unity Interstitial started'),
+      onClick: (placementId) => print('🖱 Unity Interstitial clicked - Revenue!'),
+      onSkipped: (placementId) => print('⏭ Unity Interstitial skipped'),
       onComplete: (placementId) {
-        print('✅ Interstitial completed');
+        print('✅ Unity Interstitial completed');
         _isInterstitialLoaded = false;
       },
       onFailed: (placementId, error, message) {
-        print('❌ Interstitial failed: $error - $message');
+        print('❌ Unity Interstitial failed: $error - $message');
         _isInterstitialLoaded = false;
       },
     );
@@ -94,9 +133,8 @@ class AdsService {
     );
   }
 
-  // 🔹 SHOW REWARDED
-  static Future<void> showRewarded({required VoidCallback onReward}) async {
-    if (!_isInitialized) await initialize();
+  // 🔹 UNITY REWARDED (PRIVATE)
+  static Future<void> _showUnityRewarded({required VoidCallback onReward}) async {
 
     if (!_isRewardedLoaded) {
       await loadRewarded();
@@ -104,19 +142,19 @@ class AdsService {
     }
 
     if (!_isRewardedLoaded) {
-      print('⚠️ Rewarded not ready');
+      print('⚠️ Unity Rewarded not ready');
       return;
     }
 
     UnityAds.showVideoAd(
       placementId: _rewardedAdUnitId,
       onComplete: (placementId) {
-        print('🎁 Reward granted');
+        print('🎁 Unity Reward granted');
         onReward();
         _isRewardedLoaded = false;
       },
       onFailed: (placementId, error, message) {
-        print('❌ Rewarded failed: $error - $message');
+        print('❌ Unity Rewarded failed: $error - $message');
         _isRewardedLoaded = false;
       },
     );

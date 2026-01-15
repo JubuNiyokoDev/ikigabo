@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_icons.dart';
+import 'core/services/ads_service.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/fallback_material_localizations.dart';
 import 'presentation/providers/theme_provider.dart';
@@ -38,6 +39,9 @@ void main() async {
 
   // Initialiser l'auto-backup
   await AutoBackupService.initialize();
+
+  // Initialiser les services publicitaires
+  await AdsService.initialize();
 
   // Configuration edge-to-edge moderne pour Android 15+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
