@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:ikigabo/presentation/providers/isar_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/currencies.dart';
@@ -28,10 +29,32 @@ import '../security/pin_screen.dart';
 import '../../../core/services/ad_manager.dart';
 import '../../providers/auto_backup_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _launchUrl(BuildContext context, String url) async {
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  String _appVersion = '1.0.4+29';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _appVersion = '${packageInfo.version} (${packageInfo.buildNumber})';
+      });
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
     try {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -40,9 +63,11 @@ class SettingsScreen extends ConsumerWidget {
         throw 'Could not launch $url';
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Impossible d\'ouvrir le lien: $url')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Impossible d\'ouvrir le lien: $url')),
+        );
+      }
     }
   }
 
@@ -54,14 +79,13 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _rateApp(BuildContext context) async {
+  Future<void> _rateApp() async {
     await _launchUrl(
-      context,
       'https://play.google.com/store/apps/details?id=com.ikigabo.ikigabo',
     );
   }
 
-  Future<void> _reportProblem(BuildContext context) async {
+  Future<void> _reportProblem() async {
     try {
       final uri = Uri(
         scheme: 'mailto',
@@ -77,16 +101,18 @@ class SettingsScreen extends ConsumerWidget {
         throw 'No email app found';
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email: niyondikojoffreasjubu@gmail.com'),
-          duration: Duration(seconds: 5),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email: niyondikojoffreasjubu@gmail.com'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
-  void _showLanguageSelector(BuildContext context, WidgetRef ref) {
+  void _showLanguageSelector() {
     final l10n = AppLocalizations.of(context)!;
     final languages = [
       {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
@@ -150,7 +176,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showPinOptions(BuildContext context, WidgetRef ref) {
+  void _showPinOptions() {
     final l10n = AppLocalizations.of(context)!;
     final prefsService = ref.read(preferencesServiceProvider).value;
     final hasPinSaved = prefsService?.getSavedPin() != null;
@@ -197,7 +223,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _changePinFlow(context, ref);
+                  _changePinFlow();
                 },
               ),
               ListTile(
@@ -208,7 +234,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  _showPinVerificationDialog(context, ref);
+                  _showPinVerificationDialog();
                 },
               ),
             ] else ...[
@@ -238,7 +264,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _changePinFlow(BuildContext context, WidgetRef ref) {
+  void _changePinFlow() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -250,7 +276,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showPinVerificationDialog(BuildContext context, WidgetRef ref) {
+  void _showPinVerificationDialog() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -265,7 +291,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showCurrencySelector(BuildContext context, WidgetRef ref) {
+  void _showCurrencySelector() {
     final l10n = AppLocalizations.of(context)!;
     final displayCurrencyAsync = ref.read(displayCurrencyProvider);
     final currentCurrency = displayCurrencyAsync.when(
@@ -398,7 +424,6 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showDeleteAllDataDialog(
     BuildContext context,
-    WidgetRef ref,
     AppLocalizations l10n,
     bool isDark,
   ) {
@@ -424,7 +449,7 @@ class SettingsScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _authenticateAndDelete(context, ref, l10n);
+              _authenticateAndDelete(context, l10n);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
@@ -439,7 +464,6 @@ class SettingsScreen extends ConsumerWidget {
 
   void _authenticateAndDelete(
     BuildContext context,
-    WidgetRef ref,
     AppLocalizations l10n,
   ) async {
     // Vérifier biométrie d'abord
@@ -449,7 +473,7 @@ class SettingsScreen extends ConsumerWidget {
           .read(biometricProvider.notifier)
           .authenticateWithBiometric();
       if (success) {
-        _deleteAllData(context, ref, l10n);
+        _deleteAllData(context, l10n);
         return;
       }
     }
@@ -465,7 +489,7 @@ class SettingsScreen extends ConsumerWidget {
             mode: PinMode.verify,
             onSuccess: () {
               navigator.pop(); // Utiliser la référence sauvegardée
-              _deleteAllData(context, ref, l10n);
+              _deleteAllData(context, l10n);
             },
           ),
         ),
@@ -474,12 +498,11 @@ class SettingsScreen extends ConsumerWidget {
     }
 
     // Aucune sécurité configurée, supprimer directement
-    _deleteAllData(context, ref, l10n);
+    _deleteAllData(context, l10n);
   }
 
   void _deleteAllData(
     BuildContext context,
-    WidgetRef ref,
     AppLocalizations l10n,
   ) async {
     try {
@@ -535,7 +558,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Déclencher ads settings
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdManager.showSettingsAd();
@@ -569,7 +592,7 @@ class SettingsScreen extends ConsumerWidget {
               icon: AppIcons.language,
               title: l10n.language,
               subtitle: languageNames[currentLocale.languageCode] ?? 'Français',
-              onTap: () => _showLanguageSelector(context, ref),
+              onTap: _showLanguageSelector,
               isDark: isDark,
             ).animate().fadeIn(delay: 100.ms),
             _buildSettingTile(
@@ -594,7 +617,7 @@ class SettingsScreen extends ConsumerWidget {
                 loading: () => '🇧🇮 Franc Burundais (FBu)',
                 error: (_, __) => '🇧🇮 Franc Burundais (FBu)',
               ),
-              onTap: () => _showCurrencySelector(context, ref),
+              onTap: _showCurrencySelector,
               isDark: isDark,
             ).animate().fadeIn(delay: 300.ms),
 
@@ -637,7 +660,7 @@ class SettingsScreen extends ConsumerWidget {
               icon: AppIcons.lock,
               title: l10n.pinCode,
               subtitle: l10n.changePinCode,
-              onTap: () => _showPinOptions(context, ref),
+              onTap: _showPinOptions,
               isDark: isDark,
             ).animate().fadeIn(delay: 400.ms),
             Consumer(
@@ -746,14 +769,14 @@ class SettingsScreen extends ConsumerWidget {
               icon: AppIcons.warning,
               title: l10n.reportProblem,
               subtitle: l10n.reportProblemSubtitle,
-              onTap: () => _reportProblem(context),
+              onTap: _reportProblem,
               isDark: isDark,
             ).animate().fadeIn(delay: 900.ms),
             _buildSettingTile(
               icon: AppIcons.success,
               title: l10n.rateThisApp,
               subtitle: l10n.rateOnPlayStore,
-              onTap: () => _rateApp(context),
+              onTap: _rateApp,
               isDark: isDark,
             ).animate().fadeIn(delay: 920.ms),
             _buildSettingTile(
@@ -768,7 +791,6 @@ class SettingsScreen extends ConsumerWidget {
               title: l10n.moreApps,
               subtitle: l10n.discoverOtherApps,
               onTap: () => _launchUrl(
-                context,
                 'https://play.google.com/store/apps/dev?id=RundiNova',
               ),
               isDark: isDark,
@@ -781,7 +803,7 @@ class SettingsScreen extends ConsumerWidget {
             _buildSettingTile(
               icon: AppIcons.info,
               title: l10n.version,
-              subtitle: '1.0.0 (1)',
+              subtitle: _appVersion,
               isDark: isDark,
             ).animate().fadeIn(delay: 980.ms),
             _buildSettingTile(
@@ -789,7 +811,6 @@ class SettingsScreen extends ConsumerWidget {
               title: l10n.termsAndConditions,
               subtitle: l10n.termsOfUse,
               onTap: () => _launchUrl(
-                context,
                 'https://jubuniyokodev.github.io/ikigabo/terms.html',
               ),
               isDark: isDark,
@@ -799,7 +820,6 @@ class SettingsScreen extends ConsumerWidget {
               title: l10n.privacyPolicy,
               subtitle: l10n.privacyPolicySubtitle,
               onTap: () => _launchUrl(
-                context,
                 'https://jubuniyokodev.github.io/ikigabo/privacy-policy.html',
               ),
               isDark: isDark,
@@ -809,10 +829,9 @@ class SettingsScreen extends ConsumerWidget {
 
             // Danger Zone
             _buildDangerZone(
+              context,
               isDark,
               l10n,
-              context,
-              ref,
             ).animate().fadeIn(delay: 1000.ms),
           ],
         ),
@@ -938,10 +957,9 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildDangerZone(
+    BuildContext context,
     bool isDark,
     AppLocalizations l10n,
-    BuildContext context,
-    WidgetRef ref,
   ) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -970,7 +988,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 20),
           TextButton(
             onPressed: () {
-              _showDeleteAllDataDialog(context, ref, l10n, isDark);
+              _showDeleteAllDataDialog(context, l10n, isDark);
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,

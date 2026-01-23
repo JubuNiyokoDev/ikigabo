@@ -94,7 +94,7 @@
 
       <h1><span class="material-icons" style="vertical-align: middle; margin-right: 10px; color: #4CAF50;">security</span>Politique de Confidentialité</h1>
 
-      <p><strong>Dernière mise à jour :</strong> 15 janvier 2025</p>
+      <p><strong>Dernière mise à jour :</strong> 23 janvier 2026</p>
 
       <div class="highlight">
         <strong>En résumé :</strong> Ikigabo est une application 100% offline.
@@ -178,7 +178,61 @@
         pour plus d'informations.
       </p>
 
-      <h2>6. Vos Droits</h2>
+      <h2>6. Permissions et Alarmes de Rappel</h2>
+      <p>
+        <strong>Permission d'alarme en plein écran (USE_FULL_SCREEN_INTENT) :</strong>
+      </p>
+      <p>
+        Ikigabo utilise la bibliothèque <strong>flutter_local_notifications (v18.0.1)</strong>
+        qui requiert automatiquement la permission "USE_FULL_SCREEN_INTENT" pour fournir des
+        <strong>alarmes de rappel critiques pour les dettes</strong>. Cette fonctionnalité
+        est essentielle car :
+      </p>
+      <ul>
+        <li>
+          <strong>Gestion des dettes :</strong> L'application permet aux utilisateurs de
+          suivre les dettes qu'ils doivent rembourser ou qu'on leur doit. Les rappels
+          opportuns sont cruciaux pour éviter les pénalités de retard et maintenir de
+          bonnes relations financières.
+        </li>
+        <li>
+          <strong>Alarmes prioritaires :</strong> Contrairement aux simples notifications
+          qui peuvent être ignorées, les alarmes système garantissent que les utilisateurs
+          ne manquent jamais un paiement de dette important, même lorsque l'écran est verrouillé.
+        </li>
+        <li>
+          <strong>Implémentation technique :</strong> L'application utilise la bibliothèque
+          flutter_local_notifications combinée avec AlarmClock.ACTION_SET_ALARM pour intégrer
+          les alarmes de rappel avec l'application Horloge système de votre téléphone.
+        </li>
+        <li>
+          <strong>Utilisation responsable :</strong> Cette permission est utilisée
+          UNIQUEMENT pour les rappels de dettes programmés par l'utilisateur lui-même.
+          Aucune alarme n'est déclenchée sans l'autorisation explicite de l'utilisateur.
+        </li>
+        <li>
+          <strong>Protection financière :</strong> Les rappels d'alarme aident à éviter
+          les oublis qui pourraient entraîner des frais de retard, des intérêts supplémentaires
+          ou des impacts négatifs sur la cote de crédit.
+        </li>
+      </ul>
+      <p>
+        <strong>Comment ça fonctionne :</strong> Lorsque vous créez une dette dans Ikigabo,
+        vous pouvez programmer une alarme de rappel. L'application utilise l'alarme système
+        de votre téléphone pour vous alerter au moment opportun, garantissant que vous ne
+        manquez jamais un remboursement important.
+      </p>
+      <p>
+        <strong>Bibliothèques utilisées :</strong> flutter_local_notifications v18.0.1
+        (bibliothèque officielle Flutter pour les notifications locales).
+      </p>
+      <p>
+        Cette permission ne collecte aucune donnée personnelle et n'est utilisée que pour
+        améliorer votre gestion financière en vous rappelant vos obligations de dette au
+        bon moment.
+      </p>
+
+      <h2>7. Vos Droits</h2>
       <p>Vous avez le contrôle total de vos données :</p>
       <ul>
         <li>
@@ -195,20 +249,20 @@
         <li><strong>Export :</strong> Exportez vos données en PDF</li>
       </ul>
 
-      <h2>7. Sécurité des Mineurs</h2>
+      <h2>8. Sécurité des Mineurs</h2>
       <p>
         Cette application est destinée aux personnes de <strong>13 ans et plus</strong> 
         pour la gestion financière personnelle. Les mineurs de moins de 18 ans 
         doivent obtenir l'autorisation parentale avant utilisation.
       </p>
 
-      <h2>8. Modifications</h2>
+      <h2>9. Modifications</h2>
       <p>
         Nous pouvons mettre à jour cette politique. Les modifications seront
         publiées sur cette page.
       </p>
 
-      <h2>9. Contact</h2>
+      <h2>10. Contact</h2>
       <p>Pour toute question concernant cette politique :</p>
       <p>
         <strong>Email :</strong>
