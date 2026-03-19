@@ -37,29 +37,31 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context, l10n, isDark),
-            if (_isSearchVisible) ...[
-              SizedBox(height: 6.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: custom.SearchBar(hintText: l10n.searchSource),
+      body: PageWithBanner(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context, l10n, isDark),
+              if (_isSearchVisible) ...[
+                SizedBox(height: 6.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: custom.SearchBar(hintText: l10n.searchSource),
+                ),
+              ],
+              SizedBox(height: 12.h),
+              Expanded(
+                child: sourcesAsync.when(
+                  data: (sources) => sources.isEmpty
+                      ? _buildEmptyState(l10n)
+                      : _buildSourcesList(sources, l10n),
+                  loading: () => _buildLoadingState(),
+                  error: (error, stack) =>
+                      _buildErrorState(error.toString(), l10n),
+                ),
               ),
             ],
-            SizedBox(height: 12.h),
-            Expanded(
-              child: sourcesAsync.when(
-                data: (sources) => sources.isEmpty
-                    ? _buildEmptyState(l10n)
-                    : _buildSourcesList(sources, l10n),
-                loading: () => _buildLoadingState(),
-                error: (error, stack) =>
-                    _buildErrorState(error.toString(), l10n),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -148,16 +150,10 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
         )
         .toList();
 
-    final itemsWithBanner = BannerInjector.injectBanner(
-      items,
-      ref,
-      position: 2,
-    );
-
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 14.w),
-      itemCount: itemsWithBanner.length,
-      itemBuilder: (context, index) => itemsWithBanner[index],
+      itemCount: items.length,
+      itemBuilder: (context, index) => items[index],
     );
   }
 

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ikigabo/core/services/ad_manager.dart';
 import 'package:ikigabo/data/models/category_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
@@ -16,7 +15,6 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
-import '../../../core/services/ads_service.dart';
 import '../../../core/services/dynamic_category_service.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -27,8 +25,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
       _AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState
-    extends ConsumerState<AddTransactionScreen> {
+class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -78,23 +75,24 @@ class _AddTransactionScreenState
       // Convertir l'ID négatif en ID positif pour les banques/assets/dettes
       int actualSourceId = _selectedSourceId!;
       if (_selectedSourceId! < 0) {
-        actualSourceId = -_selectedSourceId!; // Convertir en positif pour les banques
+        actualSourceId =
+            -_selectedSourceId!; // Convertir en positif pour les banques
       }
 
       // Déterminer les catégories selon la sélection
       final selectedCategory = CategoryMappingService.getCategoryFromSelection(
-        _type, 
-        _selectedCategoryKey, 
-        context
+        _type,
+        _selectedCategoryKey,
+        context,
       );
 
       final transaction = TransactionModel(
         type: _type,
-        incomeCategory: _type == TransactionType.income 
-            ? selectedCategory as IncomeCategory 
+        incomeCategory: _type == TransactionType.income
+            ? selectedCategory as IncomeCategory
             : IncomeCategory.other,
-        expenseCategory: _type == TransactionType.expense 
-            ? selectedCategory as ExpenseCategory 
+        expenseCategory: _type == TransactionType.expense
+            ? selectedCategory as ExpenseCategory
             : ExpenseCategory.other,
         amount: double.parse(_amountController.text),
         currency: _selectedCurrency,
@@ -125,7 +123,7 @@ class _AddTransactionScreenState
           Navigator.pop(context);
           _showSuccess(l10n.transactionAddedSuccess);
 
-          // Pub discrète après 2ème transaction
+          // Pub discrète après plusieurs transactions réussies.
           _showAdIfNeeded();
         }
       } catch (e) {
@@ -160,14 +158,7 @@ class _AddTransactionScreenState
   }
 
   void _showAdIfNeeded() async {
-    // Compteur simple pour afficher pub tous les 2 transactions
-    final prefs = await SharedPreferences.getInstance();
-    final transactionCount = (prefs.getInt('transaction_count') ?? 0) + 1;
-    await prefs.setInt('transaction_count', transactionCount);
-
-    if (transactionCount % 2 == 0) {
-      await AdsService.showInterstitial();
-    }
+    await AdManager.showTransactionAd();
   }
 
   @override

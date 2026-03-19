@@ -1,8 +1,8 @@
 import 'dart:ui';
-import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:flutter/services.dart';
+import 'package:unity_ads_plugin/unity_ads_plugin.dart';
+import 'ad_network_config.dart';
 import 'admob_service.dart';
-import 'dart:math';
 
 class AdsService {
   // 🔑 IDs UNITY
@@ -11,9 +11,9 @@ class AdsService {
   static const String _rewardedAdUnitId = 'Rewarded_Android';
 
   static bool _isInitialized = false;
+  static bool _isUnityInitialized = false;
   static bool _isInterstitialLoaded = false;
   static bool _isRewardedLoaded = false;
-  static final Random _random = Random();
 
   // 🔹 INIT BOTH ADS
   static Future<void> initialize() async {
@@ -22,56 +22,56 @@ class AdsService {
     // Init Unity
     await UnityAds.init(
       gameId: _gameId,
-      testMode: false,
+      testMode: AdNetworkConfig.isUnityTestMode,
       onComplete: () {
-        _isInitialized = true;
-        print('✅ Unity Ads initialized (PRODUCTION)');
+        _isUnityInitialized = true;
+        const mode = AdNetworkConfig.isUnityTestMode ? 'TEST' : 'PRODUCTION';
+        print('✅ Unity Ads initialized ($mode)');
       },
       onFailed: (error, message) {
         print('❌ Unity Ads init failed: $error - $message');
       },
     );
 
-    // Init AdMob
-    await AdMobService.initialize();
+    if (AdNetworkConfig.canUseAdMob) {
+      await AdMobService.initialize();
+    }
+
+    _isInitialized = true;
   }
 
-  // 🔹 SHOW INTERSTITIAL (ALTERNANCE 50/50)
+  // 🔹 SHOW INTERSTITIAL
   static Future<void> showInterstitial() async {
     if (!_isInitialized) await initialize();
 
-    // Alternance 50/50 entre Unity et AdMob
-    final useUnity = _random.nextBool();
-    
-    if (useUnity) {
-      print('🎯 Tentative Unity Interstitial');
-      await _showUnityInterstitial();
-    } else {
+    if (_shouldUseAdMobForFullScreen() && AdMobService.isInterstitialReady) {
       print('🎯 Tentative AdMob Interstitial');
       await AdMobService.showInterstitial();
+      return;
     }
+
+    print('🎯 Tentative Unity Interstitial');
+    await _showUnityInterstitial();
   }
 
-  // 🔹 SHOW REWARDED (ALTERNANCE 50/50)
+  // 🔹 SHOW REWARDED
   static Future<void> showRewarded({required VoidCallback onReward}) async {
     if (!_isInitialized) await initialize();
 
-    // Alternance 50/50 entre Unity et AdMob
-    final useUnity = _random.nextBool();
-    
-    if (useUnity) {
-      print('🎯 Tentative Unity Rewarded');
-      await _showUnityRewarded(onReward: onReward);
-    } else {
+    if (_shouldUseAdMobForFullScreen() && AdMobService.isRewardedReady) {
       print('🎯 Tentative AdMob Rewarded');
       await AdMobService.showRewarded(onReward: onReward);
+      return;
     }
+
+    print('🎯 Tentative Unity Rewarded');
+    await _showUnityRewarded(onReward: onReward);
   }
 
   // 🔹 LOAD INTERSTITIAL
   static Future<void> loadInterstitial() async {
     if (!_isInitialized) await initialize();
-    if (_isInterstitialLoaded) return;
+    if (!_isUnityInitialized || _isInterstitialLoaded) return;
 
     await UnityAds.load(
       placementId: _interstitialAdUnitId,
@@ -88,7 +88,6 @@ class AdsService {
 
   // 🔹 UNITY INTERSTITIAL (PRIVATE)
   static Future<void> _showUnityInterstitial() async {
-
     if (!_isInterstitialLoaded) {
       await loadInterstitial();
       await Future.delayed(const Duration(milliseconds: 500));
@@ -102,7 +101,8 @@ class AdsService {
     UnityAds.showVideoAd(
       placementId: _interstitialAdUnitId,
       onStart: (placementId) => print('▶ Unity Interstitial started'),
-      onClick: (placementId) => print('🖱 Unity Interstitial clicked - Revenue!'),
+      onClick: (placementId) =>
+          print('🖱 Unity Interstitial clicked - Revenue!'),
       onSkipped: (placementId) => print('⏭ Unity Interstitial skipped'),
       onComplete: (placementId) {
         print('✅ Unity Interstitial completed');
@@ -118,7 +118,7 @@ class AdsService {
   // 🔹 LOAD REWARDED
   static Future<void> loadRewarded() async {
     if (!_isInitialized) await initialize();
-    if (_isRewardedLoaded) return;
+    if (!_isUnityInitialized || _isRewardedLoaded) return;
 
     await UnityAds.load(
       placementId: _rewardedAdUnitId,
@@ -134,8 +134,9 @@ class AdsService {
   }
 
   // 🔹 UNITY REWARDED (PRIVATE)
-  static Future<void> _showUnityRewarded({required VoidCallback onReward}) async {
-
+  static Future<void> _showUnityRewarded({
+    required VoidCallback onReward,
+  }) async {
     if (!_isRewardedLoaded) {
       await loadRewarded();
       await Future.delayed(const Duration(milliseconds: 500));
@@ -162,4 +163,9 @@ class AdsService {
 
   static bool get isInterstitialReady => _isInterstitialLoaded;
   static bool get isRewardedReady => _isRewardedLoaded;
+
+  static bool _shouldUseAdMobForFullScreen() {
+    if (!AdNetworkConfig.canUseAdMob) return false;
+    return AdNetworkConfig.fullScreenPrimaryNetwork == AdNetwork.admob;
+  }
 }

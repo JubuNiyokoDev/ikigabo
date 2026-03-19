@@ -1,12 +1,13 @@
-import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdMobService {
   // 🔑 IDs ADMOB
-  static const String _appId = 'ca-app-pub-2300546388710165~5023194481';
-  static const String _bannerAdUnitId = 'ca-app-pub-2300546388710165/5022166817';
-  static const String _interstitialAdUnitId = 'ca-app-pub-2300546388710165/3121943541';
-  static const String _rewardedAdUnitId = 'ca-app-pub-2300546388710165/8111364581';
+  static const String _bannerAdUnitId =
+      'ca-app-pub-2300546388710165/5022166817';
+  static const String _interstitialAdUnitId =
+      'ca-app-pub-2300546388710165/3121943541';
+  static const String _rewardedAdUnitId =
+      'ca-app-pub-2300546388710165/8111364581';
 
   static bool _isInitialized = false;
   static InterstitialAd? _interstitialAd;
@@ -19,7 +20,7 @@ class AdMobService {
     await MobileAds.instance.initialize();
     _isInitialized = true;
     print('✅ AdMob initialized');
-    
+
     // Preload ads
     _loadInterstitial();
     _loadRewarded();

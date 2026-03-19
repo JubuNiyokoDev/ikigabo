@@ -9,7 +9,8 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/dashboard_provider.dart';
-import '../../providers/transaction_provider.dart' hide thisMonthIncomeProvider, thisMonthExpenseProvider;
+import '../../providers/transaction_provider.dart'
+    hide thisMonthIncomeProvider, thisMonthExpenseProvider;
 import '../../providers/debt_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
@@ -67,49 +68,64 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: BannerInjector.injectBanner([
-              _buildHeader(l10n, isDark, context).slideInFromLeft(),
-              const SizedBox(height: 16),
-              _buildBalanceCard(
-                totalWealthAsync,
-                monthlyGrowthAsync,
-                displayCurrencyAsync,
-                l10n,
-              ).bounceIn(delay: 200.ms),
-              const SizedBox(height: 16),
-              _buildQuickActions(
-                context,
-                isDark,
-                l10n,
-              ).slideInFromBottom(delay: 400.ms),
-              const SizedBox(height: 16),
-              _buildQuickStats(
-                thisMonthIncomeAsync,
-                thisMonthExpenseAsync,
-                isDark,
-                l10n,
-              ),
-              const SizedBox(height: 16),
-              _buildAssetsVsLiabilities(assetsVsLiabilitiesAsync, isDark, l10n),
-              const SizedBox(height: 16),
-              _buildWeeklyChart(weeklyActivityAsync, isDark, l10n),
-              const SizedBox(height: 16),
-              _buildDebtsSummary(debtStatsAsync, context, isDark, l10n),
-              const SizedBox(height: 16),
-              _buildTransactionsList(recentTransactionsAsync, isDark, l10n, context),
-            ], ref, position: 4),
+      body: PageWithBanner(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(l10n, isDark, context).slideInFromLeft(),
+                const SizedBox(height: 16),
+                _buildBalanceCard(
+                  totalWealthAsync,
+                  monthlyGrowthAsync,
+                  displayCurrencyAsync,
+                  l10n,
+                ).bounceIn(delay: 200.ms),
+                const SizedBox(height: 16),
+                _buildQuickActions(
+                  context,
+                  isDark,
+                  l10n,
+                ).slideInFromBottom(delay: 400.ms),
+                const SizedBox(height: 16),
+                _buildQuickStats(
+                  thisMonthIncomeAsync,
+                  thisMonthExpenseAsync,
+                  isDark,
+                  l10n,
+                ),
+                const SizedBox(height: 16),
+                _buildAssetsVsLiabilities(
+                  assetsVsLiabilitiesAsync,
+                  isDark,
+                  l10n,
+                ),
+                const SizedBox(height: 16),
+                _buildWeeklyChart(weeklyActivityAsync, isDark, l10n),
+                const SizedBox(height: 16),
+                _buildDebtsSummary(debtStatsAsync, context, isDark, l10n),
+                const SizedBox(height: 16),
+                _buildTransactionsList(
+                  recentTransactionsAsync,
+                  isDark,
+                  l10n,
+                  context,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(AppLocalizations l10n, bool isDark, BuildContext context) {
+  Widget _buildHeader(
+    AppLocalizations l10n,
+    bool isDark,
+    BuildContext context,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -182,10 +198,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 3.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12.r),
@@ -244,10 +257,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               monthlyGrowthAsync.when(
                 data: (growth) => Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 5.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: (growth >= 0 ? AppColors.success : AppColors.error)
                         .withValues(alpha: 0.2),
@@ -280,10 +290,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 loading: () => const ShimmerWidget(width: 45, height: 16),
                 error: (e, s) => Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 5.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(5.r),
@@ -310,7 +317,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ).animate().slideY(begin: 0.2, delay: 300.ms, duration: 400.ms);
   }
 
-  Widget _buildQuickActions(BuildContext context, bool isDark, AppLocalizations l10n) {
+  Widget _buildQuickActions(
+    BuildContext context,
+    bool isDark,
+    AppLocalizations l10n,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -469,7 +480,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               Flexible(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 6.h,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColors.cardBackgroundDark
@@ -510,12 +524,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            final days = [l10n.mondayShort, l10n.tuesdayShort, l10n.wednesdayShort, l10n.thursdayShort, l10n.fridayShort, l10n.saturdayShort, l10n.sundayShort];
+                            final days = [
+                              l10n.mondayShort,
+                              l10n.tuesdayShort,
+                              l10n.wednesdayShort,
+                              l10n.thursdayShort,
+                              l10n.fridayShort,
+                              l10n.saturdayShort,
+                              l10n.sundayShort,
+                            ];
                             if (value.toInt() < days.length) {
                               return Text(
                                 days[value.toInt()],
                                 style: TextStyle(
-                                  color: isDark ? AppColors.textSecondaryDark : Colors.black54,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : Colors.black54,
                                   fontSize: 12.sp,
                                 ),
                               );
@@ -558,12 +582,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          final days = [l10n.mondayShort, l10n.tuesdayShort, l10n.wednesdayShort, l10n.thursdayShort, l10n.fridayShort, l10n.saturdayShort, l10n.sundayShort];
+                          final days = [
+                            l10n.mondayShort,
+                            l10n.tuesdayShort,
+                            l10n.wednesdayShort,
+                            l10n.thursdayShort,
+                            l10n.fridayShort,
+                            l10n.saturdayShort,
+                            l10n.sundayShort,
+                          ];
                           if (value.toInt() < days.length) {
                             return Text(
                               days[value.toInt()],
                               style: TextStyle(
-                                color: isDark ? AppColors.textSecondaryDark : Colors.black54,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : Colors.black54,
                                 fontSize: 10.sp,
                               ),
                             );
@@ -640,7 +674,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       PieChartSectionData(
                         value: assets,
                         color: AppColors.success,
-                        title: '${l10n.assets}\n${_formatAmountCompact(assets)}',
+                        title:
+                            '${l10n.assets}\n${_formatAmountCompact(assets)}',
                         radius: 40,
                         titleStyle: const TextStyle(
                           fontSize: 12,
@@ -652,7 +687,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         PieChartSectionData(
                           value: liabilities,
                           color: AppColors.error,
-                          title: '${l10n.liabilities}\n${_formatAmountCompact(liabilities)}',
+                          title:
+                              '${l10n.liabilities}\n${_formatAmountCompact(liabilities)}',
                           radius: 40,
                           titleStyle: const TextStyle(
                             fontSize: 12,
@@ -674,7 +710,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: Center(
                 child: Text(
                   l10n.loadingError,
-                  style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600),
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : Colors.grey.shade600,
+                  ),
                 ),
               ),
             ),
@@ -886,7 +926,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   child: Text(
                     l10n.noRecentTransactions,
                     style: TextStyle(
-                      color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : Colors.grey.shade600,
                       fontSize: 15,
                     ),
                   ),
@@ -915,7 +957,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Center(
               child: Text(
                 l10n.loadingError,
-                style: TextStyle(color: isDark ? AppColors.error : AppColors.error, fontSize: 13),
+                style: TextStyle(
+                  color: isDark ? AppColors.error : AppColors.error,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
@@ -967,7 +1012,9 @@ class _StatCard extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 10.sp,
-              color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : Colors.grey.shade600,
             ),
           ),
           SizedBox(height: 3.h),
@@ -1020,7 +1067,9 @@ class _StatCardLoading extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : Colors.grey.shade600,
             ),
           ),
           const SizedBox(height: 4),
@@ -1055,55 +1104,60 @@ class _TransactionItem extends StatelessWidget {
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.description?.isNotEmpty == true
-                      ? transaction.description!
-                      : transaction.categoryName,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.textDark : Colors.black87,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _formatDate(transaction.date, AppLocalizations.of(context)!),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
-                  ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description?.isNotEmpty == true
+                          ? transaction.description!
+                          : transaction.categoryName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.textDark : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(
+                        transaction.date,
+                        AppLocalizations.of(context)!,
+                      ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              CurrencyAmountWidget(
+                amount: transaction.amount,
+                originalCurrency: transaction.currency,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
           ),
-          CurrencyAmountWidget(
-            amount: transaction.amount,
-            originalCurrency: transaction.currency,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
+        );
       },
     );
   }
@@ -1221,51 +1275,53 @@ class _DebtSummaryCard extends StatelessWidget {
       builder: (context, ref, child) {
         final themeMode = ref.watch(themeProvider);
         final isDark = themeMode == ThemeMode.dark;
-        
+
         return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardBackgroundDark : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.cardBackgroundDark : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: color, size: 16),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
+              Row(
+                children: [
+                  Icon(icon, color: color, size: 16),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(icon, color: color, size: 11),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : Colors.grey.shade600,
                 ),
-                child: Icon(icon, color: color, size: 11),
+              ),
+              const SizedBox(height: 4),
+              DisplayCurrencyAmountWidget(
+                amount: amount,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          DisplayCurrencyAmountWidget(
-            amount: amount,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
+        );
       },
     );
   }

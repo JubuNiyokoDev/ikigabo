@@ -33,35 +33,37 @@ class BanksListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(
-              context,
-              totalBalanceAsync,
-              ref,
-              l10n,
-              displayCurrencyAsync,
-            ),
-            const SizedBox(height: 16),
-            _buildPendingFeesAlert(
-              pendingFeesAsync,
-              banksWithFeesAsync,
-              ref,
-              l10n,
-              displayCurrencyAsync,
-            ),
-            Expanded(
-              child: banksAsync.when(
-                data: (banks) => banks.isEmpty
-                    ? _buildEmptyState(context, l10n)
-                    : _buildBanksList(context, banks),
-                loading: () => _buildLoadingState(),
-                error: (error, stack) =>
-                    _buildErrorState(error.toString(), l10n),
+      body: PageWithBanner(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(
+                context,
+                totalBalanceAsync,
+                ref,
+                l10n,
+                displayCurrencyAsync,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              _buildPendingFeesAlert(
+                pendingFeesAsync,
+                banksWithFeesAsync,
+                ref,
+                l10n,
+                displayCurrencyAsync,
+              ),
+              Expanded(
+                child: banksAsync.when(
+                  data: (banks) => banks.isEmpty
+                      ? _buildEmptyState(context, l10n)
+                      : _buildBanksList(context, banks),
+                  loading: () => _buildLoadingState(),
+                  error: (error, stack) =>
+                      _buildErrorState(error.toString(), l10n),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -175,16 +177,10 @@ class BanksListScreen extends ConsumerWidget {
               ).animate().fadeIn(delay: (banks.indexOf(bank) * 50).ms),
             )
             .toList();
-        final itemsWithBanner = BannerInjector.injectBanner(
-          items,
-          ref,
-          position: 1,
-        );
-
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: itemsWithBanner.length,
-          itemBuilder: (context, index) => itemsWithBanner[index],
+          itemCount: items.length,
+          itemBuilder: (context, index) => items[index],
         );
       },
     );

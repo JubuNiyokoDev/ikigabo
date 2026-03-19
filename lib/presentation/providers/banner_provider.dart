@@ -5,15 +5,9 @@ class BannerState {
   final bool isVisible;
   final bool isAnimating;
 
-  const BannerState({
-    required this.isVisible,
-    required this.isAnimating,
-  });
+  const BannerState({required this.isVisible, required this.isAnimating});
 
-  BannerState copyWith({
-    bool? isVisible,
-    bool? isAnimating,
-  }) {
+  BannerState copyWith({bool? isVisible, bool? isAnimating}) {
     return BannerState(
       isVisible: isVisible ?? this.isVisible,
       isAnimating: isAnimating ?? this.isAnimating,
@@ -22,26 +16,14 @@ class BannerState {
 }
 
 class BannerNotifier extends StateNotifier<BannerState> {
-  Timer? _visibilityTimer;
-  
-  BannerNotifier() : super(const BannerState(isVisible: true, isAnimating: false)) {
-    _startVisibilityTimer();
-  }
-
-  void _startVisibilityTimer() {
-    _visibilityTimer = Timer.periodic(const Duration(seconds: 12), (timer) {
-      _toggleVisibility();
-    });
-  }
+  BannerNotifier()
+    : super(const BannerState(isVisible: true, isAnimating: false));
 
   void _toggleVisibility() {
     state = state.copyWith(isAnimating: true);
-    
+
     Timer(const Duration(milliseconds: 100), () {
-      state = state.copyWith(
-        isVisible: !state.isVisible,
-        isAnimating: false,
-      );
+      state = state.copyWith(isVisible: !state.isVisible, isAnimating: false);
     });
   }
 
@@ -62,14 +44,10 @@ class BannerNotifier extends StateNotifier<BannerState> {
       });
     }
   }
-
-  @override
-  void dispose() {
-    _visibilityTimer?.cancel();
-    super.dispose();
-  }
 }
 
-final bannerProvider = StateNotifierProvider<BannerNotifier, BannerState>((ref) {
+final bannerProvider = StateNotifierProvider<BannerNotifier, BannerState>((
+  ref,
+) {
   return BannerNotifier();
 });

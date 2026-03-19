@@ -5,6 +5,7 @@ import '../../data/services/auto_backup_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/services/ad_manager.dart';
 import 'backup_provider.dart';
+import 'isar_provider.dart';
 
 final autoBackupProvider =
     StateNotifierProvider<AutoBackupNotifier, AutoBackupState>((ref) {
@@ -48,6 +49,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
   }
 
   Future<void> _initializeAutoBackup() async {
+    await _ref.read(isarProvider.future);
     await AutoBackupService.initialize(
       onBackupNeeded: _performAutoBackupInternal,
     );
@@ -55,6 +57,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
 
   Future<void> _performAutoBackupInternal() async {
     try {
+      await _ref.read(isarProvider.future);
       final backupService = _ref.read(backupServiceProvider);
       final backupData = await backupService.exportData();
       await AutoBackupService.saveAutoBackup(backupData);
@@ -104,6 +107,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
     state = state.copyWith(isBackingUp: true, error: null);
 
     try {
+      await _ref.read(isarProvider.future);
       final canProceed = await AdManager.showRewardedForAutoBackup();
       if (!canProceed) {
         state = state.copyWith(isBackingUp: false);

@@ -33,29 +33,36 @@ class AssetsListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context, totalValueAsync, l10n, displayCurrencyAsync),
-            const SizedBox(height: 16),
-            _buildStatsRow(assetStatsAsync, l10n, displayCurrencyAsync),
-            const SizedBox(height: 16),
-            Expanded(
-              child: assetsAsync.when(
-                data: (assets) {
-                  final ownedAssets = assets
-                      .where((a) => a.status == AssetStatus.owned)
-                      .toList();
-                  return ownedAssets.isEmpty
-                      ? _buildEmptyState(context)
-                      : _buildAssetsList(context, ownedAssets);
-                },
-                loading: () => _buildLoadingState(),
-                error: (error, stack) =>
-                    _buildErrorState(error.toString(), context),
+      body: PageWithBanner(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(
+                context,
+                totalValueAsync,
+                l10n,
+                displayCurrencyAsync,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              _buildStatsRow(assetStatsAsync, l10n, displayCurrencyAsync),
+              const SizedBox(height: 16),
+              Expanded(
+                child: assetsAsync.when(
+                  data: (assets) {
+                    final ownedAssets = assets
+                        .where((a) => a.status == AssetStatus.owned)
+                        .toList();
+                    return ownedAssets.isEmpty
+                        ? _buildEmptyState(context)
+                        : _buildAssetsList(context, ownedAssets);
+                  },
+                  loading: () => _buildLoadingState(),
+                  error: (error, stack) =>
+                      _buildErrorState(error.toString(), context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -338,16 +345,10 @@ class AssetsListScreen extends ConsumerWidget {
             )
             .toList();
 
-        final itemsWithBanner = BannerInjector.injectBanner(
-          items,
-          ref,
-          position: 2,
-        );
-
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: itemsWithBanner.length,
-          itemBuilder: (context, index) => itemsWithBanner[index],
+          itemCount: items.length,
+          itemBuilder: (context, index) => items[index],
         );
       },
     );

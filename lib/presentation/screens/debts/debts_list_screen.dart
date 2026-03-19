@@ -42,41 +42,43 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(l10n),
-            const SizedBox(height: 16),
-            _buildAlertsSection(overdueDebtsAsync, dueSoonDebtsAsync, l10n),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: custom.SearchBar(hintText: l10n.searchDebt),
-            ),
-            const SizedBox(height: 16),
-            _buildSummaryCards(totalGivenAsync, totalReceivedAsync, l10n),
-            const SizedBox(height: 16),
-            _buildTabSelector(l10n),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: debtsAsync.when(
-                  data: (debts) {
-                    final filteredDebts = _filterDebts(debts);
-                    return filteredDebts.isEmpty
-                        ? _buildEmptyState(l10n)
-                        : _buildDebtsList(filteredDebts, l10n);
-                  },
-                  loading: () => _buildLoadingState(),
-                  error: (error, stack) =>
-                      _buildErrorState(error.toString(), l10n),
+      body: PageWithBanner(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(l10n),
+              const SizedBox(height: 16),
+              _buildAlertsSection(overdueDebtsAsync, dueSoonDebtsAsync, l10n),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: custom.SearchBar(hintText: l10n.searchDebt),
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCards(totalGivenAsync, totalReceivedAsync, l10n),
+              const SizedBox(height: 16),
+              _buildTabSelector(l10n),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: debtsAsync.when(
+                    data: (debts) {
+                      final filteredDebts = _filterDebts(debts);
+                      return filteredDebts.isEmpty
+                          ? _buildEmptyState(l10n)
+                          : _buildDebtsList(filteredDebts, l10n);
+                    },
+                    loading: () => _buildLoadingState(),
+                    error: (error, stack) =>
+                        _buildErrorState(error.toString(), l10n),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -485,16 +487,10 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
             )
             .toList();
 
-        final itemsWithBanner = BannerInjector.injectBanner(
-          items,
-          ref,
-          position: 1,
-        );
-
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: itemsWithBanner.length,
-          itemBuilder: (context, index) => itemsWithBanner[index],
+          itemCount: items.length,
+          itemBuilder: (context, index) => items[index],
         );
       },
     );
