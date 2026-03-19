@@ -21,7 +21,9 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
 });
 
 // All Transactions Stream
-final transactionsStreamProvider = StreamProvider<List<tx.TransactionModel>>((ref) {
+final transactionsStreamProvider = StreamProvider<List<tx.TransactionModel>>((
+  ref,
+) {
   final repository = ref.watch(transactionRepositoryProvider);
   return repository.watchTransactions();
 });
@@ -65,7 +67,8 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
   final TransactionRepository _repository;
   final Ref _ref;
 
-  TransactionController(this._repository, this._ref) : super(const AsyncValue.data(null));
+  TransactionController(this._repository, this._ref)
+    : super(const AsyncValue.data(null));
 
   Future<void> addTransaction(tx.TransactionModel transaction) async {
     state = const AsyncValue.loading();
@@ -74,7 +77,7 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
         await isar.writeTxn(() async {
           // Créer la transaction
           await _repository.putTransaction(transaction);
-          
+
           // Mettre à jour la balance de la source
           if (transaction.type == tx.TransactionType.income) {
             // ENTRÉE: Augmenter la balance de la destination
@@ -97,7 +100,7 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
           }
         });
       });
-      
+
       state = const AsyncValue.data(null);
       _invalidateAll();
     } catch (e, stack) {
@@ -108,7 +111,23 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
   Future<void> updateTransaction(tx.TransactionModel transaction) async {
     state = const AsyncValue.loading();
     try {
-      await _repository.updateTransaction(transaction);
+      await _ref.read(isarProvider.future).then((isar) async {
+        await isar.writeTxn(() async {
+          final previous = await isar.transactionModels.get(transaction.id);
+
+          if (previous == null) {
+            throw Exception('Transaction introuvable');
+          }
+
+          // Annuler l'impact de l'ancienne version, puis appliquer la nouvelle.
+          await _applyTransactionImpact(isar, previous, reverse: true);
+
+          transaction.updatedAt = DateTime.now();
+          await _repository.putTransaction(transaction);
+
+          await _applyTransactionImpact(isar, transaction, reverse: false);
+        });
+      });
       state = const AsyncValue.data(null);
       _invalidateAll();
     } catch (e, stack) {
@@ -119,7 +138,22 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
   Future<void> deleteTransaction(int id) async {
     state = const AsyncValue.loading();
     try {
-      await _repository.deleteTransaction(id);
+      await _ref.read(isarProvider.future).then((isar) async {
+        await isar.writeTxn(() async {
+          final transaction = await isar.transactionModels.get(id);
+          if (transaction == null) {
+            throw Exception('Transaction introuvable');
+          }
+
+          if (!transaction.isDeleted) {
+            await _applyTransactionImpact(isar, transaction, reverse: true);
+          }
+
+          transaction.isDeleted = true;
+          transaction.updatedAt = DateTime.now();
+          await _repository.putTransaction(transaction);
+        });
+      });
       state = const AsyncValue.data(null);
       _invalidateAll();
     } catch (e, stack) {
@@ -151,15 +185,15 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
     Isar isar,
     int sourceId,
     tx.SourceType sourceType,
-    double amount,
-    {required bool isIncrease}
-  ) async {
+    double amount, {
+    required bool isIncrease,
+  }) async {
     switch (sourceType) {
       case tx.SourceType.source:
         final source = await isar.sourceModels.get(sourceId);
         if (source != null) {
-          source.amount = isIncrease 
-              ? source.amount + amount 
+          source.amount = isIncrease
+              ? source.amount + amount
               : source.amount - amount;
           source.updatedAt = DateTime.now();
           await isar.sourceModels.put(source);
@@ -168,8 +202,8 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
       case tx.SourceType.bank:
         final bank = await isar.bankModels.get(sourceId);
         if (bank != null) {
-          bank.balance = isIncrease 
-              ? bank.balance + amount 
+          bank.balance = isIncrease
+              ? bank.balance + amount
               : bank.balance - amount;
           bank.updatedAt = DateTime.now();
           await isar.bankModels.put(bank);
@@ -186,10 +220,70 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
         break;
     }
   }
+
+  Future<void> _applyTransactionImpact(
+    Isar isar,
+    tx.TransactionModel transaction, {
+    required bool reverse,
+  }) async {
+    if (transaction.isDeleted ||
+        transaction.status != tx.TransactionStatus.active) {
+      return;
+    }
+
+    switch (transaction.type) {
+      case tx.TransactionType.income:
+        final targetId = transaction.targetSourceId;
+        final targetType = transaction.targetSourceType;
+        if (targetId != null && targetType != null) {
+          // Impact normal: +destination. Reverse: -destination.
+          await _updateSourceBalance(
+            isar,
+            targetId,
+            targetType,
+            transaction.amount,
+            isIncrease: !reverse,
+          );
+        }
+        break;
+      case tx.TransactionType.expense:
+        // Impact normal: -source. Reverse: +source.
+        await _updateSourceBalance(
+          isar,
+          transaction.sourceId,
+          transaction.sourceType,
+          transaction.amount,
+          isIncrease: reverse,
+        );
+        break;
+      case tx.TransactionType.transfer:
+        final targetId = transaction.targetSourceId;
+        final targetType = transaction.targetSourceType;
+
+        await _updateSourceBalance(
+          isar,
+          transaction.sourceId,
+          transaction.sourceType,
+          transaction.amount,
+          isIncrease: reverse,
+        );
+
+        if (targetId != null && targetType != null) {
+          await _updateSourceBalance(
+            isar,
+            targetId,
+            targetType,
+            transaction.amount,
+            isIncrease: !reverse,
+          );
+        }
+        break;
+    }
+  }
 }
 
 final transactionControllerProvider =
     StateNotifierProvider<TransactionController, AsyncValue<void>>((ref) {
-  final repository = ref.watch(transactionRepositoryProvider);
-  return TransactionController(repository, ref);
-});
+      final repository = ref.watch(transactionRepositoryProvider);
+      return TransactionController(repository, ref);
+    });

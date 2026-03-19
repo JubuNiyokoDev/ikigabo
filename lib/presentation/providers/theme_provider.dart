@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/preferences_service.dart';
-
-// Provider pour le service de préférences
-final preferencesServiceProvider = FutureProvider<PreferencesService>((ref) async {
-  return await PreferencesService.init();
-});
+import 'preferences_provider.dart';
 
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
   final prefsService = ref.watch(preferencesServiceProvider).value;

@@ -25,8 +25,8 @@ import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/providers/debt_provider.dart';
 import 'presentation/providers/integrated_notification_provider.dart';
 import 'presentation/providers/onboarding_provider.dart';
+import 'presentation/providers/auto_backup_provider.dart';
 import 'data/services/notification_service.dart';
-import 'data/services/auto_backup_service.dart';
 import 'core/services/real_alarm_service.dart';
 import 'presentation/widgets/shimmer_widget.dart';
 
@@ -36,9 +36,6 @@ void main() async {
   // Initialiser les services d'alarme et notifications
   await RealAlarmService.initialize();
   await NotificationService().initialize();
-
-  // Initialiser l'auto-backup
-  await AutoBackupService.initialize();
 
   // Initialiser les services publicitaires
   await AdsService.initialize();
@@ -177,6 +174,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ref.read(notificationWatcherProvider);
       // Initialiser le banner provider
       ref.read(bannerProvider);
+      // Initialiser le provider auto-backup avec callback actif
+      ref.read(autoBackupProvider);
     });
   }
 

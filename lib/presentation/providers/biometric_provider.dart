@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/services/biometric_service.dart';
-import 'theme_provider.dart';
+import 'preferences_provider.dart';
 
-final biometricProvider = StateNotifierProvider<BiometricNotifier, BiometricState>((ref) {
-  final prefsService = ref.watch(preferencesServiceProvider).value;
-  return BiometricNotifier(prefsService);
-});
+final biometricProvider =
+    StateNotifierProvider<BiometricNotifier, BiometricState>((ref) {
+      final prefsService = ref.watch(preferencesServiceProvider).value;
+      return BiometricNotifier(prefsService);
+    });
 
 class BiometricNotifier extends StateNotifier<BiometricState> {
   final PreferencesService? _prefsService;
@@ -18,7 +19,7 @@ class BiometricNotifier extends StateNotifier<BiometricState> {
   void _checkBiometricStatus() async {
     final isAvailable = await BiometricService.isAvailable();
     final isEnabled = _prefsService?.isBiometricEnabled() ?? false;
-    
+
     if (!isAvailable) {
       state = BiometricState.unavailable;
     } else if (isEnabled) {
@@ -68,9 +69,4 @@ class BiometricNotifier extends StateNotifier<BiometricState> {
   }
 }
 
-enum BiometricState {
-  loading,
-  unavailable,
-  disabled,
-  enabled,
-}
+enum BiometricState { loading, unavailable, disabled, enabled }

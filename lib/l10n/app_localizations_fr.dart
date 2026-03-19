@@ -1309,10 +1309,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrez vos transactions, suivez vos revenus et dépenses avec des statistiques détaillées.';
 
   @override
-  String get onboardingTitle3 => 'Sécurisé et privé';
+  String get onboardingTitle3 => 'Gérez vos dettes';
 
   @override
   String get onboardingDesc3 =>
+      'Suivez vos créances et vos dettes, définissez des rappels pour ne jamais manquer un paiement.';
+
+  @override
+  String get onboardingTitle4 => 'Sécurisé et privé';
+
+  @override
+  String get onboardingDesc4 =>
       'Vos données restent sur votre appareil. Sauvegardez et restaurez en toute sécurité avec un code PIN.';
 
   @override

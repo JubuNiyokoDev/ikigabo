@@ -242,7 +242,7 @@ AssetModel _assetModelDeserialize(
 ) {
   final object = AssetModel(
     createdAt: reader.readDateTime(offsets[0]),
-    currency: reader.readStringOrNull(offsets[1]) ?? 'FBU',
+    currency: reader.readStringOrNull(offsets[1]) ?? 'BIF',
     currentValue: reader.readDouble(offsets[2]),
     description: reader.readStringOrNull(offsets[3]),
     id: id,
@@ -279,7 +279,7 @@ P _assetModelDeserializeProp<P>(
     case 0:
       return (reader.readDateTime(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset) ?? 'FBU') as P;
+      return (reader.readStringOrNull(offset) ?? 'BIF') as P;
     case 2:
       return (reader.readDouble(offset)) as P;
     case 3:

@@ -17,15 +17,17 @@ final transactionServiceProvider = Provider<TransactionService>((ref) {
   );
 });
 
-final transactionControllerProvider =
-    StateNotifierProvider<TransactionController, AsyncValue<void>>((ref) {
-      return TransactionController(ref.read(transactionServiceProvider));
+final transactionServiceControllerProvider =
+    StateNotifierProvider<TransactionServiceController, AsyncValue<void>>((
+      ref,
+    ) {
+      return TransactionServiceController(ref.read(transactionServiceProvider));
     });
 
-class TransactionController extends StateNotifier<AsyncValue<void>> {
+class TransactionServiceController extends StateNotifier<AsyncValue<void>> {
   final TransactionService _transactionService;
 
-  TransactionController(this._transactionService)
+  TransactionServiceController(this._transactionService)
     : super(const AsyncValue.data(null));
 
   /// Créer une entrée d'argent externe

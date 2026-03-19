@@ -31,13 +31,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      await ref.read(prefs.preferencesServiceProvider).value?.setOnboardingCompleted(true);
-      
+      await ref
+          .read(prefs.preferencesServiceProvider)
+          .value
+          ?.setOnboardingCompleted(true);
+
       // Invalider le provider pour forcer le refresh
       ref.invalidate(onboardingCompleteProvider);
-      
+
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
@@ -101,7 +104,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Text(
                       l10n.skip,
                       style: TextStyle(
-                        color: isDark ? AppColors.textSecondaryDark : Colors.grey,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey,
                         fontSize: AppSizes.textMedium,
                       ),
                     ),
@@ -109,7 +114,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
             ),
-            
+
             // Page content
             Expanded(
               child: PageView(
@@ -122,7 +127,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
             ),
-            
+
             // Page indicators
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -132,17 +137,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   width: _currentPage == index ? 24.w : 8.w,
                   height: 8.h,
                   decoration: BoxDecoration(
-                    color: _currentPage == index 
-                        ? AppColors.primary 
-                        : (isDark ? AppColors.borderDark : Colors.grey.shade300),
+                    color: _currentPage == index
+                        ? AppColors.primary
+                        : (isDark
+                              ? AppColors.borderDark
+                              : Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 );
               }),
             ),
-            
+
             SizedBox(height: 24.h),
-            
+
             // Next/Get Started button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
@@ -171,15 +178,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(60.r),
             ),
-            child: Icon(
-              AppIcons.money,
-              size: 60.sp,
-              color: AppColors.primary,
-            ),
+            child: Icon(AppIcons.money, size: 60.sp, color: AppColors.primary),
           ).animate().scale(delay: 200.ms),
-          
+
           SizedBox(height: 32.h),
-          
+
           Text(
             l10n.onboardingTitle1,
             style: TextStyle(
@@ -189,9 +192,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 400.ms),
-          
+
           SizedBox(height: 16.h),
-          
+
           Text(
             l10n.onboardingDesc1,
             style: TextStyle(
@@ -219,15 +222,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(60.r),
             ),
-            child: Icon(
-              AppIcons.assets,
-              size: 60.sp,
-              color: AppColors.success,
-            ),
+            child: Icon(AppIcons.assets, size: 60.sp, color: AppColors.success),
           ).animate().scale(delay: 200.ms),
-          
+
           SizedBox(height: 32.h),
-          
+
           Text(
             l10n.onboardingTitle2,
             style: TextStyle(
@@ -237,9 +236,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 400.ms),
-          
+
           SizedBox(height: 16.h),
-          
+
           Text(
             l10n.onboardingDesc2,
             style: TextStyle(
@@ -273,11 +272,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               color: AppColors.accent,
             ),
           ).animate().scale(delay: 200.ms),
-          
+
           SizedBox(height: 32.h),
-          
+
           Text(
-            l10n.onboardingTitle3,
+            l10n.onboardingTitle4,
             style: TextStyle(
               fontSize: 24.sp,
               fontWeight: FontWeight.bold,
@@ -285,11 +284,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 400.ms),
-          
+
           SizedBox(height: 16.h),
-          
+
           Text(
-            l10n.onboardingDesc3,
+            l10n.onboardingDesc4,
             style: TextStyle(
               fontSize: AppSizes.textMedium,
               color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],

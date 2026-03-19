@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../l10n/app_localizations.dart';
@@ -16,6 +17,13 @@ import '../../providers/stats_provider.dart'
     hide totalIncomeProvider, totalExpenseProvider;
 import '../../providers/theme_provider.dart';
 import '../../providers/pdf_export_provider.dart';
+import '../../../data/services/pdf_export_service.dart';
+import '../../../data/models/transaction_model.dart' as tx;
+import '../../../data/models/asset_model.dart' as asset_m;
+import '../../../data/models/debt_model.dart' as debt_m;
+import '../../../data/models/bank_model.dart' as bank_m;
+import '../../../data/models/source_model.dart' as source_m;
+import 'advanced_export_screen.dart';
 import '../../widgets/currency_amount_widget.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
@@ -27,6 +35,7 @@ class StatsScreen extends ConsumerStatefulWidget {
 
 class _StatsScreenState extends ConsumerState<StatsScreen> {
   int _selectedPeriod = 1; // 0: Week, 1: Month, 2: Year, 3: All
+  bool _isExportProgressDialogOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -658,7 +667,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.read(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -674,11 +683,20 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               leading: const Icon(AppIcons.chart, color: AppColors.primary),
               title: Text(
                 l10n.fullReport,
-                style: TextStyle(color: isDark ? AppColors.textDark : Colors.black87),
+                style: TextStyle(
+                  color: isDark ? AppColors.textDark : Colors.black87,
+                ),
               ),
               subtitle: Text(
-                l10n.allFinancialData,
-                style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.black54),
+                _uiText(
+                  fr: 'Rapport complet sans limitation de lignes',
+                  en: 'Full report without row limit',
+                  rn: 'Raporo yuzuye idafise aho umurongo ugarukira',
+                  sw: 'Ripoti kamili bila kikomo cha mistari',
+                ),
+                style: TextStyle(
+                  color: isDark ? AppColors.textSecondaryDark : Colors.black54,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -686,10 +704,41 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(AppIcons.filter, color: AppColors.primary),
+              title: Text(
+                _uiText(
+                  fr: 'Rapport avance (20+ filtres)',
+                  en: 'Advanced report (20+ filters)',
+                  rn: 'Raporo yateye imbere (akarenze 20)',
+                  sw: 'Ripoti ya kina (vichujio 20+)',
+                ),
+                style: TextStyle(
+                  color: isDark ? AppColors.textDark : Colors.black87,
+                ),
+              ),
+              subtitle: Text(
+                _uiText(
+                  fr: 'Banques, sources, periode, montants, statuts, tri...',
+                  en: 'Banks, sources, periods, amounts, statuses, sort...',
+                  rn: 'Amabanki, amasoko, ibihe, amahera, uko bimeze, itondekwa...',
+                  sw: 'Benki, vyanzo, muda, kiasi, hali, upangaji...',
+                ),
+                style: TextStyle(
+                  color: isDark ? AppColors.textSecondaryDark : Colors.black54,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showAdvancedExportDialog();
+              },
+            ),
+            ListTile(
               leading: const Icon(AppIcons.assets, color: AppColors.success),
               title: Text(
                 l10n.assetReport,
-                style: TextStyle(color: isDark ? AppColors.textDark : Colors.black87),
+                style: TextStyle(
+                  color: isDark ? AppColors.textDark : Colors.black87,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -700,7 +749,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               leading: const Icon(AppIcons.debt, color: AppColors.warning),
               title: Text(
                 l10n.debtReport,
-                style: TextStyle(color: isDark ? AppColors.textDark : Colors.black87),
+                style: TextStyle(
+                  color: isDark ? AppColors.textDark : Colors.black87,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -713,77 +764,306 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  void _exportFullReport() async {
-    final l10n = AppLocalizations.of(context)!;
-    final periods = ['Semaine', 'Mois', 'Année', 'Tout'];
-    final period = periods[_selectedPeriod];
-    
-    // Récupérer les vraies données depuis les streams
-    final transactionsAsync = ref.read(transactionsStreamProvider);
-    final assetsAsync = ref.read(assetsStreamProvider);
-    final debtsAsync = ref.read(debtsStreamProvider);
-    final banksAsync = ref.read(banksStreamProvider);
-    final sourcesAsync = ref.read(sourcesStreamProvider);
-    final totalWealthAsync = ref.read(totalWealthProvider);
-    
-    final transactions = transactionsAsync.value ?? [];
-    final assets = assetsAsync.value ?? [];
-    final debts = debtsAsync.value ?? [];
-    final banks = banksAsync.value ?? [];
-    final sources = sourcesAsync.value ?? [];
-    final totalWealth = totalWealthAsync.value ?? 0;
-    final totalIncome = _getIncomeForPeriod().value ?? 0;
-    final totalExpense = _getExpenseForPeriod().value ?? 0;
-    
-    ref.read(pdfExportProvider.notifier).exportFinancialReport(
-      transactions: transactions,
-      assets: assets,
-      debts: debts,
-      banks: banks,
-      sources: sources,
-      totalWealth: totalWealth,
-      totalIncome: totalIncome,
-      totalExpense: totalExpense,
-      period: period,
-    );
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.exportInProgress),
-        backgroundColor: AppColors.primary,
+  Future<void> _showAdvancedExportDialog() async {
+    final sources = await ref.read(sourcesStreamProvider.future);
+    final banks = await ref.read(banksStreamProvider.future);
+    final assets = await ref.read(assetsStreamProvider.future);
+    final debts = await ref.read(debtsStreamProvider.future);
+
+    if (!mounted) return;
+
+    final result = await Navigator.of(context).push<AdvancedExportResult>(
+      MaterialPageRoute(
+        builder: (_) => AdvancedExportScreen(
+          sources: sources.where((item) => !item.isDeleted).toList(),
+          banks: banks.where((item) => !item.isDeleted).toList(),
+          assets: assets.where((item) => !item.isDeleted).toList(),
+          debts: debts.where((item) => !item.isDeleted).toList(),
+        ),
       ),
+    );
+
+    if (result == null) return;
+
+    await _exportFullReport(
+      filters: result.filters,
+      customTitle: result.customTitle,
     );
   }
 
-  void _exportAssetReport() async {
-    final l10n = AppLocalizations.of(context)!;
-    final assetsAsync = ref.read(assetsStreamProvider);
-    final assets = assetsAsync.value ?? [];
-    
-    ref.read(pdfExportProvider.notifier).exportAssetReport(assets);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.assetExportInProgress),
-        backgroundColor: AppColors.success,
-      ),
-    );
+  Future<void> _exportFullReport({
+    ReportExportFilters filters = const ReportExportFilters(),
+    String? customTitle,
+  }) async {
+    if (ref.read(pdfExportProvider).isExporting) {
+      _showExportBusyMessage();
+      return;
+    }
+
+    final snapshot = await _collectExportData();
+    if (snapshot == null) return;
+
+    final previousPath = ref.read(pdfExportProvider).lastExportPath;
+
+    await _runExportWithProgress(() async {
+      await ref
+          .read(pdfExportProvider.notifier)
+          .exportFinancialReport(
+            transactions: snapshot.transactions,
+            assets: snapshot.assets,
+            debts: snapshot.debts,
+            banks: snapshot.banks,
+            sources: snapshot.sources,
+            totalWealth: snapshot.totalWealth,
+            totalIncome: snapshot.totalIncome,
+            totalExpense: snapshot.totalExpense,
+            period: _periodLabelFromSelection(),
+            filters: filters,
+            customTitle: customTitle,
+          );
+    }, previousPath: previousPath);
   }
 
-  void _exportDebtReport() async {
-    final l10n = AppLocalizations.of(context)!;
-    final debtsAsync = ref.read(debtsStreamProvider);
-    final debts = debtsAsync.value ?? [];
-    
-    ref.read(pdfExportProvider.notifier).exportDebtReport(debts);
-    
+  Future<void> _exportAssetReport() async {
+    if (ref.read(pdfExportProvider).isExporting) {
+      _showExportBusyMessage();
+      return;
+    }
+
+    final assets = await ref.read(assetsStreamProvider.future);
+    final previousPath = ref.read(pdfExportProvider).lastExportPath;
+
+    await _runExportWithProgress(() async {
+      await ref.read(pdfExportProvider.notifier).exportAssetReport(assets);
+    }, previousPath: previousPath);
+  }
+
+  Future<void> _exportDebtReport() async {
+    if (ref.read(pdfExportProvider).isExporting) {
+      _showExportBusyMessage();
+      return;
+    }
+
+    final debts = await ref.read(debtsStreamProvider.future);
+    final previousPath = ref.read(pdfExportProvider).lastExportPath;
+
+    await _runExportWithProgress(() async {
+      await ref.read(pdfExportProvider.notifier).exportDebtReport(debts);
+    }, previousPath: previousPath);
+  }
+
+  Future<void> _runExportWithProgress(
+    Future<void> Function() task, {
+    String? previousPath,
+  }) async {
+    if (!mounted) return;
+    _showExportProgressDialog();
+
+    try {
+      await task();
+    } finally {
+      if (mounted && _isExportProgressDialogOpen) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+
+    if (!mounted) return;
+    final exportState = ref.read(pdfExportProvider);
+
+    if (exportState.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _uiText(
+              fr: 'Erreur export PDF: ${exportState.error}',
+              en: 'PDF export error: ${exportState.error}',
+              rn: 'Ikosa mu gusohora PDF: ${exportState.error}',
+              sw: 'Hitilafu ya kuhamisha PDF: ${exportState.error}',
+            ),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      ref.read(pdfExportProvider.notifier).clearError();
+      return;
+    }
+
+    final currentPath = exportState.lastExportPath;
+    if (currentPath != null && currentPath != previousPath) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _uiText(
+              fr: 'Export termine: $currentPath',
+              en: 'Export completed: $currentPath',
+              rn: 'Ivyasohowe birangiye: $currentPath',
+              sw: 'Uhamishaji umekamilika: $currentPath',
+            ),
+          ),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.debtExportInProgress),
+        content: Text(
+          _uiText(
+            fr: 'Export annule ou non finalise.',
+            en: 'Export cancelled or not completed.',
+            rn: 'Gusohora vyahagaritswe canke ntivyuzuye.',
+            sw: 'Uhamishaji umeghairiwa au haujakamilika.',
+          ),
+        ),
         backgroundColor: AppColors.warning,
       ),
     );
   }
+
+  void _showExportProgressDialog() {
+    if (_isExportProgressDialogOpen || !mounted) return;
+    _isExportProgressDialogOpen = true;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  _uiText(
+                    fr: 'Export PDF en cours...',
+                    en: 'PDF export in progress...',
+                    rn: 'Gusohora PDF biriko biraba...',
+                    sw: 'Uhamishaji wa PDF unaendelea...',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).whenComplete(() {
+      _isExportProgressDialogOpen = false;
+    });
+  }
+
+  void _showExportBusyMessage() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _uiText(
+            fr: 'Un export est deja en cours. Patiente un peu.',
+            en: 'An export is already running. Please wait.',
+            rn: 'Gusohora kumwe kuriko kuraba. Rindira gatoyi.',
+            sw: 'Uhamishaji tayari unaendelea. Tafadhali subiri.',
+          ),
+        ),
+        backgroundColor: AppColors.info,
+      ),
+    );
+  }
+
+  String _periodLabelFromSelection() {
+    final periods = [
+      _uiText(fr: 'Semaine', en: 'Week', rn: 'Indwi', sw: 'Wiki'),
+      _uiText(fr: 'Mois', en: 'Month', rn: 'Ukwezi', sw: 'Mwezi'),
+      _uiText(fr: 'Annee', en: 'Year', rn: 'Umwaka', sw: 'Mwaka'),
+      _uiText(fr: 'Tout', en: 'All', rn: 'Vyose', sw: 'Vyote'),
+    ];
+    return periods[_selectedPeriod];
+  }
+
+  String _uiText({
+    required String fr,
+    required String en,
+    required String rn,
+    required String sw,
+  }) {
+    final code = Localizations.localeOf(context).languageCode;
+    return switch (code) {
+      'en' => en,
+      'rn' => rn,
+      'sw' => sw,
+      _ => fr,
+    };
+  }
+
+  Future<_ExportDataSnapshot?> _collectExportData() async {
+    try {
+      final transactions = await ref.read(transactionsStreamProvider.future);
+      final assets = await ref.read(assetsStreamProvider.future);
+      final debts = await ref.read(debtsStreamProvider.future);
+      final banks = await ref.read(banksStreamProvider.future);
+      final sources = await ref.read(sourcesStreamProvider.future);
+      final totalWealth = await ref.read(totalWealthProvider.future);
+      final totalIncome =
+          _getIncomeForPeriod().value ??
+          transactions
+              .where((item) => item.type == tx.TransactionType.income)
+              .fold<double>(0.0, (sum, item) => sum + item.amount);
+      final totalExpense =
+          _getExpenseForPeriod().value ??
+          transactions
+              .where((item) => item.type == tx.TransactionType.expense)
+              .fold<double>(0.0, (sum, item) => sum + item.amount);
+
+      return _ExportDataSnapshot(
+        transactions: transactions,
+        assets: assets,
+        debts: debts,
+        banks: banks,
+        sources: sources,
+        totalWealth: totalWealth,
+        totalIncome: totalIncome,
+        totalExpense: totalExpense,
+      );
+    } catch (e) {
+      if (!mounted) return null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur de préparation export: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return null;
+    }
+  }
+}
+
+class _ExportDataSnapshot {
+  final List<tx.TransactionModel> transactions;
+  final List<asset_m.AssetModel> assets;
+  final List<debt_m.DebtModel> debts;
+  final List<bank_m.BankModel> banks;
+  final List<source_m.SourceModel> sources;
+  final double totalWealth;
+  final double totalIncome;
+  final double totalExpense;
+
+  const _ExportDataSnapshot({
+    required this.transactions,
+    required this.assets,
+    required this.debts,
+    required this.banks,
+    required this.sources,
+    required this.totalWealth,
+    required this.totalIncome,
+    required this.totalExpense,
+  });
 }
 
 class _SummaryCard extends StatelessWidget {

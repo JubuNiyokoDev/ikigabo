@@ -22,6 +22,15 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
+  static const int _dueSoonDays = 3;
+  static const int _backupReminderAfterDays = 3;
+  static const Duration _backupReminderCooldown = Duration(hours: 24);
+
+  static const String _wealthLastMilestoneKey =
+      'notification_state_wealth_last_milestone';
+  static const String _backupLastReminderAtKey =
+      'notification_state_backup_last_reminder_at';
+
   final List<NotificationItem> _notifications = [];
   final ValueNotifier<int> _notificationCount = ValueNotifier(0);
   final FlutterLocalNotificationsPlugin _flutterNotifications =
@@ -62,10 +71,10 @@ class NotificationService {
     // Créer le canal de notification AVANT de l'utiliser
     await _createNotificationChannel();
     await _requestPermissions();
-    
+
     // Charger les notifications sauvegardées
     await _loadNotifications();
-    
+
     _updateNotificationCount();
 
     // Configurer le port pour recevoir les alarmes
@@ -146,7 +155,7 @@ class NotificationService {
         title: title,
         message: message,
       );
-      
+
       if (result.success) {
         _addNotification(
           NotificationItem(
@@ -172,15 +181,45 @@ class NotificationService {
     // Vérifier si les notifications budget sont généralement activées
     if (_prefsService?.getOverdueAlertsEnabled() != true) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    final periodKey = _budgetPeriodKey(budget);
+    final progressKey =
+        'notification_state_budget_progress_${budget.id}_$periodKey';
+    final previousProgress = prefs.getDouble(progressKey);
     final warningThreshold = budget.warningThreshold ?? 80.0;
     final currentProgress = budget.progressPercentage;
 
-    if (currentProgress >= warningThreshold) {
+    // Baseline initial pour éviter un spam au premier lancement.
+    if (previousProgress == null) {
+      await prefs.setDouble(progressKey, currentProgress);
+      return;
+    }
+
+    final crossedWarning =
+        previousProgress < warningThreshold &&
+        currentProgress >= warningThreshold &&
+        currentProgress < 100;
+    final crossedExceeded = previousProgress < 100 && currentProgress >= 100;
+
+    if (crossedExceeded) {
+      _addNotification(
+        NotificationItem(
+          id: 'budget_${budget.id}_exceeded',
+          title: 'Budget dépassé',
+          body:
+              '${budget.name}: ${budget.currentAmount.toStringAsFixed(0)} ${budget.currency} (limite: ${budget.targetAmount.toStringAsFixed(0)})',
+          type: NotificationType.budgetExceeded,
+          relatedId: budget.id,
+          scheduledDate: DateTime.now(),
+        ),
+      );
+    } else if (crossedWarning) {
       _addNotification(
         NotificationItem(
           id: 'budget_${budget.id}_warning',
-          title: 'Budget Alert',
-          body: '${budget.name}: ${currentProgress.toInt()}% utilisé (${budget.currentAmount}/${budget.targetAmount} ${budget.currency})',
+          title: 'Alerte budget',
+          body:
+              '${budget.name}: ${currentProgress.toInt()}% utilisé (${budget.currentAmount.toStringAsFixed(0)}/${budget.targetAmount.toStringAsFixed(0)} ${budget.currency})',
           type: NotificationType.budgetWarning,
           relatedId: budget.id,
           scheduledDate: DateTime.now(),
@@ -188,110 +227,189 @@ class NotificationService {
       );
     }
 
-    if (budget.isOverBudget) {
-      _addNotification(
-        NotificationItem(
-          id: 'budget_${budget.id}_exceeded',
-          title: 'Budget Dépassé !',
-          body: '${budget.name}: ${budget.currentAmount} ${budget.currency} (limite: ${budget.targetAmount})',
-          type: NotificationType.budgetExceeded,
-          relatedId: budget.id,
-          scheduledDate: DateTime.now(),
-        ),
-      );
-    }
+    await prefs.setDouble(progressKey, currentProgress);
   }
 
-  Future<void> checkLowBalanceAlerts(List<SourceModel> sources, List<BankModel> banks) async {
+  Future<void> checkLowBalanceAlerts(
+    List<SourceModel> sources,
+    List<BankModel> banks,
+  ) async {
     // Vérifier si les alertes de solde faible sont activées
     if (_prefsService?.getOverdueAlertsEnabled() != true) return;
-    
-    final lowBalanceThreshold = _prefsService?.getLowBalanceThreshold() ?? 10000.0;
+
+    final prefs = await SharedPreferences.getInstance();
+    final lowBalanceThreshold =
+        _prefsService?.getLowBalanceThreshold() ?? 10000.0;
 
     for (final source in sources) {
-      if (source.amount <= lowBalanceThreshold && source.amount > 0) {
+      final stateKey = 'notification_state_low_source_${source.id}';
+      final previousIsLow = prefs.getBool(stateKey);
+      final isLow = source.amount <= lowBalanceThreshold;
+
+      if (previousIsLow == null) {
+        await prefs.setBool(stateKey, isLow);
+        continue;
+      }
+
+      if (!previousIsLow && isLow) {
         _addNotification(
           NotificationItem(
             id: 'low_balance_source_${source.id}',
             title: 'Solde Faible',
-            body: '${source.name}: ${source.amount} ${source.currency}',
+            body:
+                '${source.name}: ${source.amount.toStringAsFixed(0)} ${source.currency} (seuil: ${lowBalanceThreshold.toStringAsFixed(0)})',
             type: NotificationType.lowBalance,
             relatedId: source.id,
             scheduledDate: DateTime.now(),
           ),
         );
       }
+
+      if (previousIsLow && !isLow) {
+        removeNotification('low_balance_source_${source.id}');
+      }
+
+      await prefs.setBool(stateKey, isLow);
     }
 
     for (final bank in banks) {
-      if (bank.balance <= lowBalanceThreshold && bank.balance > 0) {
+      final stateKey = 'notification_state_low_bank_${bank.id}';
+      final previousIsLow = prefs.getBool(stateKey);
+      final isLow = bank.balance <= lowBalanceThreshold;
+
+      if (previousIsLow == null) {
+        await prefs.setBool(stateKey, isLow);
+        continue;
+      }
+
+      if (!previousIsLow && isLow) {
         _addNotification(
           NotificationItem(
             id: 'low_balance_bank_${bank.id}',
             title: 'Solde Bancaire Faible',
-            body: '${bank.name}: ${bank.balance} ${bank.currency}',
+            body:
+                '${bank.name}: ${bank.balance.toStringAsFixed(0)} ${bank.currency} (seuil: ${lowBalanceThreshold.toStringAsFixed(0)})',
             type: NotificationType.lowBalance,
             relatedId: bank.id,
             scheduledDate: DateTime.now(),
           ),
         );
       }
+
+      if (previousIsLow && !isLow) {
+        removeNotification('low_balance_bank_${bank.id}');
+      }
+
+      await prefs.setBool(stateKey, isLow);
     }
   }
 
   Future<void> checkOverdueDebts(List<DebtModel> debts) async {
     if (_prefsService?.getOverdueAlertsEnabled() != true) return;
 
+    final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
     for (final debt in debts) {
-      if (debt.dueDate != null && debt.dueDate!.isBefore(now) && debt.status != DebtStatus.fullyPaid) {
+      final stateKey = 'notification_state_debt_${debt.id}_overdue';
+      final previousIsOverdue = prefs.getBool(stateKey);
+      final isOverdue =
+          debt.dueDate != null &&
+          debt.dueDate!.isBefore(now) &&
+          debt.status != DebtStatus.fullyPaid;
+
+      if (previousIsOverdue == null) {
+        await prefs.setBool(stateKey, isOverdue);
+        continue;
+      }
+
+      if (!previousIsOverdue && isOverdue) {
         final daysPastDue = now.difference(debt.dueDate!).inDays;
         _addNotification(
           NotificationItem(
             id: 'debt_${debt.id}_overdue',
             title: 'Dette en retard',
-            body: '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (${daysPastDue} jours de retard)',
+            body:
+                '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (${daysPastDue} jours de retard)',
             type: NotificationType.debtOverdue,
             relatedId: debt.id,
             scheduledDate: DateTime.now(),
           ),
         );
       }
+
+      if (previousIsOverdue && !isOverdue) {
+        removeNotification('debt_${debt.id}_overdue');
+      }
+
+      await prefs.setBool(stateKey, isOverdue);
     }
   }
 
   Future<void> checkUpcomingDebts(List<DebtModel> debts) async {
     if (_prefsService?.getDebtRemindersEnabled() != true) return;
 
+    final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
-    final in3Days = now.add(const Duration(days: 3));
-    
+
     for (final debt in debts) {
-      if (debt.dueDate != null && 
-          debt.dueDate!.isAfter(now) && 
-          debt.dueDate!.isBefore(in3Days) && 
-          debt.status != DebtStatus.fullyPaid) {
-        final daysUntilDue = debt.dueDate!.difference(now).inDays;
+      final stateKey = 'notification_state_debt_${debt.id}_due_soon';
+      final previousIsDueSoon = prefs.getBool(stateKey);
+      final dueDate = debt.dueDate;
+      final daysUntilDue = dueDate != null
+          ? dueDate.difference(now).inDays
+          : -1;
+      final isDueSoon =
+          dueDate != null &&
+          daysUntilDue >= 0 &&
+          daysUntilDue <= _dueSoonDays &&
+          debt.status != DebtStatus.fullyPaid;
+
+      if (previousIsDueSoon == null) {
+        await prefs.setBool(stateKey, isDueSoon);
+        continue;
+      }
+
+      if (!previousIsDueSoon && isDueSoon) {
         _addNotification(
           NotificationItem(
             id: 'debt_${debt.id}_due_soon',
             title: 'Échéance proche',
-            body: '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (dans ${daysUntilDue} jours)',
+            body:
+                '${debt.personName}: ${debt.remainingAmount.toStringAsFixed(0)} ${debt.currency} (dans ${daysUntilDue} jours)',
             type: NotificationType.debtReminder,
             relatedId: debt.id,
             scheduledDate: DateTime.now(),
           ),
         );
       }
+
+      if (previousIsDueSoon && !isDueSoon) {
+        removeNotification('debt_${debt.id}_due_soon');
+      }
+
+      await prefs.setBool(stateKey, isDueSoon);
     }
   }
 
-  Future<void> celebrateWealthMilestone(double newWealth, String currency) async {
+  Future<void> celebrateWealthMilestone(
+    double newWealth,
+    String currency,
+  ) async {
     // Vérifier si les objectifs patrimoine sont activés
     if (_prefsService?.getWealthMilestonesEnabled() != true) return;
-    
-    final milestones = [50000, 100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000];
-    
+
+    final prefs = await SharedPreferences.getInstance();
+    final milestones = [
+      50000,
+      100000,
+      250000,
+      500000,
+      1000000,
+      2500000,
+      5000000,
+      10000000,
+    ];
+
     // Trouver le plus grand milestone atteint
     int? achievedMilestone;
     for (final milestone in milestones.reversed) {
@@ -300,25 +418,31 @@ class NotificationService {
         break;
       }
     }
-    
+
     if (achievedMilestone == null) return;
-    
-    final key = 'milestone_$achievedMilestone';
-    final alreadyCelebrated = _prefsService?.getBool(key) ?? false;
-    
-    if (!alreadyCelebrated) {
+
+    final previousMilestone = prefs.getInt(_wealthLastMilestoneKey);
+
+    // Baseline initial pour éviter un pop-up historique au premier lancement.
+    if (previousMilestone == null) {
+      await prefs.setInt(_wealthLastMilestoneKey, achievedMilestone);
+      return;
+    }
+
+    if (achievedMilestone > previousMilestone) {
       _addNotification(
         NotificationItem(
           id: 'wealth_milestone_$achievedMilestone',
           title: '🎉 Nouveau Palier Atteint !',
-          body: 'Votre patrimoine total est maintenant de ${newWealth.toStringAsFixed(0)} $currency (palier ${achievedMilestone ~/ 1000}K franchi)',
+          body:
+              'Votre patrimoine total est maintenant de ${newWealth.toStringAsFixed(0)} $currency (palier ${achievedMilestone ~/ 1000}K franchi)',
           type: NotificationType.wealthMilestone,
           scheduledDate: DateTime.now(),
         ),
       );
-      
-      await _prefsService?.setBool(key, true);
     }
+
+    await prefs.setInt(_wealthLastMilestoneKey, achievedMilestone);
   }
 
   // Supprimer cette méthode inutile qui crée des notifications aléatoires
@@ -332,15 +456,27 @@ class NotificationService {
     // Vérifier si les alertes frais bancaires sont activées
     if (_prefsService?.getBankFeesEnabled() != true) return;
 
+    final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
     final nextDeduction = bank.nextDeductionDate!;
     final daysDifference = nextDeduction.difference(now).inDays;
 
     if (daysDifference <= 1 && daysDifference >= 0) {
+      final feeDayKey = DateTime(
+        nextDeduction.year,
+        nextDeduction.month,
+        nextDeduction.day,
+      ).millisecondsSinceEpoch;
+      final stateKey = 'notification_state_bank_fee_${bank.id}_last_day';
+      final lastNotifiedFeeDay = prefs.getInt(stateKey);
+      if (lastNotifiedFeeDay == feeDayKey) {
+        return;
+      }
+
       final fee = bank.calculateInterest();
       _addNotification(
         NotificationItem(
-          id: 'bank_${bank.id}_fee',
+          id: 'bank_${bank.id}_fee_$feeDayKey',
           title: 'Frais bancaires à venir',
           body:
               'Des frais de ${fee.toStringAsFixed(0)} ${bank.currency} seront prélevés de ${bank.name} dans $daysDifference jour(s)',
@@ -349,6 +485,8 @@ class NotificationService {
           scheduledDate: nextDeduction,
         ),
       );
+
+      await prefs.setInt(stateKey, feeDayKey);
     }
   }
 
@@ -356,15 +494,53 @@ class NotificationService {
     // Vérifier si les rappels sauvegarde sont activés
     if (_prefsService?.getBackupRemindersEnabled() != true) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final lastBackup = _prefsService?.getLastBackupDate();
+    final isBackupOutdated =
+        lastBackup == null ||
+        now.difference(lastBackup).inDays >= _backupReminderAfterDays;
+
+    if (!isBackupOutdated) {
+      removeNotification('backup_reminder_stale');
+      return;
+    }
+
+    final lastReminderAtMillis = prefs.getInt(_backupLastReminderAtKey);
+    if (lastReminderAtMillis != null) {
+      final lastReminderAt = DateTime.fromMillisecondsSinceEpoch(
+        lastReminderAtMillis,
+      );
+      if (now.difference(lastReminderAt) < _backupReminderCooldown) {
+        return;
+      }
+    }
+
     _addNotification(
       NotificationItem(
-        id: 'backup_reminder_${DateTime.now().millisecondsSinceEpoch}',
+        id: 'backup_reminder_stale',
         title: 'Sauvegarde recommandée',
         body: 'Il est temps de sauvegarder vos données',
         type: NotificationType.backupReminder,
-        scheduledDate: DateTime.now(),
+        scheduledDate: now,
       ),
     );
+
+    await prefs.setInt(_backupLastReminderAtKey, now.millisecondsSinceEpoch);
+  }
+
+  String _budgetPeriodKey(BudgetModel budget) {
+    final start = DateTime(
+      budget.startDate.year,
+      budget.startDate.month,
+      budget.startDate.day,
+    ).millisecondsSinceEpoch;
+    final end = DateTime(
+      budget.endDate.year,
+      budget.endDate.month,
+      budget.endDate.day,
+    ).millisecondsSinceEpoch;
+    return '${budget.period.name}_${start}_$end';
   }
 
   void _addNotification(NotificationItem notification) {
@@ -384,11 +560,12 @@ class NotificationService {
 
   bool _isNotificationTypeEnabled(NotificationType type) {
     if (_prefsService == null) return false;
-    
+
     switch (type) {
       case NotificationType.debtReminder:
-      case NotificationType.debtOverdue:
         return _prefsService!.getDebtRemindersEnabled();
+      case NotificationType.debtOverdue:
+        return _prefsService!.getOverdueAlertsEnabled();
       case NotificationType.bankFee:
         return _prefsService!.getBankFeesEnabled();
       case NotificationType.wealthMilestone:
@@ -416,6 +593,7 @@ class NotificationService {
 
   void clearAllNotifications() {
     _notifications.clear();
+    _saveNotifications();
     _updateNotificationCount();
   }
 
@@ -531,7 +709,9 @@ class NotificationService {
       final notificationsJson = jsonDecode(notificationsString) as List;
       _notifications.clear();
       _notifications.addAll(
-        notificationsJson.map((json) => NotificationItem.fromJson(json)).toList(),
+        notificationsJson
+            .map((json) => NotificationItem.fromJson(json))
+            .toList(),
       );
     }
   }
@@ -572,15 +752,18 @@ class NotificationItem {
     'isRead': isRead,
   };
 
-  factory NotificationItem.fromJson(Map<String, dynamic> json) => NotificationItem(
-    id: json['id'],
-    title: json['title'],
-    body: json['body'],
-    type: NotificationType.values[json['type']],
-    relatedId: json['relatedId'],
-    scheduledDate: DateTime.fromMillisecondsSinceEpoch(json['scheduledDate']),
-    isRead: json['isRead'] ?? false,
-  );
+  factory NotificationItem.fromJson(Map<String, dynamic> json) =>
+      NotificationItem(
+        id: json['id'],
+        title: json['title'],
+        body: json['body'],
+        type: NotificationType.values[json['type']],
+        relatedId: json['relatedId'],
+        scheduledDate: DateTime.fromMillisecondsSinceEpoch(
+          json['scheduledDate'],
+        ),
+        isRead: json['isRead'] ?? false,
+      );
 }
 
 enum NotificationType {

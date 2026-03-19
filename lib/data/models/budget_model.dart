@@ -71,7 +71,7 @@ class BudgetModel {
     required this.period,
     required this.targetAmount,
     this.currentAmount = 0.0,
-    this.currency = 'FBU',
+    this.currency = 'BIF',
     this.categoryId,
     required this.startDate,
     required this.endDate,

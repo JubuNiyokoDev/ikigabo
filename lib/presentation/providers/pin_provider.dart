@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/preferences_service.dart';
-import 'theme_provider.dart';
+import 'preferences_provider.dart';
 
 final pinProvider = StateNotifierProvider<PinNotifier, PinState>((ref) {
   final prefsService = ref.watch(preferencesServiceProvider).value;
@@ -18,7 +18,7 @@ class PinNotifier extends StateNotifier<PinState> {
     if (_prefsService != null) {
       final isEnabled = _prefsService.isPinEnabled();
       final savedPin = _prefsService.getSavedPin();
-      
+
       if (isEnabled && savedPin != null) {
         state = PinState.required;
       } else {
@@ -40,8 +40,8 @@ class PinNotifier extends StateNotifier<PinState> {
 
   Future<bool> verifyPin(String pin) async {
     if (_prefsService != null) {
-      final savedPin = _prefsService.getSavedPin();
-      if (savedPin == pin) {
+      final isValid = _prefsService.verifyPin(pin);
+      if (isValid) {
         state = PinState.authenticated;
         return true;
       }
@@ -51,8 +51,8 @@ class PinNotifier extends StateNotifier<PinState> {
 
   Future<bool> changePin(String oldPin, String newPin) async {
     if (_prefsService != null) {
-      final savedPin = _prefsService.getSavedPin();
-      if (savedPin == oldPin) {
+      final isOldPinValid = _prefsService.verifyPin(oldPin);
+      if (isOldPinValid) {
         return await _prefsService.savePin(newPin);
       }
     }
@@ -83,9 +83,4 @@ class PinNotifier extends StateNotifier<PinState> {
   }
 }
 
-enum PinState {
-  loading,
-  notSet,
-  required,
-  authenticated,
-}
+enum PinState { loading, notSet, required, authenticated }

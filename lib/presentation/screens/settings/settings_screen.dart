@@ -11,7 +11,8 @@ import '../../../core/constants/currencies.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/locale_provider.dart';
-import '../../providers/currency_provider.dart' hide preferencesServiceProvider;
+import '../../providers/currency_provider.dart';
+import '../../providers/preferences_provider.dart';
 import '../../providers/pin_provider.dart';
 import '../../providers/biometric_provider.dart';
 import '../../providers/source_provider.dart';
@@ -501,10 +502,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _deleteAllData(context, l10n);
   }
 
-  void _deleteAllData(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) async {
+  void _deleteAllData(BuildContext context, AppLocalizations l10n) async {
     try {
       // Supprimer toutes les données de la base
       final isar = ref.read(isarProvider).value;
@@ -740,7 +738,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       : Switch(
                           value: autoBackupState.isEnabled,
                           onChanged: (value) {
-                            ref.read(autoBackupProvider.notifier).toggleAutoBackup(value);
+                            ref
+                                .read(autoBackupProvider.notifier)
+                                .toggleAutoBackup(value);
                           },
                           activeTrackColor: AppColors.primary,
                         ),

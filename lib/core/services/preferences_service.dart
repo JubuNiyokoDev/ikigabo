@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
@@ -7,9 +11,11 @@ class PreferencesService {
   static const String _themeKey = 'theme_mode';
   static const String _currencyKey = 'default_currency';
   static const String _pinKey = 'user_pin';
+  static const String _pinSaltKey = 'user_pin_salt';
   static const String _pinEnabledKey = 'pin_enabled';
   static const String _biometricEnabledKey = 'biometric_enabled';
-  static const String _notificationDebtRemindersKey = 'notification_debt_reminders';
+  static const String _notificationDebtRemindersKey =
+      'notification_debt_reminders';
   static const String _notificationBankFeesKey = 'notification_bank_fees';
   static const String _notificationWealthKey = 'notification_wealth';
   static const String _notificationBackupKey = 'notification_backup';
@@ -103,19 +109,54 @@ class PreferencesService {
     return _prefs.getString(_pinKey);
   }
 
+  /// Vérifier le PIN utilisateur
+  /// Compatibilité legacy: si aucun sel n'existe, comparer en clair.
+  bool verifyPin(String pin) {
+    final savedPin = _prefs.getString(_pinKey);
+    if (savedPin == null) return false;
+
+    final salt = _prefs.getString(_pinSaltKey);
+    if (salt == null) {
+      return savedPin == pin;
+    }
+
+    final computedHash = _hashPin(pin, salt);
+    return savedPin == computedHash;
+  }
+
   /// Sauvegarder le PIN
   Future<bool> savePin(String pin) async {
-    final success = await _prefs.setString(_pinKey, pin);
-    if (success) {
-      await _prefs.setBool(_pinEnabledKey, true);
-    }
-    return success;
+    if (pin.isEmpty) return false;
+
+    final salt = _generateSalt();
+    final pinHash = _hashPin(pin, salt);
+
+    final savePinHash = await _prefs.setString(_pinKey, pinHash);
+    if (!savePinHash) return false;
+
+    final saveSalt = await _prefs.setString(_pinSaltKey, salt);
+    if (!saveSalt) return false;
+
+    await _prefs.setBool(_pinEnabledKey, true);
+    return true;
   }
 
   /// Désactiver le PIN
   Future<bool> disablePin() async {
     await _prefs.remove(_pinKey);
+    await _prefs.remove(_pinSaltKey);
     return await _prefs.setBool(_pinEnabledKey, false);
+  }
+
+  String _generateSalt() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64Encode(bytes);
+  }
+
+  String _hashPin(String pin, String salt) {
+    final bytes = utf8.encode('$salt:$pin');
+    return sha256.convert(bytes).toString();
   }
 
   // === BIOMÉTRIE ===
@@ -133,18 +174,27 @@ class PreferencesService {
   // === NOTIFICATIONS ===
 
   /// Récupérer les préférences de notifications
-  bool getDebtRemindersEnabled() => _prefs.getBool(_notificationDebtRemindersKey) ?? true;
+  bool getDebtRemindersEnabled() =>
+      _prefs.getBool(_notificationDebtRemindersKey) ?? true;
   bool getBankFeesEnabled() => _prefs.getBool(_notificationBankFeesKey) ?? true;
-  bool getWealthMilestonesEnabled() => _prefs.getBool(_notificationWealthKey) ?? true;
-  bool getBackupRemindersEnabled() => _prefs.getBool(_notificationBackupKey) ?? true;
-  bool getOverdueAlertsEnabled() => _prefs.getBool(_notificationOverdueKey) ?? true;
+  bool getWealthMilestonesEnabled() =>
+      _prefs.getBool(_notificationWealthKey) ?? true;
+  bool getBackupRemindersEnabled() =>
+      _prefs.getBool(_notificationBackupKey) ?? true;
+  bool getOverdueAlertsEnabled() =>
+      _prefs.getBool(_notificationOverdueKey) ?? true;
 
   /// Sauvegarder les préférences de notifications
-  Future<bool> setDebtRemindersEnabled(bool enabled) => _prefs.setBool(_notificationDebtRemindersKey, enabled);
-  Future<bool> setBankFeesEnabled(bool enabled) => _prefs.setBool(_notificationBankFeesKey, enabled);
-  Future<bool> setWealthMilestonesEnabled(bool enabled) => _prefs.setBool(_notificationWealthKey, enabled);
-  Future<bool> setBackupRemindersEnabled(bool enabled) => _prefs.setBool(_notificationBackupKey, enabled);
-  Future<bool> setOverdueAlertsEnabled(bool enabled) => _prefs.setBool(_notificationOverdueKey, enabled);
+  Future<bool> setDebtRemindersEnabled(bool enabled) =>
+      _prefs.setBool(_notificationDebtRemindersKey, enabled);
+  Future<bool> setBankFeesEnabled(bool enabled) =>
+      _prefs.setBool(_notificationBankFeesKey, enabled);
+  Future<bool> setWealthMilestonesEnabled(bool enabled) =>
+      _prefs.setBool(_notificationWealthKey, enabled);
+  Future<bool> setBackupRemindersEnabled(bool enabled) =>
+      _prefs.setBool(_notificationBackupKey, enabled);
+  Future<bool> setOverdueAlertsEnabled(bool enabled) =>
+      _prefs.setBool(_notificationOverdueKey, enabled);
 
   // === BACKUP ===
 
@@ -152,32 +202,40 @@ class PreferencesService {
   bool isAutoBackupEnabled() => _prefs.getBool(_autoBackupEnabledKey) ?? true;
 
   /// Activer/désactiver la sauvegarde automatique
-  Future<bool> setAutoBackupEnabled(bool enabled) => _prefs.setBool(_autoBackupEnabledKey, enabled);
+  Future<bool> setAutoBackupEnabled(bool enabled) =>
+      _prefs.setBool(_autoBackupEnabledKey, enabled);
 
   /// Récupérer la date de dernière sauvegarde
   DateTime? getLastBackupDate() {
     final timestamp = _prefs.getInt(_lastBackupDateKey);
-    return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+    return timestamp != null
+        ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+        : null;
   }
 
   /// Sauvegarder la date de dernière sauvegarde
-  Future<bool> setLastBackupDate(DateTime date) => _prefs.setInt(_lastBackupDateKey, date.millisecondsSinceEpoch);
+  Future<bool> setLastBackupDate(DateTime date) =>
+      _prefs.setInt(_lastBackupDateKey, date.millisecondsSinceEpoch);
 
   // === SEUILS ===
 
   /// Récupérer le seuil de solde faible
-  double getLowBalanceThreshold() => _prefs.getDouble(_lowBalanceThresholdKey) ?? 10000.0;
+  double getLowBalanceThreshold() =>
+      _prefs.getDouble(_lowBalanceThresholdKey) ?? 10000.0;
 
   /// Sauvegarder le seuil de solde faible
-  Future<bool> setLowBalanceThreshold(double threshold) => _prefs.setDouble(_lowBalanceThresholdKey, threshold);
+  Future<bool> setLowBalanceThreshold(double threshold) =>
+      _prefs.setDouble(_lowBalanceThresholdKey, threshold);
 
   // === ONBOARDING ===
 
   /// Vérifier si l'onboarding est terminé
-  bool isOnboardingCompleted() => _prefs.getBool(_onboardingCompletedKey) ?? false;
+  bool isOnboardingCompleted() =>
+      _prefs.getBool(_onboardingCompletedKey) ?? false;
 
   /// Marquer l'onboarding comme terminé
-  Future<bool> setOnboardingCompleted(bool completed) => _prefs.setBool(_onboardingCompletedKey, completed);
+  Future<bool> setOnboardingCompleted(bool completed) =>
+      _prefs.setBool(_onboardingCompletedKey, completed);
 
   /// Méthodes génériques pour bool
   bool getBool(String key) => _prefs.getBool(key) ?? false;
@@ -193,16 +251,16 @@ class PreferencesService {
     // Sauvegarder langue et thème
     final language = getSavedLanguage();
     final theme = getSavedThemeMode();
-    
+
     // Effacer tout
     await _prefs.clear();
-    
+
     // Restaurer langue et thème
     if (language != null) {
       await saveLanguage(language);
     }
     await saveThemeMode(theme);
-    
+
     return true;
   }
 

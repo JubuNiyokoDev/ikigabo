@@ -7,8 +7,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../data/models/debt_model.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../providers/debt_provider.dart' hide filteredDebtsProvider;
-import '../../providers/search_provider.dart';
+import '../../providers/debt_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
@@ -26,6 +25,9 @@ class DebtsListScreen extends ConsumerStatefulWidget {
 
 class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
   int _selectedTab = 0; // 0: All, 1: Given, 2: Received
+  DebtStatus? _statusFilter;
+  bool _onlyOverdue = false;
+  _DebtSortOption _sortOption = _DebtSortOption.dueDateAsc;
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +94,195 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
   }
 
   List<DebtModel> _filterDebts(List<DebtModel> debts) {
-    switch (_selectedTab) {
-      case 1:
-        return debts.where((d) => d.type == DebtType.given).toList();
-      case 2:
-        return debts.where((d) => d.type == DebtType.received).toList();
-      default:
-        return debts;
+    var filtered = switch (_selectedTab) {
+      1 => debts.where((d) => d.type == DebtType.given).toList(),
+      2 => debts.where((d) => d.type == DebtType.received).toList(),
+      _ => debts.toList(),
+    };
+
+    if (_statusFilter != null) {
+      filtered = filtered.where((d) => d.status == _statusFilter).toList();
     }
+
+    if (_onlyOverdue) {
+      filtered = filtered.where((d) => d.isOverdue).toList();
+    }
+
+    filtered.sort(
+      (a, b) => switch (_sortOption) {
+        _DebtSortOption.dueDateAsc => _compareNullableDate(
+          a.dueDate,
+          b.dueDate,
+        ),
+        _DebtSortOption.dueDateDesc => _compareNullableDate(
+          b.dueDate,
+          a.dueDate,
+        ),
+        _DebtSortOption.amountAsc => a.remainingAmount.compareTo(
+          b.remainingAmount,
+        ),
+        _DebtSortOption.amountDesc => b.remainingAmount.compareTo(
+          a.remainingAmount,
+        ),
+        _DebtSortOption.createdDesc => b.createdAt.compareTo(a.createdAt),
+        _DebtSortOption.nameAsc => a.personName.toLowerCase().compareTo(
+          b.personName.toLowerCase(),
+        ),
+      },
+    );
+
+    return filtered;
+  }
+
+  int _compareNullableDate(DateTime? a, DateTime? b) {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    return a.compareTo(b);
+  }
+
+  bool get _hasActiveFilter => _statusFilter != null || _onlyOverdue;
+
+  void _showFilterSortSheet(AppLocalizations l10n) {
+    var tempStatus = _statusFilter;
+    var tempOnlyOverdue = _onlyOverdue;
+    var tempSort = _sortOption;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filtres & tri',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<_DebtSortOption>(
+                    value: tempSort,
+                    decoration: const InputDecoration(labelText: 'Trier par'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: _DebtSortOption.dueDateAsc,
+                        child: Text('Échéance (plus proche)'),
+                      ),
+                      DropdownMenuItem(
+                        value: _DebtSortOption.dueDateDesc,
+                        child: Text('Échéance (plus lointaine)'),
+                      ),
+                      DropdownMenuItem(
+                        value: _DebtSortOption.amountDesc,
+                        child: Text('Montant restant (décroissant)'),
+                      ),
+                      DropdownMenuItem(
+                        value: _DebtSortOption.amountAsc,
+                        child: Text('Montant restant (croissant)'),
+                      ),
+                      DropdownMenuItem(
+                        value: _DebtSortOption.createdDesc,
+                        child: Text('Plus récentes'),
+                      ),
+                      DropdownMenuItem(
+                        value: _DebtSortOption.nameAsc,
+                        child: Text('Nom (A-Z)'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setModalState(() => tempSort = value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<DebtStatus?>(
+                    value: tempStatus,
+                    decoration: const InputDecoration(labelText: 'Statut'),
+                    items: const [
+                      DropdownMenuItem<DebtStatus?>(
+                        value: null,
+                        child: Text('Tous les statuts'),
+                      ),
+                      DropdownMenuItem(
+                        value: DebtStatus.pending,
+                        child: Text('En attente'),
+                      ),
+                      DropdownMenuItem(
+                        value: DebtStatus.partiallyPaid,
+                        child: Text('Partiellement payé'),
+                      ),
+                      DropdownMenuItem(
+                        value: DebtStatus.fullyPaid,
+                        child: Text('Payé'),
+                      ),
+                      DropdownMenuItem(
+                        value: DebtStatus.cancelled,
+                        child: Text('Annulé'),
+                      ),
+                    ],
+                    onChanged: (value) =>
+                        setModalState(() => tempStatus = value),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Uniquement en retard'),
+                    value: tempOnlyOverdue,
+                    onChanged: (value) =>
+                        setModalState(() => tempOnlyOverdue = value),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _statusFilter = null;
+                              _onlyOverdue = false;
+                              _sortOption = _DebtSortOption.dueDateAsc;
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Réinitialiser'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              _statusFilter = tempStatus;
+                              _onlyOverdue = tempOnlyOverdue;
+                              _sortOption = tempSort;
+                            });
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Filtres appliqués'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: const Text('Appliquer'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildHeader(AppLocalizations l10n) {
@@ -138,12 +321,24 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
                 ),
               ),
               IconButton(
-                onPressed: () {
-                  // TODO: Filter/Sort
-                },
-                icon: Icon(
-                  AppIcons.filter,
-                  color: isDark ? AppColors.textDark : Colors.black87,
+                onPressed: () => _showFilterSortSheet(l10n),
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      AppIcons.filter,
+                      color: isDark ? AppColors.textDark : Colors.black87,
+                    ),
+                    if (_hasActiveFilter)
+                      const Positioned(
+                        right: -2,
+                        top: -2,
+                        child: CircleAvatar(
+                          radius: 4,
+                          backgroundColor: AppColors.primary,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -806,4 +1001,13 @@ class _AlertCard extends StatelessWidget {
       },
     );
   }
+}
+
+enum _DebtSortOption {
+  dueDateAsc,
+  dueDateDesc,
+  amountAsc,
+  amountDesc,
+  createdDesc,
+  nameAsc,
 }

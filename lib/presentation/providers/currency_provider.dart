@@ -1,12 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/services/preferences_service.dart';
 import '../../core/services/currency_conversion_service.dart';
 import '../../core/constants/currencies.dart';
-
-// Provider pour le service de préférences
-final preferencesServiceProvider = FutureProvider<PreferencesService>((ref) async {
-  return await PreferencesService.init();
-});
+import 'preferences_provider.dart';
 
 // Provider pour la devise d'affichage actuelle
 final displayCurrencyProvider = FutureProvider<Currency>((ref) async {
@@ -29,10 +24,10 @@ class CurrencyController extends StateNotifier<AsyncValue<void>> {
     try {
       final prefsService = await _ref.read(preferencesServiceProvider.future);
       await prefsService.saveCurrency(currencyCode);
-      
+
       // Invalider le provider pour forcer le refresh
       _ref.invalidate(displayCurrencyProvider);
-      
+
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -40,9 +35,10 @@ class CurrencyController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final currencyControllerProvider = StateNotifierProvider<CurrencyController, AsyncValue<void>>((ref) {
-  return CurrencyController(ref);
-});
+final currencyControllerProvider =
+    StateNotifierProvider<CurrencyController, AsyncValue<void>>((ref) {
+      return CurrencyController(ref);
+    });
 
 // Helper pour convertir un montant vers la devise d'affichage
 Future<double> convertToDisplayCurrency({

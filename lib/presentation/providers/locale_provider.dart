@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ikigabo/presentation/providers/theme_provider.dart';
 import '../../core/services/preferences_service.dart';
+import 'preferences_provider.dart';
 
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   final prefsService = ref.watch(preferencesServiceProvider).value;

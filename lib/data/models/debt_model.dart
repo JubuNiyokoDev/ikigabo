@@ -70,7 +70,7 @@ class DebtModel {
     this.personContact,
     required this.totalAmount,
     this.paidAmount = 0.0,
-    this.currency = 'FBU',
+    this.currency = 'BIF',
     required this.date,
     this.dueDate,
     this.status = DebtStatus.pending,

@@ -256,7 +256,7 @@ DebtModel _debtModelDeserialize(
   final object = DebtModel(
     collateral: reader.readStringOrNull(offsets[0]),
     createdAt: reader.readDateTime(offsets[1]),
-    currency: reader.readStringOrNull(offsets[2]) ?? 'FBU',
+    currency: reader.readStringOrNull(offsets[2]) ?? 'BIF',
     date: reader.readDateTime(offsets[3]),
     description: reader.readStringOrNull(offsets[5]),
     dueDate: reader.readDateTimeOrNull(offsets[6]),
@@ -296,7 +296,7 @@ P _debtModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? 'FBU') as P;
+      return (reader.readStringOrNull(offset) ?? 'BIF') as P;
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:

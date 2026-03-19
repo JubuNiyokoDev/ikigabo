@@ -564,7 +564,7 @@ abstract class AppLocalizations {
   String get progression;
   String get paidLabel;
   String get totalLabel;
-  
+
   // Debt Detail Screen additional translations
   String get informationsLabel;
   String get contactLabel;
@@ -627,6 +627,8 @@ abstract class AppLocalizations {
   String get onboardingDesc2;
   String get onboardingTitle3;
   String get onboardingDesc3;
+  String get onboardingTitle4;
+  String get onboardingDesc4;
   String get skip;
   String get next;
   String get getStarted;

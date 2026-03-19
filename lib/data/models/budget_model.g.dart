@@ -232,7 +232,7 @@ BudgetModel _budgetModelDeserialize(
   final object = BudgetModel(
     categoryId: reader.readStringOrNull(offsets[0]),
     createdAt: reader.readDateTime(offsets[1]),
-    currency: reader.readStringOrNull(offsets[2]) ?? 'FBU',
+    currency: reader.readStringOrNull(offsets[2]) ?? 'BIF',
     currentAmount: reader.readDoubleOrNull(offsets[3]) ?? 0.0,
     description: reader.readStringOrNull(offsets[5]),
     endDate: reader.readDateTime(offsets[6]),
@@ -269,7 +269,7 @@ P _budgetModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? 'FBU') as P;
+      return (reader.readStringOrNull(offset) ?? 'BIF') as P;
     case 3:
       return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 4:

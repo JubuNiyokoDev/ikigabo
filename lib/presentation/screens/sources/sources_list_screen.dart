@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../data/models/source_model.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../providers/search_provider.dart' hide filteredSourcesProvider;
+import '../../providers/search_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';

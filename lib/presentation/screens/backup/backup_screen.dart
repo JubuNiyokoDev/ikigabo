@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/backup_provider.dart';
 import '../../providers/biometric_provider.dart';
+import '../../providers/preferences_provider.dart';
 import '../../../core/services/ad_manager.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {

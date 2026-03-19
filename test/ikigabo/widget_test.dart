@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ikigabo/main.dart';
 
 void main() {
   testWidgets('App starts correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const IkigaboApp());
+    await tester.pumpWidget(const ProviderScope(child: IkigaboApp()));
     expect(find.byType(IkigaboApp), findsOneWidget);
   });
 }

@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:developer' as developer;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 import '../../data/services/auto_backup_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/services/ad_manager.dart';
@@ -51,7 +49,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
 
   Future<void> _initializeAutoBackup() async {
     await AutoBackupService.initialize(
-      onBackupNeeded: () => _performAutoBackupInternal(),
+      onBackupNeeded: _performAutoBackupInternal,
     );
   }
 
@@ -60,12 +58,16 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
       final backupService = _ref.read(backupServiceProvider);
       final backupData = await backupService.exportData();
       await AutoBackupService.saveAutoBackup(backupData);
-      
+
       final prefs = await PreferencesService.init();
       final lastBackup = prefs.getLastBackupDate();
       state = state.copyWith(lastBackupDate: lastBackup);
     } catch (e) {
-      print('Erreur auto-backup interne: $e');
+      developer.log(
+        'Erreur auto-backup interne: $e',
+        name: 'AutoBackupNotifier',
+        error: e,
+      );
     }
   }
 
@@ -114,7 +116,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
 
       final prefs = await PreferencesService.init();
       final lastBackup = prefs.getLastBackupDate();
-      
+
       state = state.copyWith(isBackingUp: false, lastBackupDate: lastBackup);
     } catch (e) {
       state = state.copyWith(isBackingUp: false, error: e.toString());

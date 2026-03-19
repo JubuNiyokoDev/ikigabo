@@ -7,9 +7,10 @@ import '../../data/models/debt_model.dart';
 import '../../data/models/bank_model.dart';
 import '../../data/models/source_model.dart';
 
-final pdfExportProvider = StateNotifierProvider<PdfExportNotifier, PdfExportState>((ref) {
-  return PdfExportNotifier();
-});
+final pdfExportProvider =
+    StateNotifierProvider<PdfExportNotifier, PdfExportState>((ref) {
+      return PdfExportNotifier();
+    });
 
 class PdfExportState {
   final bool isExporting;
@@ -48,6 +49,7 @@ class PdfExportNotifier extends StateNotifier<PdfExportState> {
     required double totalIncome,
     required double totalExpense,
     required String period,
+    ReportExportFilters filters = const ReportExportFilters(),
     String? customTitle,
   }) async {
     if (state.isExporting) return;
@@ -72,18 +74,13 @@ class PdfExportNotifier extends StateNotifier<PdfExportState> {
         totalIncome: totalIncome,
         totalExpense: totalExpense,
         period: period,
+        filters: filters,
         customTitle: customTitle,
       );
 
-      state = state.copyWith(
-        isExporting: false,
-        lastExportPath: filePath,
-      );
+      state = state.copyWith(isExporting: false, lastExportPath: filePath);
     } catch (e) {
-      state = state.copyWith(
-        isExporting: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isExporting: false, error: e.toString());
     }
   }
 
@@ -102,15 +99,9 @@ class PdfExportNotifier extends StateNotifier<PdfExportState> {
 
       final filePath = await PdfExportService.exportAssetReport(assets);
 
-      state = state.copyWith(
-        isExporting: false,
-        lastExportPath: filePath,
-      );
+      state = state.copyWith(isExporting: false, lastExportPath: filePath);
     } catch (e) {
-      state = state.copyWith(
-        isExporting: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isExporting: false, error: e.toString());
     }
   }
 
@@ -129,15 +120,9 @@ class PdfExportNotifier extends StateNotifier<PdfExportState> {
 
       final filePath = await PdfExportService.exportDebtReport(debts);
 
-      state = state.copyWith(
-        isExporting: false,
-        lastExportPath: filePath,
-      );
+      state = state.copyWith(isExporting: false, lastExportPath: filePath);
     } catch (e) {
-      state = state.copyWith(
-        isExporting: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isExporting: false, error: e.toString());
     }
   }
 

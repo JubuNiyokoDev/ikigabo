@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
+import 'stats_screen.dart' as classic_stats;
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -91,9 +92,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             ),
           ),
           IconButton(
-            onPressed: () {
-              // TODO: Export stats
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const classic_stats.StatsScreen(),
+              ),
+            ),
             icon: Icon(
               AppIcons.export,
               color: isDark ? AppColors.textDark : Colors.black87,
@@ -242,7 +246,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                       padding: const EdgeInsets.all(40),
                       child: Text(
                         l10n.noData,
-                        style: const TextStyle(color: AppColors.textSecondaryDark),
+                        style: const TextStyle(
+                          color: AppColors.textSecondaryDark,
+                        ),
                       ),
                     ),
                   );
@@ -349,7 +355,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
-                    return const FlLine(color: AppColors.borderDark, strokeWidth: 1);
+                    return const FlLine(
+                      color: AppColors.borderDark,
+                      strokeWidth: 1,
+                    );
                   },
                 ),
                 titlesData: FlTitlesData(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/services/real_alarm_service.dart';
 
 class AlarmScreen extends StatefulWidget {
   final String title;
@@ -57,18 +58,38 @@ class _AlarmScreenState extends State<AlarmScreen>
     Navigator.of(context).pop();
   }
 
-  void _snoozeAlarm() {
-    _audioPlayer.stop();
-    _audioPlayer.dispose();
-    _animationController.dispose();
-    // TODO: Reprogrammer l'alarme dans 5 minutes
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Alarme reportée de 5 minutes'),
-        backgroundColor: AppColors.warning,
+  Future<void> _snoozeAlarm() async {
+    await _audioPlayer.stop();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final snoozeAt = DateTime.now().add(const Duration(minutes: 5));
+    final result = await RealAlarmService.scheduleRealAlarm(
+      id: widget.debtId,
+      dateTime: snoozeAt,
+      title: widget.title,
+      message: widget.body,
+    );
+
+    if (!mounted) return;
+
+    navigator.pop();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.success
+              ? 'Alarme reportée à ${_formatTime(snoozeAt)}'
+              : 'Impossible de reporter: ${result.error ?? 'erreur inconnue'}',
+        ),
+        backgroundColor: result.success ? AppColors.warning : AppColors.error,
       ),
     );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 
   @override

@@ -71,7 +71,7 @@ class AssetModel {
     required this.type,
     required this.purchasePrice,
     required this.currentValue,
-    this.currency = 'FBU',
+    this.currency = 'BIF',
     required this.purchaseDate,
     this.status = AssetStatus.owned,
     this.quantity,
