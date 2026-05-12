@@ -15,6 +15,7 @@ import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
 import '../../widgets/page_with_banner.dart';
 import 'add_source_screen.dart';
+import 'transfer_screen.dart';
 import '../../../core/services/ad_manager.dart';
 
 class SourcesListScreen extends ConsumerStatefulWidget {
@@ -118,6 +119,19 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TransferScreen()),
+              );
+            },
+            icon: Icon(
+              AppIcons.transfer,
+              color: isDark ? AppColors.textDark : Colors.black87,
+              size: 20.sp,
             ),
           ),
           IconButton(

@@ -1,0 +1,212 @@
+{
+  "video_duration": 120,
+  "audio_tracks": {
+    "music": {
+      "file": "audio/music/startup-cinematic-bed.mp3",
+      "enabled": false,
+      "loop": true,
+      "default_level": 0.2
+    },
+    "voice_over": [
+      {
+        "start": 0,
+        "end": 5,
+        "text": "Et si gerer votre argent devenait enfin simple, clair et rassurant ?",
+        "asset": "audio/voice-over/00-hook.mp3",
+        "enabled": false,
+        "musicLevel": 0.14,
+        "volume": 1
+      },
+      {
+        "start": 5,
+        "end": 12,
+        "text": "Cash, comptes bancaires, dettes, depenses, actifs... quand tout est disperse, on avance a l'aveugle.",
+        "asset": "audio/voice-over/01-problem-spread.mp3",
+        "enabled": false,
+        "musicLevel": 0.13,
+        "volume": 1
+      },
+      {
+        "start": 12,
+        "end": 20,
+        "text": "On oublie un mouvement, on sous-estime un manque, on reporte les decisions. Ce qui devrait rassurer finit par fatiguer.",
+        "asset": "audio/voice-over/02-problem-fatigue.mp3",
+        "enabled": false,
+        "musicLevel": 0.13,
+        "volume": 1
+      },
+      {
+        "start": 20,
+        "end": 30,
+        "text": "Ikigabo reunit votre realite financiere dans une seule application simple, privee et pensee pour le quotidien.",
+        "asset": "audio/voice-over/03-solution-core.mp3",
+        "enabled": false,
+        "musicLevel": 0.15,
+        "volume": 1
+      },
+      {
+        "start": 30,
+        "end": 40,
+        "text": "Suivez vos liquidites, vos comptes, vos mouvements et vos dettes sans perdre le fil.",
+        "asset": "audio/voice-over/04-solution-flow.mp3",
+        "enabled": false,
+        "musicLevel": 0.15,
+        "volume": 1
+      },
+      {
+        "start": 40,
+        "end": 50,
+        "text": "Ajoutez aussi vos biens convertibles, votre betail, vos recoltes, vos terrains ou vos vehicules pour voir votre patrimoine tel qu'il est vraiment.",
+        "asset": "audio/voice-over/05-solution-assets.mp3",
+        "enabled": false,
+        "musicLevel": 0.15,
+        "volume": 1
+      },
+      {
+        "start": 50,
+        "end": 60,
+        "text": "En un regard, visualisez votre patrimoine total, vos transactions recentes et l'evolution de votre activite.",
+        "asset": "audio/voice-over/06-feature-dashboard.mp3",
+        "enabled": false,
+        "musicLevel": 0.16,
+        "volume": 1
+      },
+      {
+        "start": 60,
+        "end": 70,
+        "text": "Entrees, sorties, categories, historique et recherche: tout est organise pour aller vite et rester clair.",
+        "asset": "audio/voice-over/07-feature-transactions.mp3",
+        "enabled": false,
+        "musicLevel": 0.16,
+        "volume": 1
+      },
+      {
+        "start": 70,
+        "end": 80,
+        "text": "Les graphiques et les tendances vous aident a comprendre, anticiper et mieux decider.",
+        "asset": "audio/voice-over/08-feature-stats.mp3",
+        "enabled": false,
+        "musicLevel": 0.17,
+        "volume": 1
+      },
+      {
+        "start": 80,
+        "end": 90,
+        "text": "Avec le mode 100% offline, le code PIN, la biometrie et plusieurs langues, l'experience reste personnelle, fluide et sereine.",
+        "asset": "audio/voice-over/09-feature-trust.mp3",
+        "enabled": false,
+        "musicLevel": 0.17,
+        "volume": 1
+      },
+      {
+        "start": 90,
+        "end": 100,
+        "text": "Avec Ikigabo, vous ne subissez plus vos chiffres. Vous savez ou vous en etes, et vous avancez avec confiance.",
+        "asset": "audio/voice-over/10-emotion-control.mp3",
+        "enabled": false,
+        "musicLevel": 0.18,
+        "volume": 1
+      },
+      {
+        "start": 100,
+        "end": 110,
+        "text": "Parce qu'une meilleure vue sur votre argent, c'est plus de calme, de controle et de liberte dans vos decisions.",
+        "asset": "audio/voice-over/11-emotion-clarity.mp3",
+        "enabled": false,
+        "musicLevel": 0.18,
+        "volume": 1
+      },
+      {
+        "start": 110,
+        "end": 120,
+        "text": "Decouvrez Ikigabo sur Google Play et reprenez le controle de votre patrimoine, des aujourd'hui.",
+        "asset": "audio/voice-over/12-call-to-action.mp3",
+        "enabled": false,
+        "musicLevel": 0.2,
+        "volume": 1
+      }
+    ],
+    "sfx": [
+      {
+        "time": 4.6,
+        "type": "whoosh",
+        "asset": "audio/sfx/transition-whoosh.wav",
+        "enabled": false,
+        "volume": 0.3,
+        "duration": 1
+      },
+      {
+        "time": 20,
+        "type": "ping",
+        "asset": "audio/sfx/solution-ping.wav",
+        "enabled": false,
+        "volume": 0.24,
+        "duration": 0.8
+      },
+      {
+        "time": 33.4,
+        "type": "click",
+        "asset": "audio/sfx/click-soft.wav",
+        "enabled": false,
+        "volume": 0.22,
+        "duration": 0.5
+      },
+      {
+        "time": 49.7,
+        "type": "whoosh_soft",
+        "asset": "audio/sfx/swipe-soft.wav",
+        "enabled": false,
+        "volume": 0.26,
+        "duration": 0.8
+      },
+      {
+        "time": 60.1,
+        "type": "click",
+        "asset": "audio/sfx/click-soft.wav",
+        "enabled": false,
+        "volume": 0.22,
+        "duration": 0.5
+      },
+      {
+        "time": 70.2,
+        "type": "ping",
+        "asset": "audio/sfx/stat-ping.wav",
+        "enabled": false,
+        "volume": 0.24,
+        "duration": 0.8
+      },
+      {
+        "time": 79.8,
+        "type": "whoosh",
+        "asset": "audio/sfx/transition-whoosh.wav",
+        "enabled": false,
+        "volume": 0.3,
+        "duration": 1
+      },
+      {
+        "time": 93.5,
+        "type": "ping",
+        "asset": "audio/sfx/benefit-ping.wav",
+        "enabled": false,
+        "volume": 0.22,
+        "duration": 0.8
+      },
+      {
+        "time": 110,
+        "type": "whoosh_soft",
+        "asset": "audio/sfx/swipe-soft.wav",
+        "enabled": false,
+        "volume": 0.26,
+        "duration": 0.8
+      },
+      {
+        "time": 116.8,
+        "type": "ping",
+        "asset": "audio/sfx/cta-ping.wav",
+        "enabled": false,
+        "volume": 0.24,
+        "duration": 0.8
+      }
+    ]
+  }
+}

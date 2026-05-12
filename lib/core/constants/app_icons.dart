@@ -71,6 +71,9 @@ class AppIcons {
   static const chart = HugeIcons.strokeRoundedChartHistogram; // Alternative
   static const pieChart = HugeIcons.strokeRoundedPieChart;
 
+  // Transfer
+  static const transfer = HugeIcons.strokeRoundedArrowDataTransferHorizontal;
+
   // Settings
   static const language = HugeIcons.strokeRoundedTranslate;
   static const theme = HugeIcons.strokeRoundedMoon02;

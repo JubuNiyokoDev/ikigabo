@@ -1,0 +1,566 @@
+{
+  "episode-01": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Titre d'accueil",
+      "x": 0.5,
+      "y": 0.26,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Illustration centrale",
+      "x": 0.5,
+      "y": 0.47,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Indicateur du parcours",
+      "x": 0.5,
+      "y": 0.82,
+      "gesture": "swipe",
+      "to_x": 0.72,
+      "to_y": 0.82,
+      "sfx": "whoosh_soft",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Bouton Suivant",
+      "x": 0.5,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    }
+  ],
+  "episode-02": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Message principal",
+      "x": 0.5,
+      "y": 0.25,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Contenu d'introduction",
+      "x": 0.5,
+      "y": 0.46,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Progression",
+      "x": 0.54,
+      "y": 0.82,
+      "gesture": "swipe",
+      "to_x": 0.7,
+      "to_y": 0.82,
+      "sfx": "whoosh_soft",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Continuer",
+      "x": 0.5,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    }
+  ],
+  "episode-03": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Zone PIN",
+      "x": 0.5,
+      "y": 0.28,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Premier chiffre",
+      "x": 0.33,
+      "y": 0.68,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Deuxieme chiffre",
+      "x": 0.5,
+      "y": 0.68,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Biometrie ou validation",
+      "x": 0.5,
+      "y": 0.9,
+      "gesture": "tap",
+      "sfx": "ping",
+      "side": "right"
+    }
+  ],
+  "episode-04": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Resume du patrimoine",
+      "x": 0.5,
+      "y": 0.16,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Graphique principal",
+      "x": 0.5,
+      "y": 0.36,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Transactions recentes",
+      "x": 0.5,
+      "y": 0.68,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Ajouter un mouvement",
+      "x": 0.84,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    }
+  ],
+  "episode-05": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Valeur globale",
+      "x": 0.5,
+      "y": 0.15,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Liste des sources",
+      "x": 0.5,
+      "y": 0.34,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Lecture dettes et actifs",
+      "x": 0.5,
+      "y": 0.58,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Retour a la vue globale",
+      "x": 0.18,
+      "y": 0.08,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    }
+  ],
+  "episode-06": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Type de transaction",
+      "x": 0.5,
+      "y": 0.16,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Source concernee",
+      "x": 0.5,
+      "y": 0.3,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Montant a saisir",
+      "x": 0.5,
+      "y": 0.48,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Valider l'ajout",
+      "x": 0.5,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "ping",
+      "side": "left"
+    }
+  ],
+  "episode-07": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Recherche en haut",
+      "x": 0.5,
+      "y": 0.12,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Filtres rapides",
+      "x": 0.76,
+      "y": 0.2,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Ouvrir une transaction",
+      "x": 0.5,
+      "y": 0.38,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Faire defiler l'historique",
+      "x": 0.5,
+      "y": 0.72,
+      "gesture": "swipe",
+      "to_x": 0.5,
+      "to_y": 0.52,
+      "sfx": "whoosh_soft",
+      "side": "right"
+    }
+  ],
+  "episode-08": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Choisir la periode",
+      "x": 0.5,
+      "y": 0.14,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Lire le graphique",
+      "x": 0.5,
+      "y": 0.33,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Comparer les categories",
+      "x": 0.5,
+      "y": 0.56,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Descendre pour plus de details",
+      "x": 0.5,
+      "y": 0.76,
+      "gesture": "swipe",
+      "to_x": 0.5,
+      "to_y": 0.56,
+      "sfx": "whoosh_soft",
+      "side": "left"
+    }
+  ],
+  "episode-09": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Vue analytique",
+      "x": 0.5,
+      "y": 0.2,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Zone a interpreter",
+      "x": 0.5,
+      "y": 0.4,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Element a corriger",
+      "x": 0.68,
+      "y": 0.63,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Decision suivante",
+      "x": 0.5,
+      "y": 0.84,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    }
+  ],
+  "episode-10": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Options generales",
+      "x": 0.5,
+      "y": 0.18,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Langue",
+      "x": 0.5,
+      "y": 0.36,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Securite",
+      "x": 0.5,
+      "y": 0.52,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Autres reglages",
+      "x": 0.5,
+      "y": 0.74,
+      "gesture": "swipe",
+      "to_x": 0.5,
+      "to_y": 0.58,
+      "sfx": "whoosh_soft",
+      "side": "left"
+    }
+  ],
+  "episode-11": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Promesse du mode hors ligne",
+      "x": 0.5,
+      "y": 0.24,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Explication du fonctionnement",
+      "x": 0.5,
+      "y": 0.46,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "right"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Navigation vers la suite",
+      "x": 0.46,
+      "y": 0.82,
+      "gesture": "swipe",
+      "to_x": 0.68,
+      "to_y": 0.82,
+      "sfx": "whoosh_soft",
+      "side": "right"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Passer a l'etape suivante",
+      "x": 0.5,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "right"
+    }
+  ],
+  "episode-12": [
+    {
+      "step_index": 0,
+      "at": 4,
+      "duration": 8,
+      "target": "Commencer par voir",
+      "x": 0.5,
+      "y": 0.16,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 1,
+      "at": 14,
+      "duration": 8,
+      "target": "Ajouter au bon moment",
+      "x": 0.84,
+      "y": 0.92,
+      "gesture": "tap",
+      "sfx": "click",
+      "side": "left"
+    },
+    {
+      "step_index": 2,
+      "at": 24,
+      "duration": 8,
+      "target": "Verifier et relire",
+      "x": 0.5,
+      "y": 0.68,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    },
+    {
+      "step_index": 3,
+      "at": 36,
+      "duration": 9,
+      "target": "Continuer avec clarte",
+      "x": 0.5,
+      "y": 0.36,
+      "gesture": "focus",
+      "sfx": "ping",
+      "side": "left"
+    }
+  ]
+}

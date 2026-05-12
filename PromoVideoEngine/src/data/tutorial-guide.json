@@ -1,0 +1,245 @@
+{
+  "video_duration_seconds": 600,
+  "episodes": [
+    {
+      "id": "episode-01",
+      "time_start": 0,
+      "time_end": 50,
+      "episode_label": "Episode 1",
+      "scene_type": "introduction",
+      "headline": "Bienvenue dans Ikigabo",
+      "subheadline": "Comprendre l'application avant meme de toucher aux boutons",
+      "voiceover": "Ikigabo est une application de gestion de patrimoine personnel qui vous aide a suivre ce que vous possedez, ce que vous gagnez, ce que vous depensez et ce que vous devez. Ici, l'objectif n'est pas seulement de noter des chiffres. L'objectif est de voir votre situation clairement, de reprendre le controle et de prendre de meilleures decisions au quotidien.",
+      "screenshot": "app/onboarding-dark-1.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#74E8FF", "#8CF6C6", "#F8C15C"],
+      "steps": [
+        "Commencez par voir Ikigabo comme votre tableau de bord personnel de patrimoine.",
+        "L'application ne se limite pas au solde bancaire: elle integre cash, banques, dettes et biens.",
+        "Chaque ecran a un role simple: comprendre, enregistrer, suivre et ajuster.",
+        "Avant toute chose, prenez l'habitude de parcourir l'app avec une logique: voir, ajouter, verifier, decider."
+      ],
+      "capabilities": ["Patrimoine", "Transactions", "Biens", "Dettes", "Clarte"]
+    },
+    {
+      "id": "episode-02",
+      "time_start": 50,
+      "time_end": 100,
+      "episode_label": "Episode 2",
+      "scene_type": "onboarding",
+      "headline": "Le premier contact avec l'application",
+      "subheadline": "Comment lire l'interface et comprendre ce que l'app attend de vous",
+      "voiceover": "Les premiers ecrans servent a poser le contexte. Ils vous montrent qu'Ikigabo est construit pour une utilisation simple et progressive. Vous n'avez pas besoin de tout remplir d'un coup. L'important est de commencer avec votre situation reelle, puis d'ajouter les elements au fur et a mesure: argent disponible, comptes, dettes, actifs et habitudes.",
+      "screenshot": "app/onboarding-dark-2.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#8CF6C6", "#74E8FF", "#FF9275"],
+      "steps": [
+        "Lisez les messages d'accueil comme une promesse: une app qui simplifie votre suivi financier.",
+        "Reperez les grandes familles d'information que vous allez renseigner ensuite.",
+        "Ne cherchez pas la perfection au debut. Une base simple suffit pour demarrer.",
+        "L'objectif du depart est d'entrer dans une routine claire, pas de tout parametrer en une fois."
+      ],
+      "capabilities": ["Demarrage simple", "Progressif", "Vision claire", "Routine"]
+    },
+    {
+      "id": "episode-03",
+      "time_start": 100,
+      "time_end": 150,
+      "episode_label": "Episode 3",
+      "scene_type": "security",
+      "headline": "Proteger vos donnees des l'ouverture",
+      "subheadline": "PIN, biometrie et confiance au quotidien",
+      "voiceover": "Avant meme d'analyser votre patrimoine, Ikigabo protege l'acces a vos informations. Le code PIN verrouille l'entree dans l'application et peut etre complete par la biometrie selon votre appareil. Cette etape est essentielle, parce que des donnees personnelles bien suivies doivent aussi etre bien protegees.",
+      "screenshot": "app/pin-dark.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#FF9275", "#74E8FF", "#8CF6C6"],
+      "steps": [
+        "Au premier lancement, creez un code PIN que vous retiendrez facilement mais qui reste prive.",
+        "Si votre telephone le permet, activez la biometrie pour un acces plus rapide.",
+        "Considerez cette etape comme la porte d'entree de votre coffre personnel.",
+        "Une bonne securite vous permet d'utiliser l'application tous les jours avec plus de serenite."
+      ],
+      "capabilities": ["PIN", "Biometrie", "Confidentialite", "Confiance"]
+    },
+    {
+      "id": "episode-04",
+      "time_start": 150,
+      "time_end": 200,
+      "episode_label": "Episode 4",
+      "scene_type": "dashboard",
+      "headline": "Lire le dashboard comme un centre de commandement",
+      "subheadline": "La vue d'ensemble qui vous dit ou vous en etes tout de suite",
+      "voiceover": "Le dashboard est l'ecran que vous ouvrirez le plus souvent. Il vous donne un resume de votre patrimoine, de votre activite recente et des mouvements importants. Avec le temps, cet ecran devient votre repere quotidien. En un regard, vous savez si la situation est stable, si une action est urgente ou si tout suit le plan.",
+      "screenshot": "app/dashboard-light.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#74E8FF", "#F8C15C", "#8CF6C6"],
+      "steps": [
+        "Regardez d'abord la valeur globale du patrimoine pour comprendre votre position.",
+        "Ensuite, observez l'activite recente pour voir ce qui a bouge depuis votre dernier passage.",
+        "Analysez les blocs les plus visibles pour identifier un manque, un exces ou une nouvelle priorite.",
+        "Revenez souvent sur cet ecran: c'est lui qui vous donne la vision rapide de votre quotidien."
+      ],
+      "capabilities": ["Vue globale", "Activite recente", "Lecture rapide", "Priorites"]
+    },
+    {
+      "id": "episode-05",
+      "time_start": 200,
+      "time_end": 250,
+      "episode_label": "Episode 5",
+      "scene_type": "patrimony",
+      "headline": "Comprendre ce que votre patrimoine veut vraiment dire",
+      "subheadline": "Au-dela du solde: cash, comptes, dettes et actifs",
+      "voiceover": "Dans Ikigabo, votre patrimoine n'est pas seulement l'argent que vous voyez sur un compte. Il peut inclure votre cash, vos comptes bancaires, vos creances, vos dettes, vos biens convertibles et d'autres valeurs reelles. C'est cette logique qui rend l'application plus utile qu'un simple carnet de depenses.",
+      "screenshot": "app/dashboard-dark.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#F8C15C", "#74E8FF", "#FF9275"],
+      "steps": [
+        "Pensez votre situation en ensembles: ce que vous avez, ce que l'on vous doit et ce que vous devez.",
+        "N'ignorez pas les biens ou actifs non bancaires s'ils ont une vraie valeur dans votre vie.",
+        "Mettez a jour les montants lorsque votre realite change, meme si ce n'est pas une transaction classique.",
+        "Plus votre base refletera la realite, plus le dashboard deviendra fiable pour decider."
+      ],
+      "capabilities": ["Cash", "Banques", "Dettes", "Biens convertibles"]
+    },
+    {
+      "id": "episode-06",
+      "time_start": 250,
+      "time_end": 300,
+      "episode_label": "Episode 6",
+      "scene_type": "transaction-entry",
+      "headline": "Ajouter une transaction pas a pas",
+      "subheadline": "Le geste le plus important pour garder vos donnees vivantes",
+      "voiceover": "Quand vous ouvrez l'ecran d'ajout de transaction, l'idee est simple: enregistrer un mouvement de maniere claire. Vous choisissez le type, la source, le montant et les informations utiles. C'est cette regularite qui permet ensuite au dashboard, a l'historique et aux statistiques d'etre vraiment utiles.",
+      "screenshot": "app/new-transaction-light.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#8CF6C6", "#74E8FF", "#F8C15C"],
+      "steps": [
+        "Choisissez si vous enregistrez une entree ou une sortie.",
+        "Selectionnez la source concernee: cash, banque, caisse ou autre origine disponible.",
+        "Renseignez le montant avec precision puis ajoutez une categorie ou une note si utile.",
+        "Validez seulement quand le mouvement correspond vraiment a ce qui s'est passe dans la realite."
+      ],
+      "capabilities": ["Entree", "Sortie", "Source", "Categorie", "Montant"]
+    },
+    {
+      "id": "episode-07",
+      "time_start": 300,
+      "time_end": 350,
+      "episode_label": "Episode 7",
+      "scene_type": "transaction-history",
+      "headline": "Relire l'historique pour comprendre vos habitudes",
+      "subheadline": "Une liste claire pour verifier, retrouver et corriger",
+      "voiceover": "L'historique des transactions vous aide a revoir ce que vous avez deja enregistre. C'est l'endroit ideal pour retrouver un mouvement, verifier un montant ou comprendre une periode. Plus vous l'utilisez, plus vous passez d'une logique de memoire fatiguee a une logique de trace claire et consultable.",
+      "screenshot": "app/transactions-list-light.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#74E8FF", "#8CF6C6", "#FF9275"],
+      "steps": [
+        "Parcourez la liste pour verifier que les derniers mouvements sont bien presents.",
+        "Utilisez la recherche ou les categories pour retrouver plus vite une operation.",
+        "Reperez les erreurs de saisie avant qu'elles n'affectent votre lecture globale.",
+        "Consultez cet historique comme un journal fiable de votre activite financiere."
+      ],
+      "capabilities": ["Historique", "Recherche", "Verification", "Correction"]
+    },
+    {
+      "id": "episode-08",
+      "time_start": 350,
+      "time_end": 400,
+      "episode_label": "Episode 8",
+      "scene_type": "statistics",
+      "headline": "Transformer les chiffres en tendances utiles",
+      "subheadline": "Les statistiques vous montrent ce que les listes ne disent pas seules",
+      "voiceover": "Les statistiques ne servent pas a faire joli. Elles servent a voir les tendances: quand vous depensez plus, ou vos entrees varient, ou un comportement devient repetitif. Cet ecran vous aide a prendre du recul. Et dans une bonne gestion, prendre du recul est souvent ce qui manque le plus.",
+      "screenshot": "app/stats-light.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#F8C15C", "#74E8FF", "#8CF6C6"],
+      "steps": [
+        "Regardez les graphiques pour comprendre la direction generale, pas seulement un chiffre isole.",
+        "Cherchez les hausses et les baisses inhabituelles sur une periode donnee.",
+        "Servez-vous des stats pour confirmer une intuition ou corriger une mauvaise impression.",
+        "Revenez sur cet ecran apres plusieurs jours d'usage pour mieux voir les tendances."
+      ],
+      "capabilities": ["Graphiques", "Tendances", "Analyse", "Decision"]
+    },
+    {
+      "id": "episode-09",
+      "time_start": 400,
+      "time_end": 450,
+      "episode_label": "Episode 9",
+      "scene_type": "analysis",
+      "headline": "Passer de l'observation a la decision",
+      "subheadline": "Lire les statistiques pour agir, pas seulement pour regarder",
+      "voiceover": "Une bonne lecture des statistiques vous permet de faire quelque chose de concret: ralentir une categorie de depenses, revoir une habitude, mieux planifier une periode a venir ou suivre une progression. Ikigabo devient alors un outil de pilotage. Ce n'est plus juste un registre. C'est un support de decision.",
+      "screenshot": "app/stats-dark.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#FF9275", "#F8C15C", "#74E8FF"],
+      "steps": [
+        "Posez-vous une question simple devant les stats: qu'est-ce que ce graphique m'apprend vraiment ?",
+        "Reperez une tendance que vous voulez garder et une tendance que vous voulez corriger.",
+        "Transformez cette lecture en action concrete pour les prochains jours.",
+        "Revenez ensuite dans l'application pour mesurer si votre decision produit un effet."
+      ],
+      "capabilities": ["Lecture intelligente", "Choix concrets", "Suivi", "Pilotage"]
+    },
+    {
+      "id": "episode-10",
+      "time_start": 450,
+      "time_end": 500,
+      "episode_label": "Episode 10",
+      "scene_type": "settings",
+      "headline": "Configurer l'application selon votre facon de vivre",
+      "subheadline": "Langue, preferences, securite et confort d'utilisation",
+      "voiceover": "L'ecran des parametres vous permet d'adapter Ikigabo a votre rythme. C'est ici que vous ajustez les elements qui rendent l'experience plus personnelle: securite, options utiles, preferences d'affichage et autres reglages selon vos besoins. Une application puissante devient vraiment pratique quand elle s'adapte a vous.",
+      "screenshot": "app/settings-light.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#8CF6C6", "#FF9275", "#74E8FF"],
+      "steps": [
+        "Prenez le temps de verifier vos options de securite et vos preferences principales.",
+        "Ajustez l'application pour qu'elle soit naturelle a utiliser dans votre quotidien.",
+        "Si vous utilisez plusieurs langues, profitez des options prevues pour rester a l'aise.",
+        "Les bons reglages au debut rendent l'usage futur plus rapide et plus agreable."
+      ],
+      "capabilities": ["Preferences", "Langues", "Securite", "Confort"]
+    },
+    {
+      "id": "episode-11",
+      "time_start": 500,
+      "time_end": 550,
+      "episode_label": "Episode 11",
+      "scene_type": "advanced-usage",
+      "headline": "Tout ce que vous pouvez suivre avec Ikigabo",
+      "subheadline": "Une application pensee pour la vraie vie, meme hors connexion",
+      "voiceover": "Ikigabo est utile parce qu'il ne pense pas seulement en termes de depenses classiques. Vous pouvez y suivre des banques, du cash, des dettes, des biens convertibles, des categories personnalisees et des informations qui reflètent votre quotidien reel. Le tout avec une logique offline-first pour rester fonctionnel meme sans connexion constante.",
+      "screenshot": "app/onboarding-dark-3.jpg",
+      "layout": "image-right",
+      "accent_palette": ["#74E8FF", "#8CF6C6", "#F8C15C"],
+      "steps": [
+        "Utilisez l'application pour suivre non seulement l'argent visible, mais aussi les valeurs reelles autour de vous.",
+        "Ajoutez vos dettes donnees ou recues pour garder une image honnete de votre situation.",
+        "Pensez categories et sources de maniere souple: l'app s'adapte a votre fonctionnement.",
+        "Le mode hors ligne vous permet de continuer a enregistrer et consulter meme quand le reseau manque."
+      ],
+      "capabilities": ["Offline-first", "Sources multiples", "Dettes", "Biens", "Flexibilite"]
+    },
+    {
+      "id": "episode-12",
+      "time_start": 550,
+      "time_end": 600,
+      "episode_label": "Episode 12",
+      "scene_type": "closing",
+      "headline": "La bonne routine pour bien utiliser Ikigabo",
+      "subheadline": "Voir, enregistrer, verifier, comprendre, puis recommencer simplement",
+      "voiceover": "Pour tirer le meilleur d'Ikigabo, gardez une routine simple. Ouvrez le dashboard pour voir la situation. Ajoutez chaque mouvement important. Verifiez votre historique. Consultez vos statistiques pour comprendre l'evolution. Puis ajustez vos decisions. C'est cette repetition calme qui transforme l'application en vrai compagnon de gestion patrimoniale.",
+      "screenshot": "app/dashboard-light.jpg",
+      "layout": "image-left",
+      "accent_palette": ["#F8C15C", "#74E8FF", "#FF9275"],
+      "steps": [
+        "Commencez chaque jour ou chaque semaine par le dashboard pour voir ou vous en etes.",
+        "Ajoutez les transactions et changements importants sans attendre trop longtemps.",
+        "Relisez l'historique et les statistiques pour comprendre ce qui a vraiment bouge.",
+        "Utilisez cette clarte pour prendre une meilleure decision ensuite et garder le controle."
+      ],
+      "capabilities": ["Routine", "Clarte", "Controle", "Google Play"]
+    }
+  ]
+}

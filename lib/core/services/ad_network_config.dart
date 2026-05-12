@@ -3,8 +3,8 @@ enum AdNetwork { unity, admob }
 class AdNetworkConfig {
   const AdNetworkConfig._();
 
-  // Set to true when the AdMob account is fully approved again.
-  static const bool isAdMobEnabled = false;
+  // AdMob et Unity sont tous les deux actifs simultanément
+  static const bool isAdMobEnabled = true;
   static const bool isUnityTestMode = true;
   static const bool showBannerDebugState = true;
 

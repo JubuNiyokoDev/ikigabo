@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdMobService {
@@ -57,7 +58,7 @@ class AdMobService {
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         _interstitialAd = null;
-        _loadInterstitial(); // Reload for next time
+        _loadInterstitial();
         print('✅ AdMob Interstitial dismissed');
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
@@ -69,6 +70,36 @@ class AdMobService {
     );
 
     await _interstitialAd!.show();
+  }
+
+  // 🔹 SHOW INTERSTITIAL (attend la fermeture)
+  static Future<void> showInterstitialAndWait() async {
+    if (_interstitialAd == null) {
+      print('⚠️ AdMob Interstitial not ready');
+      return;
+    }
+
+    final completer = Completer<void>();
+
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _interstitialAd = null;
+        _loadInterstitial();
+        print('✅ AdMob Interstitial dismissed');
+        if (!completer.isCompleted) completer.complete();
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        ad.dispose();
+        _interstitialAd = null;
+        _loadInterstitial();
+        print('❌ AdMob Interstitial show failed: $error');
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+
+    await _interstitialAd!.show();
+    await completer.future;
   }
 
   // 🔹 LOAD REWARDED
@@ -102,7 +133,7 @@ class AdMobService {
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         _rewardedAd = null;
-        _loadRewarded(); // Reload for next time
+        _loadRewarded();
         print('✅ AdMob Rewarded dismissed');
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
@@ -119,6 +150,42 @@ class AdMobService {
         onReward();
       },
     );
+  }
+
+  // 🔹 SHOW REWARDED (attend la fermeture + reward)
+  static Future<void> showRewardedAndWait({required Function() onReward}) async {
+    if (_rewardedAd == null) {
+      print('⚠️ AdMob Rewarded not ready');
+      return;
+    }
+
+    final completer = Completer<void>();
+
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _rewardedAd = null;
+        _loadRewarded();
+        print('✅ AdMob Rewarded dismissed');
+        if (!completer.isCompleted) completer.complete();
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        ad.dispose();
+        _rewardedAd = null;
+        _loadRewarded();
+        print('❌ AdMob Rewarded show failed: $error');
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+
+    await _rewardedAd!.show(
+      onUserEarnedReward: (ad, reward) {
+        print('🎁 AdMob Reward earned: ${reward.amount} ${reward.type}');
+        onReward();
+      },
+    );
+
+    await completer.future;
   }
 
   // 🔹 CREATE BANNER

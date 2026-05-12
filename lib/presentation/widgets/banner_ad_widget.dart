@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
-import '../../core/services/ad_network_config.dart';
 import '../providers/banner_provider.dart';
 import 'admob_banner_widget.dart';
 
@@ -15,21 +15,19 @@ class BannerAdWidget extends ConsumerStatefulWidget {
 
 class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     with SingleTickerProviderStateMixin {
-  static const double _unityBannerHeight = 52;
+  static const double _bannerHeight = 52;
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  late bool _showAdMobBanner;
-  bool _isUnityLoaded = false;
-  bool _hideUnityBanner = false;
-  String _bannerDebugLabel = 'Banner loading...';
+
+  bool _showAdMob = false;
+  bool _unityReady = false;
+  bool _admobReady = false;
+  Timer? _rotateTimer;
 
   @override
   void initState() {
     super.initState();
-    _showAdMobBanner =
-        AdNetworkConfig.canUseAdMob &&
-        AdNetworkConfig.bannerPrimaryNetwork == AdNetwork.admob;
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -43,10 +41,27 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    _startRotation();
+  }
+
+  void _startRotation() {
+    _rotateTimer?.cancel();
+    _rotateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      setState(() {
+        if (_showAdMob && _unityReady) {
+          _showAdMob = false;
+        } else if (!_showAdMob && _admobReady) {
+          _showAdMob = true;
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
+    _rotateTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -55,15 +70,6 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   Widget build(BuildContext context) {
     final bannerState = ref.watch(bannerProvider);
 
-    if (_hideUnityBanner) {
-      if (!AdNetworkConfig.showBannerDebugState) {
-        return const SizedBox.shrink();
-      }
-
-      return _buildDebugState(context);
-    }
-
-    // Animer selon l'état
     if (bannerState.isVisible) {
       _animationController.forward();
     } else {
@@ -77,95 +83,59 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
           offset: Offset(0, _slideAnimation.value * 80.h),
           child: Opacity(
             opacity: _fadeAnimation.value,
-            child: _showAdMobBanner
-                ? const AdMobBannerWidget()
-                : AnimatedSize(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    child: ClipRect(
-                      child: Align(
-                        alignment: Alignment.center,
-                        heightFactor: _isUnityLoaded ? 1 : 0,
-                        child: SizedBox(
-                          height: _unityBannerHeight.h,
-                          child: UnityBannerAd(
-                            placementId: 'Banner_Android',
-                            onLoad: (placementId) {
-                              if (!mounted) return;
-                              setState(() {
-                                _isUnityLoaded = true;
-                                _hideUnityBanner = false;
-                                _bannerDebugLabel =
-                                    'Banner loaded: $placementId';
-                              });
-                              print('Unity Banner chargé: $placementId');
-                            },
-                            onClick: (placementId) =>
-                                print('Unity Banner cliqué: $placementId'),
-                            onShown: (placementId) {
-                              if (!mounted) return;
-                              setState(() {
-                                _bannerDebugLabel =
-                                    'Banner shown: $placementId';
-                              });
-                              print('Unity Banner affiché: $placementId');
-                            },
-                            onFailed: (placementId, error, message) {
-                              if (!mounted) return;
-
-                              if (AdNetworkConfig.canUseAdMob) {
-                                setState(() {
-                                  _showAdMobBanner = true;
-                                  _isUnityLoaded = false;
-                                  _bannerDebugLabel =
-                                      'Unity failed, fallback AdMob: $error';
-                                });
-                                print(
-                                  'Unity Banner erreur, fallback AdMob: '
-                                  '$placementId - $error - $message',
-                                );
-                                return;
-                              }
-
-                              setState(() {
-                                _isUnityLoaded = false;
-                                _hideUnityBanner = true;
-                                _bannerDebugLabel =
-                                    'Unity banner failed: $error - $message';
-                              });
-
-                              print('Unity Banner erreur: $error - $message');
-                            },
-                          ),
-                        ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRect(
+                  child: Align(
+                    heightFactor: _showAdMob ? 0 : 1,
+                    child: SizedBox(
+                      height: _bannerHeight.h,
+                      child: UnityBannerAd(
+                        placementId: 'Banner_Android',
+                        onLoad: (_) => _onUnityReady(),
+                        onClick: (_) => print('Unity Banner cliqué'),
+                        onShown: (_) => _onUnityReady(),
+                        onFailed: (_, __, ___) => _onUnityFailed(),
                       ),
                     ),
                   ),
+                ),
+                ClipRect(
+                  child: Align(
+                    heightFactor: _showAdMob ? 1 : 0,
+                    child: SizedBox(
+                      height: _bannerHeight.h,
+                      child: AdMobBannerWidget(onLoaded: _onAdMobReady),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildDebugState(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(minHeight: 44.h),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        _bannerDebugLabel,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w600,
-          color: Colors.orange.shade900,
-        ),
-      ),
-    );
+  void _onUnityReady() {
+    if (!mounted) return;
+    setState(() => _unityReady = true);
+  }
+
+  void _onUnityFailed() {
+    if (!mounted) return;
+    setState(() {
+      _unityReady = false;
+      if (_admobReady) _showAdMob = true;
+    });
+  }
+
+  void _onAdMobReady() {
+    if (!mounted) return;
+    setState(() {
+      _admobReady = true;
+      if (!_unityReady) _showAdMob = true;
+    });
   }
 }

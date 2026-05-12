@@ -748,6 +748,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ).animate().fadeIn(delay: 700.ms),
+            Consumer(
+              builder: (context, ref, child) {
+                final autoBackupState = ref.watch(autoBackupProvider);
+                final isDriveConnected = autoBackupState.isDriveConnected;
+                final driveEmail = autoBackupState.driveUserEmail;
+
+                return _buildSettingTile(
+                  icon: AppIcons.backup,
+                  title: 'Google Drive',
+                  subtitle: isDriveConnected
+                      ? 'Connecté: $driveEmail'
+                      : 'Sauvegarder sur Google Drive',
+                  trailing: isDriveConnected
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.logout,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(autoBackupProvider.notifier)
+                                .disconnectDrive();
+                          },
+                        )
+                      : Icon(
+                          AppIcons.back,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : Colors.black54,
+                          size: 20,
+                        ),
+                  onTap: () {
+                    if (!isDriveConnected) {
+                      ref
+                          .read(autoBackupProvider.notifier)
+                          .connectDrive();
+                    }
+                  },
+                  isDark: isDark,
+                );
+              },
+            ).animate().fadeIn(delay: 750.ms),
             _buildSettingTile(
               icon: AppIcons.export,
               title: l10n.backupRestore,

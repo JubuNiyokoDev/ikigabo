@@ -6,14 +6,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/services/ad_manager.dart';
+import '../../core/services/google_drive_service.dart';
 
 class AutoBackupService {
   static Timer? _timer;
   static const Duration _checkInterval = Duration(hours: 1);
-  static Future<void> Function()? _backupCallback;
+  static Future<String> Function()? _backupCallback;
 
   static Future<void> initialize({
-    Future<void> Function()? onBackupNeeded,
+    Future<String> Function()? onBackupNeeded,
   }) async {
     _backupCallback = onBackupNeeded;
     _timer?.cancel();
@@ -31,8 +32,8 @@ class AutoBackupService {
     final lastBackup = prefs.getLastBackupDate();
     final now = DateTime.now();
 
-    // Vérifier si 24h se sont écoulées
-    if (lastBackup == null || now.difference(lastBackup).inHours >= 24) {
+    // Vérifier si 1h s'est écoulée (backup auto chaque heure)
+    if (lastBackup == null || now.difference(lastBackup).inHours >= 1) {
       await _performAutoBackup(prefs);
     }
   }
@@ -43,7 +44,7 @@ class AutoBackupService {
       final canProceed = await AdManager.showRewardedForImportExport();
       if (!canProceed) return;
 
-      // Déclencher le callback pour que le provider fasse le backup.
+      // Déclencher le callback pour que le provider fasse le backup local
       if (_backupCallback == null) {
         developer.log(
           'Auto-backup ignoré: callback non initialisé',
@@ -52,11 +53,27 @@ class AutoBackupService {
         return;
       }
 
-      await _backupCallback!.call();
+      final backupData = await _backupCallback!.call();
       developer.log(
-        'Auto-backup déclenché avec succès',
+        'Auto-backup local effectué',
         name: 'AutoBackupService',
       );
+
+      // Upload vers Google Drive si l'utilisateur est connecté
+      if (GoogleDriveService.isSignedIn) {
+        final driveSuccess = await GoogleDriveService.uploadBackup(backupData);
+        if (driveSuccess) {
+          developer.log(
+            'Auto-backup Drive réussi',
+            name: 'AutoBackupService',
+          );
+        } else {
+          developer.log(
+            'Auto-backup Drive échoué',
+            name: 'AutoBackupService',
+          );
+        }
+      }
     } catch (e) {
       developer.log(
         'Erreur auto-backup: $e',

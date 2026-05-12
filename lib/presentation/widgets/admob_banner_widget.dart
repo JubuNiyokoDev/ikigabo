@@ -3,7 +3,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ikigabo/core/services/admob_service.dart';
 
 class AdMobBannerWidget extends StatefulWidget {
-  const AdMobBannerWidget({super.key});
+  final VoidCallback? onLoaded;
+
+  const AdMobBannerWidget({super.key, this.onLoaded});
 
   @override
   State<AdMobBannerWidget> createState() => _AdMobBannerWidgetState();
@@ -23,9 +25,8 @@ class _AdMobBannerWidgetState extends State<AdMobBannerWidget> {
     _bannerAd = AdMobService.createBanner()
       ..load().then((_) {
         if (mounted) {
-          setState(() {
-            _isLoaded = true;
-          });
+          setState(() => _isLoaded = true);
+          widget.onLoaded?.call();
         }
       });
   }

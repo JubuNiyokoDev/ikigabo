@@ -16,6 +16,7 @@ import '../../providers/source_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../../core/services/dynamic_category_service.dart';
+import '../sources/transfer_screen.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key});
@@ -240,7 +241,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             isSelected: _type == TransactionType.income,
             onTap: () => setState(() {
               _type = TransactionType.income;
-              _selectedCategoryKey = null; // Reset category selection
+              _selectedCategoryKey = null;
             }),
             isDark: isDark,
           ),
@@ -254,8 +255,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             isSelected: _type == TransactionType.expense,
             onTap: () => setState(() {
               _type = TransactionType.expense;
-              _selectedCategoryKey = null; // Reset category selection
+              _selectedCategoryKey = null;
             }),
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: AppSizes.spacing8),
+        Expanded(
+          child: _TypeButton(
+            label: 'Transfert',
+            icon: AppIcons.transfer,
+            color: AppColors.primary,
+            isSelected: false,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TransferScreen()),
+              );
+            },
             isDark: isDark,
           ),
         ),
