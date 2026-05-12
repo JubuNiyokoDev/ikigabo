@@ -1,7 +1,0 @@
-node_modules
-out
-.remotion
-.turbo
-dist
-.venv
-public/audio/generated

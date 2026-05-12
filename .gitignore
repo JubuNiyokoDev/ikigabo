@@ -70,6 +70,12 @@ web/
 windows/
 
 ############################
+# PromoVideoEngine (large assets)
+############################
+PromoVideoEngine/
+PromoVideoEngine/**/*
+
+############################
 # Tools
 ############################
 bundletool.jar
