@@ -1,204 +1,297 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'ad_network_config.dart';
 
 class AdMobService {
-  // 🔑 IDs ADMOB
-  static const String _bannerAdUnitId =
+  static const String _liveBannerAdUnitId =
       'ca-app-pub-2300546388710165/5022166817';
-  static const String _interstitialAdUnitId =
+  static const String _liveInterstitialAdUnitId =
       'ca-app-pub-2300546388710165/3121943541';
-  static const String _rewardedAdUnitId =
+  static const String _liveRewardedAdUnitId =
       'ca-app-pub-2300546388710165/8111364581';
+
+  static const String _testBannerAdUnitId =
+      'ca-app-pub-3940256099942544/6300978111';
+  static const String _testInterstitialAdUnitId =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const String _testRewardedAdUnitId =
+      'ca-app-pub-3940256099942544/5224354917';
 
   static bool _isInitialized = false;
   static InterstitialAd? _interstitialAd;
   static RewardedAd? _rewardedAd;
+  static Completer<bool>? _interstitialLoadCompleter;
+  static Completer<bool>? _rewardedLoadCompleter;
 
-  // 🔹 INIT ADMOB
   static Future<void> initialize() async {
     if (_isInitialized) return;
+    if (!AdNetworkConfig.canUseAdMob) return;
+
+    if (AdNetworkConfig.useTestAds) {
+      await MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: AdNetworkConfig.adMobTestDeviceIds),
+      );
+    }
 
     await MobileAds.instance.initialize();
     _isInitialized = true;
-    print('✅ AdMob initialized');
+    print('✅ AdMob initialized ($_modeLabel)');
 
-    // Preload ads
-    _loadInterstitial();
-    _loadRewarded();
+    unawaited(loadInterstitial());
+    unawaited(loadRewarded());
   }
 
-  // 🔹 LOAD INTERSTITIAL
-  static Future<void> _loadInterstitial() async {
-    if (!_isInitialized) await initialize();
+  static String get _bannerAdUnitId =>
+      AdNetworkConfig.useTestAds ? _testBannerAdUnitId : _liveBannerAdUnitId;
 
-    await InterstitialAd.load(
+  static String get _interstitialAdUnitId => AdNetworkConfig.useTestAds
+      ? _testInterstitialAdUnitId
+      : _liveInterstitialAdUnitId;
+
+  static String get _rewardedAdUnitId => AdNetworkConfig.useTestAds
+      ? _testRewardedAdUnitId
+      : _liveRewardedAdUnitId;
+
+  static String get _modeLabel =>
+      AdNetworkConfig.useTestAds ? 'TEST' : 'PRODUCTION';
+
+  static Future<bool> loadInterstitial({bool force = false}) async {
+    if (!AdNetworkConfig.canUseAdMob) return false;
+    if (!_isInitialized) await initialize();
+    if (!_isInitialized) return false;
+    if (_interstitialAd != null && !force) return true;
+    if (_interstitialLoadCompleter != null) {
+      return _interstitialLoadCompleter!.future;
+    }
+
+    if (force) {
+      _interstitialAd?.dispose();
+      _interstitialAd = null;
+    }
+
+    final completer = Completer<bool>();
+    _interstitialLoadCompleter = completer;
+
+    InterstitialAd.load(
       adUnitId: _interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          _interstitialAd?.dispose();
           _interstitialAd = ad;
-          print('✅ AdMob Interstitial loaded');
+          print('✅ AdMob Interstitial loaded ($_modeLabel)');
+          if (identical(_interstitialLoadCompleter, completer)) {
+            _interstitialLoadCompleter = null;
+          }
+          if (!completer.isCompleted) completer.complete(true);
         },
         onAdFailedToLoad: (error) {
           print('❌ AdMob Interstitial failed: $error');
           _interstitialAd = null;
+          if (identical(_interstitialLoadCompleter, completer)) {
+            _interstitialLoadCompleter = null;
+          }
+          if (!completer.isCompleted) completer.complete(false);
         },
       ),
     );
-  }
 
-  // 🔹 SHOW INTERSTITIAL
-  static Future<void> showInterstitial() async {
-    if (_interstitialAd == null) {
-      print('⚠️ AdMob Interstitial not ready');
-      return;
-    }
-
-    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-      onAdDismissedFullScreenContent: (ad) {
-        ad.dispose();
-        _interstitialAd = null;
-        _loadInterstitial();
-        print('✅ AdMob Interstitial dismissed');
-      },
-      onAdFailedToShowFullScreenContent: (ad, error) {
-        ad.dispose();
-        _interstitialAd = null;
-        _loadInterstitial();
-        print('❌ AdMob Interstitial show failed: $error');
+    return completer.future.timeout(
+      AdNetworkConfig.adLoadTimeout,
+      onTimeout: () {
+        if (identical(_interstitialLoadCompleter, completer)) {
+          _interstitialLoadCompleter = null;
+        }
+        if (!completer.isCompleted) completer.complete(false);
+        print('⚠️ AdMob Interstitial load timeout');
+        return false;
       },
     );
-
-    await _interstitialAd!.show();
   }
 
-  // 🔹 SHOW INTERSTITIAL (attend la fermeture)
+  static Future<void> showInterstitial() async {
+    await showInterstitialAndWait();
+  }
+
   static Future<void> showInterstitialAndWait() async {
     if (_interstitialAd == null) {
-      print('⚠️ AdMob Interstitial not ready');
-      return;
+      final loaded = await loadInterstitial();
+      if (!loaded || _interstitialAd == null) {
+        print('⚠️ AdMob Interstitial not ready');
+        return;
+      }
     }
 
     final completer = Completer<void>();
+    final ad = _interstitialAd!;
+    _interstitialAd = null;
 
-    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        print('▶ AdMob Interstitial started');
+      },
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
-        _interstitialAd = null;
-        _loadInterstitial();
+        unawaited(loadInterstitial());
         print('✅ AdMob Interstitial dismissed');
         if (!completer.isCompleted) completer.complete();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
-        _interstitialAd = null;
-        _loadInterstitial();
+        unawaited(loadInterstitial(force: true));
         print('❌ AdMob Interstitial show failed: $error');
         if (!completer.isCompleted) completer.complete();
       },
     );
 
-    await _interstitialAd!.show();
-    await completer.future;
+    try {
+      await ad.show();
+    } catch (error) {
+      ad.dispose();
+      unawaited(loadInterstitial(force: true));
+      print('❌ AdMob Interstitial show threw: $error');
+      if (!completer.isCompleted) completer.complete();
+    }
+
+    await completer.future.timeout(
+      const Duration(minutes: 2),
+      onTimeout: () {
+        print('⚠️ AdMob Interstitial show timeout');
+      },
+    );
   }
 
-  // 🔹 LOAD REWARDED
-  static Future<void> _loadRewarded() async {
+  static Future<bool> loadRewarded({bool force = false}) async {
+    if (!AdNetworkConfig.canUseAdMob) return false;
     if (!_isInitialized) await initialize();
+    if (!_isInitialized) return false;
+    if (_rewardedAd != null && !force) return true;
+    if (_rewardedLoadCompleter != null) {
+      return _rewardedLoadCompleter!.future;
+    }
 
-    await RewardedAd.load(
+    if (force) {
+      _rewardedAd?.dispose();
+      _rewardedAd = null;
+    }
+
+    final completer = Completer<bool>();
+    _rewardedLoadCompleter = completer;
+
+    RewardedAd.load(
       adUnitId: _rewardedAdUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
+          _rewardedAd?.dispose();
           _rewardedAd = ad;
-          print('✅ AdMob Rewarded loaded');
+          print('✅ AdMob Rewarded loaded ($_modeLabel)');
+          if (identical(_rewardedLoadCompleter, completer)) {
+            _rewardedLoadCompleter = null;
+          }
+          if (!completer.isCompleted) completer.complete(true);
         },
         onAdFailedToLoad: (error) {
           print('❌ AdMob Rewarded failed: $error');
           _rewardedAd = null;
+          if (identical(_rewardedLoadCompleter, completer)) {
+            _rewardedLoadCompleter = null;
+          }
+          if (!completer.isCompleted) completer.complete(false);
         },
       ),
     );
-  }
 
-  // 🔹 SHOW REWARDED
-  static Future<void> showRewarded({required Function() onReward}) async {
-    if (_rewardedAd == null) {
-      print('⚠️ AdMob Rewarded not ready');
-      return;
-    }
-
-    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-      onAdDismissedFullScreenContent: (ad) {
-        ad.dispose();
-        _rewardedAd = null;
-        _loadRewarded();
-        print('✅ AdMob Rewarded dismissed');
-      },
-      onAdFailedToShowFullScreenContent: (ad, error) {
-        ad.dispose();
-        _rewardedAd = null;
-        _loadRewarded();
-        print('❌ AdMob Rewarded show failed: $error');
-      },
-    );
-
-    await _rewardedAd!.show(
-      onUserEarnedReward: (ad, reward) {
-        print('🎁 AdMob Reward earned: ${reward.amount} ${reward.type}');
-        onReward();
+    return completer.future.timeout(
+      AdNetworkConfig.adLoadTimeout,
+      onTimeout: () {
+        if (identical(_rewardedLoadCompleter, completer)) {
+          _rewardedLoadCompleter = null;
+        }
+        if (!completer.isCompleted) completer.complete(false);
+        print('⚠️ AdMob Rewarded load timeout');
+        return false;
       },
     );
   }
 
-  // 🔹 SHOW REWARDED (attend la fermeture + reward)
-  static Future<void> showRewardedAndWait({required Function() onReward}) async {
+  static Future<void> showRewarded({required VoidCallback onReward}) async {
+    await showRewardedAndWait(onReward: onReward);
+  }
+
+  static Future<void> showRewardedAndWait({
+    required VoidCallback onReward,
+  }) async {
     if (_rewardedAd == null) {
-      print('⚠️ AdMob Rewarded not ready');
-      return;
+      final loaded = await loadRewarded();
+      if (!loaded || _rewardedAd == null) {
+        print('⚠️ AdMob Rewarded not ready');
+        return;
+      }
     }
 
     final completer = Completer<void>();
+    final ad = _rewardedAd!;
+    _rewardedAd = null;
 
-    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        print('▶ AdMob Rewarded started');
+      },
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
-        _rewardedAd = null;
-        _loadRewarded();
+        unawaited(loadRewarded());
         print('✅ AdMob Rewarded dismissed');
         if (!completer.isCompleted) completer.complete();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
-        _rewardedAd = null;
-        _loadRewarded();
+        unawaited(loadRewarded(force: true));
         print('❌ AdMob Rewarded show failed: $error');
         if (!completer.isCompleted) completer.complete();
       },
     );
 
-    await _rewardedAd!.show(
-      onUserEarnedReward: (ad, reward) {
-        print('🎁 AdMob Reward earned: ${reward.amount} ${reward.type}');
-        onReward();
+    try {
+      await ad.show(
+        onUserEarnedReward: (ad, reward) {
+          print('🎁 AdMob Reward earned: ${reward.amount} ${reward.type}');
+          onReward();
+        },
+      );
+    } catch (error) {
+      ad.dispose();
+      unawaited(loadRewarded(force: true));
+      print('❌ AdMob Rewarded show threw: $error');
+      if (!completer.isCompleted) completer.complete();
+    }
+
+    await completer.future.timeout(
+      const Duration(minutes: 2),
+      onTimeout: () {
+        print('⚠️ AdMob Rewarded show timeout');
       },
     );
-
-    await completer.future;
   }
 
-  // 🔹 CREATE BANNER
-  static BannerAd createBanner() {
+  static BannerAd createBanner({
+    VoidCallback? onLoaded,
+    void Function(LoadAdError error)? onFailedToLoad,
+  }) {
     return BannerAd(
       adUnitId: _bannerAdUnitId,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (ad) => print('✅ AdMob Banner loaded'),
+        onAdLoaded: (ad) {
+          print('✅ AdMob Banner loaded ($_modeLabel)');
+          onLoaded?.call();
+        },
         onAdFailedToLoad: (ad, error) {
           print('❌ AdMob Banner failed: $error');
           ad.dispose();
+          onFailedToLoad?.call(error);
         },
       ),
     );
