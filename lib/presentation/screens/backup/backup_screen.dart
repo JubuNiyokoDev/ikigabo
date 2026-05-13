@@ -29,13 +29,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   @override
   void initState() {
     super.initState();
-    _loadLastBackupDate();
-  }
-
-  void _loadLastBackupDate() async {
-    final prefs = ref.read(preferencesServiceProvider).value;
-    prefs?.getLastBackupDate();
-    // Utiliser lastBackup pour afficher la dernière sauvegarde
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prefs = ref.read(preferencesServiceProvider).value;
+      prefs?.getLastBackupDate();
+    });
   }
 
   @override
@@ -68,7 +65,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Export Section
           _buildSection(l10n.backup, isDark),
           _buildActionCard(
             icon: AppIcons.export,
@@ -80,7 +76,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
           const SizedBox(height: 20),
 
-          // Import Section
           _buildSection(l10n.restoreBackup, isDark),
           _buildActionCard(
             icon: AppIcons.import,
@@ -184,14 +179,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
-  void _showExportDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isDark,
-  ) {
-    // D'abord authentifier l'utilisateur
+  void _showExportDialog(BuildContext context, AppLocalizations l10n, bool isDark) {
     _authenticateUser(context, l10n, () {
-      // Puis montrer le dialogue d'export
       _showExportOptionsDialog(context, l10n, isDark);
     });
   }
@@ -204,7 +193,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _isAuthenticating = true);
 
     try {
-      // Vérifier biométrie d'abord
       final biometricState = ref.read(biometricProvider);
       if (biometricState == BiometricState.enabled) {
         final success = await ref
@@ -216,7 +204,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         }
       }
 
-      // Sinon vérifier PIN
       final prefsService = ref.read(preferencesServiceProvider).value;
       if (prefsService?.isPinEnabled() == true) {
         Navigator.push(
@@ -234,7 +221,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         return;
       }
 
-      // Aucune sécurité configurée
       onSuccess();
     } finally {
       setState(() => _isAuthenticating = false);
@@ -292,11 +278,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
-  void _showImportDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isDark,
-  ) {
+  void _showImportDialog(BuildContext context, AppLocalizations l10n, bool isDark) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -337,7 +319,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   void _selectAndImportFile(BuildContext context, AppLocalizations l10n) async {
     try {
-      // Utiliser FilePicker sans initialDirectory pour éviter les restrictions
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -358,13 +339,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _isAuthenticating = true);
 
     try {
-      // Essayer d'importer sans mot de passe d'abord
       final importResult = await ref
           .read(backupControllerProvider.notifier)
           .importData(content);
 
       if (!importResult.success) {
-        // Si échec, demander mot de passe
         _showPasswordDialog(content, l10n);
         return;
       }
@@ -375,7 +354,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         await ref
             .read(backupControllerProvider.notifier)
             .applyImport(importResult.data!);
-        // Montrer rewarded pour import réussi
         await AdManager.showRewardedForImportExport();
         _showSuccessDialog(l10n.dataImportedSuccess);
       }
@@ -492,17 +470,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .read(backupControllerProvider.notifier)
           .exportData(password: password);
 
-      // Sauvegarder la date de dernière sauvegarde
       final prefs = ref.read(preferencesServiceProvider).value;
       await prefs?.setLastBackupDate(DateTime.now());
 
-      // Sauvegarder dans le stockage interne
       await ref
           .read(backupControllerProvider.notifier)
           .saveBackupToStorage(backupData);
 
       if (mounted) {
-        // Montrer rewarded pour export réussi
         await AdManager.showRewardedForImportExport();
         _showSuccessDialog(
           '${l10n.backupCreatedSuccess}\n\n${l10n.fileSavedIn}\n${l10n.downloadsIkigaboPath}',

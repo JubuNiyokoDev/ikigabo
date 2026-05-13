@@ -22,10 +22,12 @@ import '../../providers/debt_provider.dart';
 import '../../providers/transaction_provider.dart'
     hide thisMonthIncomeProvider, thisMonthExpenseProvider;
 import '../../providers/dashboard_provider.dart';
+import '../../widgets/inline_banner_ad.dart';
 import '../notifications/notification_settings_screen.dart';
 import '../backup/backup_screen.dart';
 import '../categories/categories_management_screen.dart';
 import '../budgets/budgets_screen.dart';
+import 'drive_backup_screen.dart';
 import '../security/pin_screen.dart';
 import '../../../core/services/ad_manager.dart';
 import '../../providers/auto_backup_provider.dart';
@@ -759,33 +761,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Google Drive',
                   subtitle: isDriveConnected
                       ? 'Connecté: $driveEmail'
-                      : 'Sauvegarder sur Google Drive',
-                  trailing: isDriveConnected
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.logout,
-                            color: AppColors.error,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            ref
-                                .read(autoBackupProvider.notifier)
-                                .disconnectDrive();
-                          },
+                      : 'Configurer la sauvegarde Drive',
+                  trailing: autoBackupState.isDriveBusy
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Icon(
-                          AppIcons.back,
+                          Icons.chevron_right,
                           color: isDark
                               ? AppColors.textSecondaryDark
                               : Colors.black54,
                           size: 20,
                         ),
                   onTap: () {
-                    if (!isDriveConnected) {
-                      ref
-                          .read(autoBackupProvider.notifier)
-                          .connectDrive();
-                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DriveBackupScreen(),
+                      ),
+                    );
                   },
                   isDark: isDark,
                 );
@@ -803,6 +799,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
               isDark: isDark,
             ).animate().fadeIn(delay: 800.ms),
+
+            const InlineBannerAd(padding: EdgeInsets.symmetric(vertical: 8)),
 
             const SizedBox(height: 20),
 

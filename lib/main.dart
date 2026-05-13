@@ -28,6 +28,7 @@ import 'presentation/providers/onboarding_provider.dart';
 import 'presentation/providers/auto_backup_provider.dart';
 import 'data/services/notification_service.dart';
 import 'core/services/real_alarm_service.dart';
+import 'presentation/widgets/inline_banner_ad.dart';
 import 'presentation/widgets/shimmer_widget.dart';
 
 void main() async {
@@ -306,7 +307,7 @@ class _NavigationScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: EdgeInsets.all(16.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,60 +325,62 @@ class _NavigationScreen extends ConsumerWidget {
                 ),
               ),
               SizedBox(height: 24.h),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 12.h,
-                  childAspectRatio: 1.1,
-                  children: [
-                    _NavigationCard(
-                      title: l10n.mySources,
-                      icon: AppIcons.wallet,
-                      color: Theme.of(context).colorScheme.primary,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SourcesListScreen(),
-                        ),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12.w,
+                mainAxisSpacing: 12.h,
+                childAspectRatio: 1.1,
+                children: [
+                  _NavigationCard(
+                    title: l10n.mySources,
+                    icon: AppIcons.wallet,
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SourcesListScreen(),
                       ),
                     ),
-                    _NavigationCard(
-                      title: l10n.banks,
-                      icon: AppIcons.bank,
-                      color: Theme.of(context).colorScheme.secondary,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const BanksListScreen(),
-                        ),
+                  ),
+                  _NavigationCard(
+                    title: l10n.banks,
+                    icon: AppIcons.bank,
+                    color: Theme.of(context).colorScheme.secondary,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const BanksListScreen(),
                       ),
                     ),
-                    _NavigationCard(
-                      title: l10n.assets,
-                      icon: AppIcons.assets,
-                      color: Colors.green,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AssetsListScreen(),
-                        ),
+                  ),
+                  _NavigationCard(
+                    title: l10n.assets,
+                    icon: AppIcons.assets,
+                    color: Colors.green,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AssetsListScreen(),
                       ),
                     ),
-                    _NavigationCard(
-                      title: l10n.debts,
-                      icon: AppIcons.debt,
-                      color: Colors.orange,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DebtsListScreen(),
-                        ),
+                  ),
+                  _NavigationCard(
+                    title: l10n.debts,
+                    icon: AppIcons.debt,
+                    color: Colors.orange,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DebtsListScreen(),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const InlineBannerAd(padding: EdgeInsets.symmetric(vertical: 16)),
+              SizedBox(height: kBottomNavigationBarHeight),
             ],
           ),
         ),

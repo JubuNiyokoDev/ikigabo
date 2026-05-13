@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/services/google_drive_service.dart';
 import '../../data/services/backup_service.dart';
 import 'source_provider.dart';
 import 'transaction_provider.dart' as tx;
@@ -81,6 +82,24 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       rethrow;
+    }
+  }
+
+  Future<bool> uploadToDrive(
+    String backupData, {
+    void Function(double uploadedMB, double totalMB, double percent)? onProgress,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final result = await GoogleDriveService.uploadBackup(
+        backupData,
+        onProgress: onProgress,
+      );
+      state = const AsyncValue.data(null);
+      return result;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false;
     }
   }
 }

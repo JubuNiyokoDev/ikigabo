@@ -22,6 +22,7 @@ class PreferencesService {
   static const String _notificationOverdueKey = 'notification_overdue';
   static const String _autoBackupEnabledKey = 'auto_backup_enabled';
   static const String _lastBackupDateKey = 'last_backup_date';
+  static const String _lastDriveSyncDateKey = 'last_drive_sync_date';
   static const String _lowBalanceThresholdKey = 'low_balance_threshold';
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
@@ -199,7 +200,7 @@ class PreferencesService {
   // === BACKUP ===
 
   /// Vérifier si la sauvegarde automatique est activée
-  bool isAutoBackupEnabled() => _prefs.getBool(_autoBackupEnabledKey) ?? true;
+  bool isAutoBackupEnabled() => _prefs.getBool(_autoBackupEnabledKey) ?? false;
 
   /// Activer/désactiver la sauvegarde automatique
   Future<bool> setAutoBackupEnabled(bool enabled) =>
@@ -216,6 +217,14 @@ class PreferencesService {
   /// Sauvegarder la date de dernière sauvegarde
   Future<bool> setLastBackupDate(DateTime date) =>
       _prefs.setInt(_lastBackupDateKey, date.millisecondsSinceEpoch);
+
+  DateTime? getLastDriveSyncDate() {
+    final timestamp = _prefs.getInt(_lastDriveSyncDateKey);
+    return timestamp == null ? null : DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  Future<bool> setLastDriveSyncDate(DateTime date) =>
+      _prefs.setInt(_lastDriveSyncDateKey, date.millisecondsSinceEpoch);
 
   // === SEUILS ===
 

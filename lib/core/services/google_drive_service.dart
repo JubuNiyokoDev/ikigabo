@@ -116,19 +116,29 @@ class GoogleDriveService {
       body: folderMetadata,
     );
 
-    if (createResponse.statusCode == 200) {
+    if (createResponse.statusCode == 200 || createResponse.statusCode == 201) {
       final data = jsonDecode(createResponse.body);
       return data['id'];
     }
 
     developer.log(
-      'Erreur création dossier Drive: ${createResponse.statusCode}',
+      'Erreur création dossier Drive: '
+      '${createResponse.statusCode} ${createResponse.body}',
       name: 'GoogleDriveService',
     );
     return null;
   }
 
-  static Future<bool> uploadBackup(String backupData) async {
+  /// Calcule la taille en MB du backup avant upload.
+  static double calculateBackupSizeMB(String backupData) {
+    final bytes = utf8.encode(backupData);
+    return bytes.length / (1024 * 1024);
+  }
+
+  static Future<bool> uploadBackup(
+    String backupData, {
+    void Function(double uploadedMB, double totalMB, double percent)? onProgress,
+  }) async {
     if (_currentUser == null && !await isUserSignedIn()) return false;
 
     try {
@@ -144,8 +154,10 @@ class GoogleDriveService {
 
       await _cleanOldBackups(accessToken, folderId);
 
-      final uploadUrl = Uri.parse(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+      final uploadUrl = Uri.https(
+        'www.googleapis.com',
+        '/upload/drive/v3/files',
+        {'uploadType': 'multipart', 'fields': 'id,name'},
       );
 
       final metadata = jsonEncode({
@@ -154,17 +166,39 @@ class GoogleDriveService {
         'description': 'Ikigabo backup - ${now.toIso8601String()}',
       });
 
-      final request = http.MultipartRequest('POST', uploadUrl);
-      request.headers['Authorization'] = 'Bearer $accessToken';
-      request.fields['metadata'] = metadata;
-      request.files.add(
-        http.MultipartFile.fromString('media', backupData),
+      final boundary =
+          'ikigabo_${now.microsecondsSinceEpoch}_${backupData.length}';
+      final body = utf8.encode(
+        '--$boundary\r\n'
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n'
+        '$metadata\r\n'
+        '--$boundary\r\n'
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n'
+        '$backupData\r\n'
+        '--$boundary--\r\n',
       );
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
+      final totalMB = body.length / (1024 * 1024);
 
-      if (response.statusCode == 200) {
+      // Simuler progression réaliste (préparation → upload → finalisation)
+      onProgress?.call(0, totalMB, 0);
+      await Future.delayed(const Duration(milliseconds: 200));
+      onProgress?.call(totalMB * 0.1, totalMB, 10);
+
+      final response = await http.post(
+        uploadUrl,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'multipart/related; boundary=$boundary',
+        },
+        body: body,
+      );
+
+      onProgress?.call(totalMB * 0.9, totalMB, 90);
+      await Future.delayed(const Duration(milliseconds: 150));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        onProgress?.call(totalMB, totalMB, 100);
         developer.log(
           'Backup uploadé sur Drive: $filename',
           name: 'GoogleDriveService',
@@ -173,7 +207,7 @@ class GoogleDriveService {
       }
 
       developer.log(
-        'Erreur upload Drive: ${response.statusCode} $responseBody',
+        'Erreur upload Drive: ${response.statusCode} ${response.body}',
         name: 'GoogleDriveService',
       );
       return false;
@@ -193,9 +227,12 @@ class GoogleDriveService {
   ) async {
     try {
       final query = "'$folderId' in parents and trashed=false";
-      final url = Uri.parse(
-        'https://www.googleapis.com/drive/v3/files?q=${Uri.encodeComponent(query)}&orderBy=createdTime&pageSize=20',
-      );
+      final url = Uri.https('www.googleapis.com', '/drive/v3/files', {
+        'q': query,
+        'orderBy': 'createdTime',
+        'pageSize': '20',
+        'fields': 'files(id,name,createdTime)',
+      });
 
       final response = await http.get(
         url,
@@ -216,9 +253,7 @@ class GoogleDriveService {
             final fileId = files[i]['id'];
             if (fileId != null) {
               await http.delete(
-                Uri.parse(
-                  'https://www.googleapis.com/drive/v3/files/$fileId',
-                ),
+                Uri.parse('https://www.googleapis.com/drive/v3/files/$fileId'),
                 headers: {'Authorization': 'Bearer $accessToken'},
               );
             }

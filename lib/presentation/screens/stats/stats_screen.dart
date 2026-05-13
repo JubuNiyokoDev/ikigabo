@@ -25,6 +25,7 @@ import '../../../data/models/bank_model.dart' as bank_m;
 import '../../../data/models/source_model.dart' as source_m;
 import 'advanced_export_screen.dart';
 import '../../widgets/currency_amount_widget.dart';
+import '../../widgets/inline_banner_ad.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -63,6 +64,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _buildSummaryCards(incomeAsync, expenseAsync, l10n),
+                  const InlineBannerAd(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                  ),
                   const SizedBox(height: 16),
                   _buildPieChart(incomeAsync, expenseAsync, l10n),
                   const SizedBox(height: 16),

@@ -13,7 +13,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
-import '../../widgets/page_with_banner.dart';
+import '../../widgets/inline_banner_ad.dart';
 import 'add_source_screen.dart';
 import 'transfer_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -38,31 +38,29 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: PageWithBanner(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context, l10n, isDark),
-              if (_isSearchVisible) ...[
-                SizedBox(height: 6.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: custom.SearchBar(hintText: l10n.searchSource),
-                ),
-              ],
-              SizedBox(height: 12.h),
-              Expanded(
-                child: sourcesAsync.when(
-                  data: (sources) => sources.isEmpty
-                      ? _buildEmptyState(l10n)
-                      : _buildSourcesList(sources, l10n),
-                  loading: () => _buildLoadingState(),
-                  error: (error, stack) =>
-                      _buildErrorState(error.toString(), l10n),
-                ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context, l10n, isDark),
+            if (_isSearchVisible) ...[
+              SizedBox(height: 6.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: custom.SearchBar(hintText: l10n.searchSource),
               ),
             ],
-          ),
+            SizedBox(height: 12.h),
+            Expanded(
+              child: sourcesAsync.when(
+                data: (sources) => sources.isEmpty
+                    ? _buildEmptyState(l10n)
+                    : _buildSourcesList(sources, l10n),
+                loading: () => _buildLoadingState(),
+                error: (error, stack) =>
+                    _buildErrorState(error.toString(), l10n),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -166,8 +164,16 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
 
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 14.w),
-      itemCount: items.length,
-      itemBuilder: (context, index) => items[index],
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        final bannerIndex = items.length > 2 ? 2 : items.length;
+        if (index == bannerIndex) {
+          return const InlineBannerAd();
+        }
+
+        final itemIndex = index > bannerIndex ? index - 1 : index;
+        return items[itemIndex];
+      },
     );
   }
 

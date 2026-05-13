@@ -11,7 +11,7 @@ import '../../providers/debt_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
-import '../../widgets/page_with_banner.dart';
+import '../../widgets/inline_banner_ad.dart';
 import 'add_debt_screen.dart';
 import 'debt_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -42,43 +42,41 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: PageWithBanner(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(l10n),
-              const SizedBox(height: 16),
-              _buildAlertsSection(overdueDebtsAsync, dueSoonDebtsAsync, l10n),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: custom.SearchBar(hintText: l10n.searchDebt),
-              ),
-              const SizedBox(height: 16),
-              _buildSummaryCards(totalGivenAsync, totalReceivedAsync, l10n),
-              const SizedBox(height: 16),
-              _buildTabSelector(l10n),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  child: debtsAsync.when(
-                    data: (debts) {
-                      final filteredDebts = _filterDebts(debts);
-                      return filteredDebts.isEmpty
-                          ? _buildEmptyState(l10n)
-                          : _buildDebtsList(filteredDebts, l10n);
-                    },
-                    loading: () => _buildLoadingState(),
-                    error: (error, stack) =>
-                        _buildErrorState(error.toString(), l10n),
-                  ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(l10n),
+            const SizedBox(height: 16),
+            _buildAlertsSection(overdueDebtsAsync, dueSoonDebtsAsync, l10n),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: custom.SearchBar(hintText: l10n.searchDebt),
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryCards(totalGivenAsync, totalReceivedAsync, l10n),
+            const SizedBox(height: 16),
+            _buildTabSelector(l10n),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: debtsAsync.when(
+                  data: (debts) {
+                    final filteredDebts = _filterDebts(debts);
+                    return filteredDebts.isEmpty
+                        ? _buildEmptyState(l10n)
+                        : _buildDebtsList(filteredDebts, l10n);
+                  },
+                  loading: () => _buildLoadingState(),
+                  error: (error, stack) =>
+                      _buildErrorState(error.toString(), l10n),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -489,8 +487,16 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length,
-          itemBuilder: (context, index) => items[index],
+          itemCount: items.length + 1,
+          itemBuilder: (context, index) {
+            final bannerIndex = items.length > 2 ? 2 : items.length;
+            if (index == bannerIndex) {
+              return const InlineBannerAd();
+            }
+
+            final itemIndex = index > bannerIndex ? index - 1 : index;
+            return items[itemIndex];
+          },
         );
       },
     );

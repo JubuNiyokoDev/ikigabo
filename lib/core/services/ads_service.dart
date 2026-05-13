@@ -41,18 +41,30 @@ class AdsService {
     }
   }
 
-  /// Affiche les interstitielles des deux réseaux (Unity puis AdMob)
+  /// Affiche une interstitielle sur le réseau principal, puis tente le fallback.
   static Future<void> showInterstitial() async {
     if (!_isInitialized) await initialize();
 
-    await _showUnityInterstitialAndWait();
-    if (AdNetworkConfig.canUseAdMob) {
-      await AdMobService.showInterstitialAndWait();
+    if (AdNetworkConfig.fullScreenPrimaryNetwork == AdNetwork.admob &&
+        AdNetworkConfig.canUseAdMob) {
+      final adMobLoaded = await AdMobService.loadInterstitial();
+      if (adMobLoaded) {
+        await AdMobService.showInterstitialAndWait();
+      } else {
+        await _showUnityInterstitialAndWait();
+      }
+    } else {
+      final unityLoaded = await loadInterstitial();
+      if (unityLoaded) {
+        await _showUnityInterstitialAndWait();
+      } else if (AdNetworkConfig.canUseAdMob) {
+        await AdMobService.showInterstitialAndWait();
+      }
     }
     _preloadFullScreenAds();
   }
 
-  /// Affiche les rewarded des deux réseaux (Unity puis AdMob)
+  /// Affiche une rewarded sur le réseau principal, puis tente le fallback.
   static Future<void> showRewarded({required VoidCallback onReward}) async {
     if (!_isInitialized) await initialize();
 
@@ -63,9 +75,21 @@ class AdsService {
       onReward();
     }
 
-    await _showUnityRewardedAndWait(onReward: grantRewardOnce);
-    if (AdNetworkConfig.canUseAdMob) {
-      await AdMobService.showRewardedAndWait(onReward: grantRewardOnce);
+    if (AdNetworkConfig.fullScreenPrimaryNetwork == AdNetwork.admob &&
+        AdNetworkConfig.canUseAdMob) {
+      final adMobLoaded = await AdMobService.loadRewarded();
+      if (adMobLoaded) {
+        await AdMobService.showRewardedAndWait(onReward: grantRewardOnce);
+      } else {
+        await _showUnityRewardedAndWait(onReward: grantRewardOnce);
+      }
+    } else {
+      final unityLoaded = await loadRewarded();
+      if (unityLoaded) {
+        await _showUnityRewardedAndWait(onReward: grantRewardOnce);
+      } else if (AdNetworkConfig.canUseAdMob) {
+        await AdMobService.showRewardedAndWait(onReward: grantRewardOnce);
+      }
     }
     _preloadFullScreenAds();
   }

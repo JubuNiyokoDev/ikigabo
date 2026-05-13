@@ -19,7 +19,7 @@ import '../../widgets/animations.dart';
 import '../../widgets/physics_animations.dart';
 import '../../widgets/notification_badge.dart';
 import '../../widgets/currency_amount_widget.dart';
-import '../../widgets/page_with_banner.dart';
+import '../../widgets/inline_banner_ad.dart';
 import '../banks/banks_list_screen.dart';
 import '../assets/assets_list_screen.dart';
 import '../debts/debts_list_screen.dart';
@@ -68,53 +68,48 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: PageWithBanner(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(l10n, isDark, context).slideInFromLeft(),
-                const SizedBox(height: 16),
-                _buildBalanceCard(
-                  totalWealthAsync,
-                  monthlyGrowthAsync,
-                  displayCurrencyAsync,
-                  l10n,
-                ).bounceIn(delay: 200.ms),
-                const SizedBox(height: 16),
-                _buildQuickActions(
-                  context,
-                  isDark,
-                  l10n,
-                ).slideInFromBottom(delay: 400.ms),
-                const SizedBox(height: 16),
-                _buildQuickStats(
-                  thisMonthIncomeAsync,
-                  thisMonthExpenseAsync,
-                  isDark,
-                  l10n,
-                ),
-                const SizedBox(height: 16),
-                _buildAssetsVsLiabilities(
-                  assetsVsLiabilitiesAsync,
-                  isDark,
-                  l10n,
-                ),
-                const SizedBox(height: 16),
-                _buildWeeklyChart(weeklyActivityAsync, isDark, l10n),
-                const SizedBox(height: 16),
-                _buildDebtsSummary(debtStatsAsync, context, isDark, l10n),
-                const SizedBox(height: 16),
-                _buildTransactionsList(
-                  recentTransactionsAsync,
-                  isDark,
-                  l10n,
-                  context,
-                ),
-              ],
-            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(l10n, isDark, context).slideInFromLeft(),
+              const SizedBox(height: 16),
+              _buildBalanceCard(
+                totalWealthAsync,
+                monthlyGrowthAsync,
+                displayCurrencyAsync,
+                l10n,
+              ).bounceIn(delay: 200.ms),
+              const SizedBox(height: 16),
+              _buildQuickActions(
+                context,
+                isDark,
+                l10n,
+              ).slideInFromBottom(delay: 400.ms),
+              const SizedBox(height: 16),
+              _buildQuickStats(
+                thisMonthIncomeAsync,
+                thisMonthExpenseAsync,
+                isDark,
+                l10n,
+              ),
+              const InlineBannerAd(padding: EdgeInsets.symmetric(vertical: 16)),
+              _buildAssetsVsLiabilities(assetsVsLiabilitiesAsync, isDark, l10n),
+              const SizedBox(height: 16),
+              _buildWeeklyChart(weeklyActivityAsync, isDark, l10n),
+              const SizedBox(height: 16),
+              _buildDebtsSummary(debtStatsAsync, context, isDark, l10n),
+              const SizedBox(height: 16),
+              _buildTransactionsList(
+                recentTransactionsAsync,
+                isDark,
+                l10n,
+                context,
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ),

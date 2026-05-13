@@ -12,7 +12,7 @@ import '../../providers/bank_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
-import '../../widgets/page_with_banner.dart';
+import '../../widgets/inline_banner_ad.dart';
 import 'add_bank_screen.dart';
 import 'bank_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -33,37 +33,35 @@ class BanksListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: PageWithBanner(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(
-                context,
-                totalBalanceAsync,
-                ref,
-                l10n,
-                displayCurrencyAsync,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(
+              context,
+              totalBalanceAsync,
+              ref,
+              l10n,
+              displayCurrencyAsync,
+            ),
+            const SizedBox(height: 16),
+            _buildPendingFeesAlert(
+              pendingFeesAsync,
+              banksWithFeesAsync,
+              ref,
+              l10n,
+              displayCurrencyAsync,
+            ),
+            Expanded(
+              child: banksAsync.when(
+                data: (banks) => banks.isEmpty
+                    ? _buildEmptyState(context, l10n)
+                    : _buildBanksList(context, banks),
+                loading: () => _buildLoadingState(),
+                error: (error, stack) =>
+                    _buildErrorState(error.toString(), l10n),
               ),
-              const SizedBox(height: 16),
-              _buildPendingFeesAlert(
-                pendingFeesAsync,
-                banksWithFeesAsync,
-                ref,
-                l10n,
-                displayCurrencyAsync,
-              ),
-              Expanded(
-                child: banksAsync.when(
-                  data: (banks) => banks.isEmpty
-                      ? _buildEmptyState(context, l10n)
-                      : _buildBanksList(context, banks),
-                  loading: () => _buildLoadingState(),
-                  error: (error, stack) =>
-                      _buildErrorState(error.toString(), l10n),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -179,8 +177,16 @@ class BanksListScreen extends ConsumerWidget {
             .toList();
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length,
-          itemBuilder: (context, index) => items[index],
+          itemCount: items.length + 1,
+          itemBuilder: (context, index) {
+            final bannerIndex = items.length > 2 ? 2 : items.length;
+            if (index == bannerIndex) {
+              return const InlineBannerAd();
+            }
+
+            final itemIndex = index > bannerIndex ? index - 1 : index;
+            return items[itemIndex];
+          },
         );
       },
     );

@@ -13,7 +13,7 @@ import '../../providers/asset_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
-import '../../widgets/page_with_banner.dart';
+import '../../widgets/inline_banner_ad.dart';
 import 'add_asset_screen.dart';
 import 'asset_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -33,36 +33,29 @@ class AssetsListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
-      body: PageWithBanner(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(
-                context,
-                totalValueAsync,
-                l10n,
-                displayCurrencyAsync,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context, totalValueAsync, l10n, displayCurrencyAsync),
+            const SizedBox(height: 16),
+            _buildStatsRow(assetStatsAsync, l10n, displayCurrencyAsync),
+            const SizedBox(height: 16),
+            Expanded(
+              child: assetsAsync.when(
+                data: (assets) {
+                  final ownedAssets = assets
+                      .where((a) => a.status == AssetStatus.owned)
+                      .toList();
+                  return ownedAssets.isEmpty
+                      ? _buildEmptyState(context)
+                      : _buildAssetsList(context, ownedAssets);
+                },
+                loading: () => _buildLoadingState(),
+                error: (error, stack) =>
+                    _buildErrorState(error.toString(), context),
               ),
-              const SizedBox(height: 16),
-              _buildStatsRow(assetStatsAsync, l10n, displayCurrencyAsync),
-              const SizedBox(height: 16),
-              Expanded(
-                child: assetsAsync.when(
-                  data: (assets) {
-                    final ownedAssets = assets
-                        .where((a) => a.status == AssetStatus.owned)
-                        .toList();
-                    return ownedAssets.isEmpty
-                        ? _buildEmptyState(context)
-                        : _buildAssetsList(context, ownedAssets);
-                  },
-                  loading: () => _buildLoadingState(),
-                  error: (error, stack) =>
-                      _buildErrorState(error.toString(), context),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -347,8 +340,16 @@ class AssetsListScreen extends ConsumerWidget {
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length,
-          itemBuilder: (context, index) => items[index],
+          itemCount: items.length + 1,
+          itemBuilder: (context, index) {
+            final bannerIndex = items.length > 2 ? 2 : items.length;
+            if (index == bannerIndex) {
+              return const InlineBannerAd();
+            }
+
+            final itemIndex = index > bannerIndex ? index - 1 : index;
+            return items[itemIndex];
+          },
         );
       },
     );

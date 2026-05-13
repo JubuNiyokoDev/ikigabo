@@ -15,13 +15,15 @@ class AutoBackupService {
 
   static Future<void> initialize({
     Future<String> Function()? onBackupNeeded,
+    bool runImmediately = false,
   }) async {
     _backupCallback = onBackupNeeded;
     _timer?.cancel();
     _timer = Timer.periodic(_checkInterval, (_) => _checkAndBackup());
 
-    // Vérifier immédiatement au démarrage
-    await _checkAndBackup();
+    if (runImmediately) {
+      await _checkAndBackup();
+    }
   }
 
   static Future<void> _checkAndBackup() async {
@@ -54,24 +56,15 @@ class AutoBackupService {
       }
 
       final backupData = await _backupCallback!.call();
-      developer.log(
-        'Auto-backup local effectué',
-        name: 'AutoBackupService',
-      );
+      developer.log('Auto-backup local effectué', name: 'AutoBackupService');
 
       // Upload vers Google Drive si l'utilisateur est connecté
       if (GoogleDriveService.isSignedIn) {
         final driveSuccess = await GoogleDriveService.uploadBackup(backupData);
         if (driveSuccess) {
-          developer.log(
-            'Auto-backup Drive réussi',
-            name: 'AutoBackupService',
-          );
+          developer.log('Auto-backup Drive réussi', name: 'AutoBackupService');
         } else {
-          developer.log(
-            'Auto-backup Drive échoué',
-            name: 'AutoBackupService',
-          );
+          developer.log('Auto-backup Drive échoué', name: 'AutoBackupService');
         }
       }
     } catch (e) {

@@ -7,15 +7,18 @@ class AdNetworkConfig {
 
   // AdMob et Unity sont tous les deux actifs simultanément
   static const bool isAdMobEnabled = true;
-  static const bool useTestAds = false;
+  static const bool useTestAds = bool.fromEnvironment(
+    'IKIGABO_USE_TEST_ADS',
+    defaultValue: !kReleaseMode,
+  );
   static const bool isUnityTestMode = useTestAds;
   static const bool showBannerDebugState = kDebugMode;
   static const List<String> adMobTestDeviceIds = <String>[
     'A13309D31987749D96D20C4C55979E7F',
   ];
 
-  static const AdNetwork bannerPrimaryNetwork = AdNetwork.unity;
-  static const AdNetwork fullScreenPrimaryNetwork = AdNetwork.unity;
+  static const AdNetwork bannerPrimaryNetwork = AdNetwork.admob;
+  static const AdNetwork fullScreenPrimaryNetwork = AdNetwork.admob;
 
   static const bool useRewardedForCoreActions = false;
   static const bool showDashboardInterstitial = false;
