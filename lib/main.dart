@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,8 @@ void main() async {
 
   // Initialiser les services publicitaires
   await AdsService.initialize();
+  // App Open Ad au premier lancement
+  unawaited(AdsService.showAppOpen());
 
   // Configuration edge-to-edge moderne pour Android 15+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

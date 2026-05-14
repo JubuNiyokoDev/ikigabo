@@ -1,102 +1,181 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'ad_network_config.dart';
 import 'admob_service.dart';
 
+/// Index du prochain format plein écran à afficher.
+/// Ordre : 0=AdMob Interstitial, 1=Unity Interstitial,
+///         2=AdMob Rewarded, 3=Unity Rewarded,
+///         4=AdMob RewardedInterstitial, 5=AdMob AppOpen
+const String _turnKey = 'ad_turn_index';
+const int _totalFormats = 6;
+
 class AdsService {
   static const String _gameId = '6021741';
-  static const String _interstitialAdUnitId = 'Interstitial_Android';
-  static const String _rewardedAdUnitId = 'Rewarded_Android';
+  static const String _unityInterstitialId = 'Interstitial_Android';
+  static const String _unityRewardedId = 'Rewarded_Android';
 
   static bool _isInitialized = false;
   static bool _isUnityInitialized = false;
-  static bool _isInterstitialLoaded = false;
-  static bool _isRewardedLoaded = false;
+  static bool _isUnityInterstitialLoaded = false;
+  static bool _isUnityRewardedLoaded = false;
   static Completer<void>? _initializeCompleter;
-  static Completer<bool>? _interstitialLoadCompleter;
-  static Completer<bool>? _rewardedLoadCompleter;
+  static Completer<bool>? _unityInterstitialLoadCompleter;
+  static Completer<bool>? _unityRewardedLoadCompleter;
 
+  // ── Init ──────────────────────────────────────────────────────────────────
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    if (_initializeCompleter != null) {
-      return _initializeCompleter!.future;
-    }
+    if (_initializeCompleter != null) return _initializeCompleter!.future;
 
     final completer = Completer<void>();
     _initializeCompleter = completer;
 
     try {
       await _initializeUnity();
-
-      if (AdNetworkConfig.canUseAdMob) {
-        await AdMobService.initialize();
-      }
-
+      if (AdNetworkConfig.canUseAdMob) await AdMobService.initialize();
       _isInitialized = true;
-      _preloadFullScreenAds();
+      _preloadAll();
     } finally {
       if (!completer.isCompleted) completer.complete();
       _initializeCompleter = null;
     }
   }
 
-  /// Affiche une interstitielle sur le réseau principal, puis tente le fallback.
-  static Future<void> showInterstitial() async {
-    if (!_isInitialized) await initialize();
-
-    if (AdNetworkConfig.fullScreenPrimaryNetwork == AdNetwork.admob &&
-        AdNetworkConfig.canUseAdMob) {
-      final adMobLoaded = await AdMobService.loadInterstitial();
-      if (adMobLoaded) {
-        await AdMobService.showInterstitialAndWait();
-      } else {
-        await _showUnityInterstitialAndWait();
-      }
-    } else {
-      final unityLoaded = await loadInterstitial();
-      if (unityLoaded) {
-        await _showUnityInterstitialAndWait();
-      } else if (AdNetworkConfig.canUseAdMob) {
-        await AdMobService.showInterstitialAndWait();
-      }
+  static void _preloadAll() {
+    unawaited(_loadUnityInterstitial());
+    unawaited(_loadUnityRewarded());
+    if (AdNetworkConfig.canUseAdMob) {
+      unawaited(AdMobService.loadInterstitial());
+      unawaited(AdMobService.loadRewarded());
+      unawaited(AdMobService.loadAppOpen());
+      unawaited(AdMobService.loadRewardedInterstitial());
     }
-    _preloadFullScreenAds();
   }
 
-  /// Affiche une rewarded sur le réseau principal, puis tente le fallback.
+  // ── Tour suivant ──────────────────────────────────────────────────────────
+  static Future<int> _nextTurn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getInt(_turnKey) ?? 0;
+    final next = (current + 1) % _totalFormats;
+    await prefs.setInt(_turnKey, next);
+    return current;
+  }
+
+  // ── Interstitial (sans récompense) ────────────────────────────────────────
+  static Future<void> showInterstitial() async {
+    if (!_isInitialized) await initialize();
+    final turn = await _nextTurn();
+
+    switch (turn) {
+      case 0: // AdMob Interstitial
+        final ok = await AdMobService.loadInterstitial();
+        if (ok) {
+          await AdMobService.showInterstitialAndWait();
+        } else {
+          await _showUnityInterstitialAndWait();
+        }
+      case 1: // Unity Interstitial
+        final ok = await _loadUnityInterstitial();
+        if (ok) {
+          await _showUnityInterstitialAndWait();
+        } else if (AdNetworkConfig.canUseAdMob) {
+          await AdMobService.showInterstitialAndWait();
+        }
+      case 2: // AdMob Rewarded (sans gate)
+        final ok = await AdMobService.loadRewarded();
+        if (ok) {
+          await AdMobService.showRewardedAndWait(onReward: () {});
+        } else {
+          await _showUnityInterstitialAndWait();
+        }
+      case 3: // Unity Rewarded (sans gate)
+        final ok = await _loadUnityRewarded();
+        if (ok) {
+          await _showUnityRewardedAndWait(onReward: () {});
+        } else if (AdNetworkConfig.canUseAdMob) {
+          await AdMobService.showInterstitialAndWait();
+        }
+      case 4: // AdMob RewardedInterstitial
+        final ok = await AdMobService.loadRewardedInterstitial();
+        if (ok) {
+          await AdMobService.showRewardedInterstitialAndWait(onReward: () {});
+        } else {
+          await _showUnityInterstitialAndWait();
+        }
+      case 5: // AdMob AppOpen
+        final ok = await AdMobService.loadAppOpen();
+        if (ok) {
+          await AdMobService.showAppOpenAndWait();
+        } else if (AdNetworkConfig.canUseAdMob) {
+          await AdMobService.showInterstitialAndWait();
+        }
+    }
+
+    _preloadAll();
+  }
+
+  // ── Rewarded (avec gate — récompense obligatoire) ─────────────────────────
   static Future<void> showRewarded({required VoidCallback onReward}) async {
     if (!_isInitialized) await initialize();
 
     var rewardGranted = false;
-    void grantRewardOnce() {
+    void grantOnce() {
       if (rewardGranted) return;
       rewardGranted = true;
       onReward();
     }
 
-    if (AdNetworkConfig.fullScreenPrimaryNetwork == AdNetwork.admob &&
-        AdNetworkConfig.canUseAdMob) {
-      final adMobLoaded = await AdMobService.loadRewarded();
-      if (adMobLoaded) {
-        await AdMobService.showRewardedAndWait(onReward: grantRewardOnce);
-      } else {
-        await _showUnityRewardedAndWait(onReward: grantRewardOnce);
-      }
-    } else {
-      final unityLoaded = await loadRewarded();
-      if (unityLoaded) {
-        await _showUnityRewardedAndWait(onReward: grantRewardOnce);
-      } else if (AdNetworkConfig.canUseAdMob) {
-        await AdMobService.showRewardedAndWait(onReward: grantRewardOnce);
-      }
+    final turn = await _nextTurn();
+
+    // Pour les rewarded gatés, on alterne entre les 4 formats avec récompense
+    switch (turn % 4) {
+      case 0: // AdMob Rewarded
+        final ok = await AdMobService.loadRewarded();
+        if (ok) {
+          await AdMobService.showRewardedAndWait(onReward: grantOnce);
+        } else {
+          await _showUnityRewardedAndWait(onReward: grantOnce);
+        }
+      case 1: // Unity Rewarded
+        final ok = await _loadUnityRewarded();
+        if (ok) {
+          await _showUnityRewardedAndWait(onReward: grantOnce);
+        } else if (AdNetworkConfig.canUseAdMob) {
+          await AdMobService.showRewardedAndWait(onReward: grantOnce);
+        }
+      case 2: // AdMob RewardedInterstitial
+        final ok = await AdMobService.loadRewardedInterstitial();
+        if (ok) {
+          await AdMobService.showRewardedInterstitialAndWait(onReward: grantOnce);
+        } else {
+          await _showUnityRewardedAndWait(onReward: grantOnce);
+        }
+      case 3: // AdMob Rewarded (fallback)
+        final ok = await AdMobService.loadRewarded();
+        if (ok) {
+          await AdMobService.showRewardedAndWait(onReward: grantOnce);
+        } else {
+          await _showUnityRewardedAndWait(onReward: grantOnce);
+        }
     }
-    _preloadFullScreenAds();
+
+    _preloadAll();
   }
 
+  // ── App Open (appelé au lancement/retour foreground) ──────────────────────
+  static Future<void> showAppOpen() async {
+    if (!_isInitialized) await initialize();
+    if (!AdNetworkConfig.canUseAdMob) return;
+    final ok = await AdMobService.loadAppOpen();
+    if (ok) await AdMobService.showAppOpenAndWait();
+  }
+
+  // ── Unity Init ────────────────────────────────────────────────────────────
   static Future<void> _initializeUnity() async {
     final completer = Completer<void>();
-
     try {
       await UnityAds.init(
         gameId: _gameId,
@@ -118,206 +197,175 @@ class AdsService {
       print('❌ Unity Ads init threw: $error');
       if (!completer.isCompleted) completer.complete();
     }
-
-    await completer.future.timeout(
-      AdNetworkConfig.adLoadTimeout,
-      onTimeout: () {
-        print('⚠️ Unity Ads init timeout');
-      },
-    );
+    await completer.future.timeout(AdNetworkConfig.adLoadTimeout, onTimeout: () {
+      print('⚠️ Unity Ads init timeout');
+    });
   }
 
-  static void _preloadFullScreenAds() {
-    unawaited(loadInterstitial());
-    unawaited(loadRewarded());
-    if (AdNetworkConfig.canUseAdMob) {
-      unawaited(AdMobService.loadInterstitial());
-      unawaited(AdMobService.loadRewarded());
-    }
-  }
-
-  // -- Unity Interstitial (attends la fin) --
-  static Future<void> _showUnityInterstitialAndWait() async {
-    if (!_isInterstitialLoaded) {
-      await loadInterstitial();
-    }
-
-    if (!_isInterstitialLoaded) {
-      print('⚠️ Unity Interstitial not ready');
-      return;
-    }
-
-    final completer = Completer<void>();
-
-    UnityAds.showVideoAd(
-      placementId: _interstitialAdUnitId,
-      onStart: (placementId) => print('▶ Unity Interstitial started'),
-      onClick: (placementId) => print('🖱 Unity Interstitial clicked'),
-      onSkipped: (placementId) {
-        print('⏭ Unity Interstitial skipped');
-        _isInterstitialLoaded = false;
-        unawaited(loadInterstitial());
-        if (!completer.isCompleted) completer.complete();
-      },
-      onComplete: (placementId) {
-        print('✅ Unity Interstitial completed');
-        _isInterstitialLoaded = false;
-        unawaited(loadInterstitial());
-        if (!completer.isCompleted) completer.complete();
-      },
-      onFailed: (placementId, error, message) {
-        print('❌ Unity Interstitial failed: $error - $message');
-        _isInterstitialLoaded = false;
-        unawaited(loadInterstitial());
-        if (!completer.isCompleted) completer.complete();
-      },
-    );
-
-    await completer.future.timeout(
-      const Duration(minutes: 2),
-      onTimeout: () {
-        print('⚠️ Unity Interstitial show timeout');
-      },
-    );
-  }
-
-  // -- Unity Rewarded (attends la fin) --
-  static Future<void> _showUnityRewardedAndWait({
-    required VoidCallback onReward,
-  }) async {
-    if (!_isRewardedLoaded) {
-      await loadRewarded();
-    }
-
-    if (!_isRewardedLoaded) {
-      print('⚠️ Unity Rewarded not ready');
-      return;
-    }
-
-    final completer = Completer<void>();
-
-    UnityAds.showVideoAd(
-      placementId: _rewardedAdUnitId,
-      onStart: (placementId) => print('▶ Unity Rewarded started'),
-      onClick: (placementId) => print('🖱 Unity Rewarded clicked'),
-      onSkipped: (placementId) {
-        print('⏭ Unity Rewarded skipped');
-        _isRewardedLoaded = false;
-        unawaited(loadRewarded());
-        if (!completer.isCompleted) completer.complete();
-      },
-      onComplete: (placementId) {
-        print('🎁 Unity Reward granted');
-        onReward();
-        _isRewardedLoaded = false;
-        unawaited(loadRewarded());
-        if (!completer.isCompleted) completer.complete();
-      },
-      onFailed: (placementId, error, message) {
-        print('❌ Unity Rewarded failed: $error - $message');
-        _isRewardedLoaded = false;
-        unawaited(loadRewarded());
-        if (!completer.isCompleted) completer.complete();
-      },
-    );
-
-    await completer.future.timeout(
-      const Duration(minutes: 2),
-      onTimeout: () {
-        print('⚠️ Unity Rewarded show timeout');
-      },
-    );
-  }
-
-  // -- Load --
-  static Future<bool> loadInterstitial() async {
+  // ── Unity Load ────────────────────────────────────────────────────────────
+  static Future<bool> _loadUnityInterstitial() async {
     if (!_isInitialized) await initialize();
     if (!_isUnityInitialized) return false;
-    if (_isInterstitialLoaded) return true;
-    if (_interstitialLoadCompleter != null) {
-      return _interstitialLoadCompleter!.future;
+    if (_isUnityInterstitialLoaded) return true;
+    if (_unityInterstitialLoadCompleter != null) {
+      return _unityInterstitialLoadCompleter!.future;
     }
 
     final completer = Completer<bool>();
-    _interstitialLoadCompleter = completer;
+    _unityInterstitialLoadCompleter = completer;
 
     UnityAds.load(
-      placementId: _interstitialAdUnitId,
-      onComplete: (placementId) {
-        _isInterstitialLoaded = true;
-        if (identical(_interstitialLoadCompleter, completer)) {
-          _interstitialLoadCompleter = null;
+      placementId: _unityInterstitialId,
+      onComplete: (id) {
+        _isUnityInterstitialLoaded = true;
+        if (identical(_unityInterstitialLoadCompleter, completer)) {
+          _unityInterstitialLoadCompleter = null;
         }
         print('✅ Unity Interstitial loaded');
         if (!completer.isCompleted) completer.complete(true);
       },
-      onFailed: (placementId, error, message) {
-        _isInterstitialLoaded = false;
-        if (identical(_interstitialLoadCompleter, completer)) {
-          _interstitialLoadCompleter = null;
+      onFailed: (id, error, message) {
+        _isUnityInterstitialLoaded = false;
+        if (identical(_unityInterstitialLoadCompleter, completer)) {
+          _unityInterstitialLoadCompleter = null;
         }
         print('❌ Unity Interstitial load failed: $error - $message');
         if (!completer.isCompleted) completer.complete(false);
       },
     );
 
-    return completer.future.timeout(
-      AdNetworkConfig.adLoadTimeout,
-      onTimeout: () {
-        if (identical(_interstitialLoadCompleter, completer)) {
-          _interstitialLoadCompleter = null;
-        }
-        if (!completer.isCompleted) completer.complete(false);
-        print('⚠️ Unity Interstitial load timeout');
-        return false;
-      },
-    );
+    return completer.future.timeout(AdNetworkConfig.adLoadTimeout, onTimeout: () {
+      if (identical(_unityInterstitialLoadCompleter, completer)) {
+        _unityInterstitialLoadCompleter = null;
+      }
+      if (!completer.isCompleted) completer.complete(false);
+      print('⚠️ Unity Interstitial load timeout');
+      return false;
+    });
   }
 
-  static Future<bool> loadRewarded() async {
+  static Future<bool> _loadUnityRewarded() async {
     if (!_isInitialized) await initialize();
     if (!_isUnityInitialized) return false;
-    if (_isRewardedLoaded) return true;
-    if (_rewardedLoadCompleter != null) {
-      return _rewardedLoadCompleter!.future;
+    if (_isUnityRewardedLoaded) return true;
+    if (_unityRewardedLoadCompleter != null) {
+      return _unityRewardedLoadCompleter!.future;
     }
 
     final completer = Completer<bool>();
-    _rewardedLoadCompleter = completer;
+    _unityRewardedLoadCompleter = completer;
 
     UnityAds.load(
-      placementId: _rewardedAdUnitId,
-      onComplete: (placementId) {
-        _isRewardedLoaded = true;
-        if (identical(_rewardedLoadCompleter, completer)) {
-          _rewardedLoadCompleter = null;
+      placementId: _unityRewardedId,
+      onComplete: (id) {
+        _isUnityRewardedLoaded = true;
+        if (identical(_unityRewardedLoadCompleter, completer)) {
+          _unityRewardedLoadCompleter = null;
         }
         print('✅ Unity Rewarded loaded');
         if (!completer.isCompleted) completer.complete(true);
       },
-      onFailed: (placementId, error, message) {
-        _isRewardedLoaded = false;
-        if (identical(_rewardedLoadCompleter, completer)) {
-          _rewardedLoadCompleter = null;
+      onFailed: (id, error, message) {
+        _isUnityRewardedLoaded = false;
+        if (identical(_unityRewardedLoadCompleter, completer)) {
+          _unityRewardedLoadCompleter = null;
         }
         print('❌ Unity Rewarded load failed: $error - $message');
         if (!completer.isCompleted) completer.complete(false);
       },
     );
 
-    return completer.future.timeout(
-      AdNetworkConfig.adLoadTimeout,
-      onTimeout: () {
-        if (identical(_rewardedLoadCompleter, completer)) {
-          _rewardedLoadCompleter = null;
-        }
-        if (!completer.isCompleted) completer.complete(false);
-        print('⚠️ Unity Rewarded load timeout');
-        return false;
-      },
-    );
+    return completer.future.timeout(AdNetworkConfig.adLoadTimeout, onTimeout: () {
+      if (identical(_unityRewardedLoadCompleter, completer)) {
+        _unityRewardedLoadCompleter = null;
+      }
+      if (!completer.isCompleted) completer.complete(false);
+      print('⚠️ Unity Rewarded load timeout');
+      return false;
+    });
   }
 
-  static bool get isInterstitialReady => _isInterstitialLoaded;
-  static bool get isRewardedReady => _isRewardedLoaded;
+  // ── Unity Show ────────────────────────────────────────────────────────────
+  static Future<void> _showUnityInterstitialAndWait() async {
+    if (!_isUnityInterstitialLoaded) await _loadUnityInterstitial();
+    if (!_isUnityInterstitialLoaded) {
+      print('⚠️ Unity Interstitial not ready');
+      return;
+    }
+
+    final completer = Completer<void>();
+    UnityAds.showVideoAd(
+      placementId: _unityInterstitialId,
+      onStart: (id) => print('▶ Unity Interstitial started'),
+      onClick: (id) => print('🖱 Unity Interstitial clicked'),
+      onSkipped: (id) {
+        _isUnityInterstitialLoaded = false;
+        unawaited(_loadUnityInterstitial());
+        print('⏭ Unity Interstitial skipped');
+        if (!completer.isCompleted) completer.complete();
+      },
+      onComplete: (id) {
+        _isUnityInterstitialLoaded = false;
+        unawaited(_loadUnityInterstitial());
+        print('✅ Unity Interstitial completed');
+        if (!completer.isCompleted) completer.complete();
+      },
+      onFailed: (id, error, message) {
+        _isUnityInterstitialLoaded = false;
+        unawaited(_loadUnityInterstitial());
+        print('❌ Unity Interstitial failed: $error - $message');
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+    await completer.future.timeout(const Duration(minutes: 2), onTimeout: () {
+      print('⚠️ Unity Interstitial show timeout');
+    });
+  }
+
+  static Future<void> _showUnityRewardedAndWait({
+    required VoidCallback onReward,
+  }) async {
+    if (!_isUnityRewardedLoaded) await _loadUnityRewarded();
+    if (!_isUnityRewardedLoaded) {
+      print('⚠️ Unity Rewarded not ready');
+      return;
+    }
+
+    final completer = Completer<void>();
+    UnityAds.showVideoAd(
+      placementId: _unityRewardedId,
+      onStart: (id) => print('▶ Unity Rewarded started'),
+      onClick: (id) => print('🖱 Unity Rewarded clicked'),
+      onSkipped: (id) {
+        _isUnityRewardedLoaded = false;
+        unawaited(_loadUnityRewarded());
+        print('⏭ Unity Rewarded skipped');
+        if (!completer.isCompleted) completer.complete();
+      },
+      onComplete: (id) {
+        _isUnityRewardedLoaded = false;
+        unawaited(_loadUnityRewarded());
+        print('🎁 Unity Reward granted');
+        onReward();
+        if (!completer.isCompleted) completer.complete();
+      },
+      onFailed: (id, error, message) {
+        _isUnityRewardedLoaded = false;
+        unawaited(_loadUnityRewarded());
+        print('❌ Unity Rewarded failed: $error - $message');
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+    await completer.future.timeout(const Duration(minutes: 2), onTimeout: () {
+      print('⚠️ Unity Rewarded show timeout');
+    });
+  }
+
+  // ── Getters publics (compatibilité) ───────────────────────────────────────
+  static bool get isInterstitialReady => _isUnityInterstitialLoaded;
+  static bool get isRewardedReady => _isUnityRewardedLoaded;
+
+  // Exposer load pour compatibilité avec ancien code
+  static Future<bool> loadInterstitial() => _loadUnityInterstitial();
+  static Future<bool> loadRewarded() => _loadUnityRewarded();
 }
