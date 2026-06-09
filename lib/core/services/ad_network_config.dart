@@ -5,8 +5,9 @@ enum AdNetwork { unity, admob }
 class AdNetworkConfig {
   const AdNetworkConfig._();
 
-  // AdMob et Unity sont tous les deux actifs simultanément
-  static const bool isAdMobEnabled = true;
+  static const bool isAdMobEnabled = false;
+  static const bool isMetaEnabled = true;
+  static const String metaTestDeviceId = '';
   static const bool useTestAds = bool.fromEnvironment(
     'IKIGABO_USE_TEST_ADS',
     defaultValue: !kReleaseMode,
@@ -24,17 +25,21 @@ class AdNetworkConfig {
   static const bool showDashboardInterstitial = false;
   static const bool showSettingsInterstitial = false;
 
-  static const int transactionInterstitialFrequency = 6;
-  static const int bankInterstitialFrequency = 8;
-  static const int sourceInterstitialFrequency = 8;
-  static const int debtInterstitialFrequency = 8;
-  static const int assetInterstitialFrequency = 8;
-  static const int reportInterstitialFrequency = 6;
+  // Fréquences équilibrées : visible mais pas agressif
+  static const int transactionInterstitialFrequency = 3;
+  static const int bankInterstitialFrequency = 4;
+  static const int sourceInterstitialFrequency = 4;
+  static const int debtInterstitialFrequency = 4;
+  static const int assetInterstitialFrequency = 4;
+  static const int reportInterstitialFrequency = 3;
+
+  // Cooldown 3 min entre 2 pubs plein écran
   static const Duration interstitialCooldown = Duration(minutes: 3);
   static const Duration adLoadTimeout = Duration(seconds: 30);
   static const Duration bannerRetryDelay = Duration(seconds: 20);
   static const Duration bannerRotationInterval = Duration(seconds: 30);
 
   static bool get canUseAdMob => isAdMobEnabled;
+  static bool get canUseMeta => isMetaEnabled;
   static bool get shouldGateCoreActions => useRewardedForCoreActions;
 }

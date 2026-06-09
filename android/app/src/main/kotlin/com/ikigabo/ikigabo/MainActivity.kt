@@ -23,11 +23,17 @@ class MainActivity : FlutterFragmentActivity() {
         const val EXTRA_MESSAGE = "message"
     }
 
+    private var metaAdsPlugin: MetaAdsPlugin? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Enable edge-to-edge - utiliser uniquement WindowCompat (compatible toutes versions)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         createNotificationChannel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        metaAdsPlugin?.destroy()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -42,6 +48,18 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        val metaChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            MetaAdsPlugin.CHANNEL_NAME,
+        )
+        metaAdsPlugin = MetaAdsPlugin(this, metaChannel)
+        metaChannel.setMethodCallHandler { call, result ->
+            metaAdsPlugin!!.handleMethodCall(call, result)
+        }
+
+        flutterEngine.platformViewsController.registry
+            .registerViewFactory("meta_banner_view", MetaBannerViewFactory(metaAdsPlugin!!))
     }
 
     private fun scheduleAlarm(call: MethodCall, result: MethodChannel.Result) {

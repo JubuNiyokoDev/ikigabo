@@ -55,6 +55,12 @@
     public static *** log(...);
 }
 
+# Meta Audience Network
+-keep class com.facebook.** { *; }
+-keep interface com.facebook.** { *; }
+-keepattributes *Annotation*
+-dontwarn com.facebook.ads.**
+
 # Ignorer warnings non critiques
 -dontwarn android.content.res.Resources$NotFoundException
 -ignorewarnings

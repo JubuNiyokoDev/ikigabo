@@ -14,6 +14,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/inline_banner_ad.dart';
+import '../../widgets/native_ad_list_item.dart';
 import 'add_asset_screen.dart';
 import 'asset_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -340,14 +341,17 @@ class AssetsListScreen extends ConsumerWidget {
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length + 1,
+          itemCount: items.length + 2,
           itemBuilder: (context, index) {
             final bannerIndex = items.length > 2 ? 2 : items.length;
-            if (index == bannerIndex) {
-              return const InlineBannerAd();
-            }
-
-            final itemIndex = index > bannerIndex ? index - 1 : index;
+            final nativeIndex = items.length > 5 ? 5 : -1;
+            if (index == bannerIndex) return const InlineBannerAd();
+            if (nativeIndex > 0 && index == nativeIndex) return const NativeAdListItem();
+            int offset = 0;
+            if (index > bannerIndex) offset++;
+            if (nativeIndex > 0 && index > nativeIndex) offset++;
+            final itemIndex = index - offset;
+            if (itemIndex < 0 || itemIndex >= items.length) return const SizedBox.shrink();
             return items[itemIndex];
           },
         );

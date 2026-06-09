@@ -56,6 +56,17 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2300546388710165~5023194481"/>
 
+        <!-- Meta Audience Network Configuration -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="2120883338770182"/>
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="false"/>
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="true"/>
+
         <receiver
             android:name=".AlarmReceiver"
             android:exported="false"/>

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
-import '../../core/services/ad_network_config.dart';
 import '../providers/banner_provider.dart';
-import 'admob_banner_widget.dart';
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
@@ -17,51 +16,62 @@ class BannerAdWidget extends ConsumerStatefulWidget {
 class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     with SingleTickerProviderStateMixin {
   static const double _bannerHeight = 52;
+  static const MethodChannel _metaChannel = MethodChannel('meta_ads_channel');
+
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
 
-  late bool _showAdMob;
-  bool _unityReady = false;
-  bool _admobReady = false;
+  bool _showMeta = false;
+  bool _metaLoaded = false;
+  bool _unityLoaded = false;
   Timer? _rotateTimer;
 
   @override
   void initState() {
     super.initState();
-    _showAdMob =
-        AdNetworkConfig.canUseAdMob &&
-        AdNetworkConfig.bannerPrimaryNetwork == AdNetwork.admob;
+    _metaChannel.setMethodCallHandler(_handleMetaCallback);
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
     _slideAnimation = Tween<double>(begin: -1.0, end: 0.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
+    _loadMetaBanner();
     _startRotation();
   }
 
-  void _startRotation() {
-    _rotateTimer?.cancel();
-    if (!AdNetworkConfig.canUseAdMob) return;
+  Future<void> _handleMetaCallback(MethodCall call) async {
+    if (!mounted) return;
+    switch (call.method) {
+      case 'onBannerLoaded':
+        setState(() => _metaLoaded = true);
+      case 'onBannerLoadFailed':
+        setState(() {
+          _metaLoaded = false;
+          if (_showMeta) _showMeta = false;
+        });
+    }
+  }
 
-    _rotateTimer = Timer.periodic(AdNetworkConfig.bannerRotationInterval, (_) {
+  Future<void> _loadMetaBanner() async {
+    try {
+      await _metaChannel.invokeMethod('loadBanner');
+    } catch (_) {}
+  }
+
+  void _startRotation() {
+    _rotateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (!mounted) return;
       setState(() {
-        _showAdMob = !_showAdMob;
-        if (_showAdMob) {
-          _admobReady = false;
-        } else {
-          _unityReady = false;
-        }
+        _showMeta = !_showMeta;
+        if (_showMeta && !_metaLoaded) _showMeta = false;
       });
     });
   }
@@ -70,6 +80,7 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   void dispose() {
     _rotateTimer?.cancel();
     _animationController.dispose();
+    _metaChannel.invokeMethod('destroyBanner').catchError((_) {});
     super.dispose();
   }
 
@@ -95,32 +106,26 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
               height: _bannerHeight.h,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
-                child: _showAdMob
-                    ? AdMobBannerWidget(
-                        key: const ValueKey('admob-banner'),
-                        onLoaded: _onAdMobReady,
-                        onFailed: _onAdMobFailed,
-                      )
+                child: _showMeta && _metaLoaded
+                    ? _MetaBannerView(key: const ValueKey('meta-banner'))
                     : UnityBannerAd(
                         key: const ValueKey('unity-banner'),
                         placementId: 'Banner_Android',
-                        onLoad: (placementId) {
-                          print('Unity Banner chargé: $placementId');
-                          _onUnityReady();
+                        onLoad: (_) {
+                          if (mounted) setState(() => _unityLoaded = true);
                         },
-                        onClick: (placementId) =>
-                            print('Unity Banner cliqué: $placementId'),
-                        onShown: (placementId) {
-                          print('Unity Banner affiché: $placementId');
-                          _onUnityReady();
+                        onShown: (_) {
+                          if (mounted) setState(() => _unityLoaded = true);
                         },
-                        onFailed: (placementId, error, message) {
-                          print(
-                            'Unity Banner erreur: '
-                            '$placementId - $error - $message',
-                          );
-                          _onUnityFailed();
+                        onFailed: (_, __, ___) {
+                          if (mounted) {
+                            setState(() {
+                              _unityLoaded = false;
+                              if (_metaLoaded) _showMeta = true;
+                            });
+                          }
                         },
+                        onClick: (_) {},
                       ),
               ),
             ),
@@ -129,34 +134,17 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
       },
     );
   }
+}
 
-  void _onUnityReady() {
-    if (!mounted) return;
-    if (_unityReady) return;
-    setState(() => _unityReady = true);
-  }
+class _MetaBannerView extends StatelessWidget {
+  const _MetaBannerView({super.key});
 
-  void _onUnityFailed() {
-    if (!mounted) return;
-    setState(() {
-      _unityReady = false;
-      if (AdNetworkConfig.canUseAdMob) _showAdMob = true;
-    });
-  }
-
-  void _onAdMobReady() {
-    if (!mounted) return;
-    if (_admobReady) return;
-    setState(() {
-      _admobReady = true;
-    });
-  }
-
-  void _onAdMobFailed() {
-    if (!mounted) return;
-    setState(() {
-      _admobReady = false;
-      _showAdMob = false;
-    });
+  @override
+  Widget build(BuildContext context) {
+    return AndroidView(
+      viewType: 'meta_banner_view',
+      layoutDirection: TextDirection.ltr,
+      creationParamsCodec: const StandardMessageCodec(),
+    );
   }
 }
