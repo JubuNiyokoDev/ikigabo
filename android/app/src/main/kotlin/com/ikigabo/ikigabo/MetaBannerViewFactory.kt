@@ -10,19 +10,21 @@ import io.flutter.plugin.platform.PlatformViewFactory
 class MetaBannerViewFactory(private val plugin: MetaAdsPlugin) :
     PlatformViewFactory(StandardMessageCodec.INSTANCE) {
 
-    override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
-        return MetaBannerPlatformView(context, plugin)
-    }
+    override fun create(context: Context, viewId: Int, args: Any?): PlatformView =
+        MetaNativeAdView(context) { plugin.getBannerView() }
 }
 
-private class MetaBannerPlatformView(
+class MetaRectangleViewFactory(private val plugin: MetaAdsPlugin) :
+    PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+
+    override fun create(context: Context, viewId: Int, args: Any?): PlatformView =
+        MetaNativeAdView(context) { plugin.getRectangleView() }
+}
+
+private class MetaNativeAdView(
     private val context: Context,
-    private val plugin: MetaAdsPlugin,
+    private val viewProvider: () -> View?,
 ) : PlatformView {
-
-    override fun getView(): View {
-        return plugin.getBannerView() ?: FrameLayout(context)
-    }
-
+    override fun getView(): View = viewProvider() ?: FrameLayout(context)
     override fun dispose() {}
 }

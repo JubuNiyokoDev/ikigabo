@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/services/dynamic_category_service.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../../core/services/ad_manager.dart';
 
 class EditTransactionScreen extends ConsumerStatefulWidget {
   final TransactionModel transaction;
@@ -228,7 +229,8 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
         );
 
         await ref.read(transactionControllerProvider.notifier).updateTransaction(updatedTransaction);
-        
+        await AdManager.showTransactionAd();
+
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(

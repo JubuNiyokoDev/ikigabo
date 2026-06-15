@@ -22,11 +22,11 @@ class AdNetworkConfig {
   static const AdNetwork fullScreenPrimaryNetwork = AdNetwork.admob;
 
   static const bool useRewardedForCoreActions = false;
-  static const bool showDashboardInterstitial = false;
-  static const bool showSettingsInterstitial = false;
+  static const bool showDashboardInterstitial = true;
+  static const bool showSettingsInterstitial = true;
 
   // Fréquences équilibrées : visible mais pas agressif
-  static const int transactionInterstitialFrequency = 3;
+  static const int transactionInterstitialFrequency = 2;
   static const int bankInterstitialFrequency = 4;
   static const int sourceInterstitialFrequency = 4;
   static const int debtInterstitialFrequency = 4;

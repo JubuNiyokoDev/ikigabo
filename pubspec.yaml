@@ -2,7 +2,7 @@ name: ikigabo
 description: "Application de gestion de patrimoine personnel - Offline First"
 publish_to: "none"
 
-version: 1.2.1+35
+version: 1.2.2+37
 
 environment:
   sdk: ^3.10.3
@@ -63,7 +63,6 @@ dependencies:
 
   # Google Mobile Ads
   google_mobile_ads: ^5.2.0
-
 
   # Google Sign-In for Drive backup
   google_sign_in: ^6.2.2

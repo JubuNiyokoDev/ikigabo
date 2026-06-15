@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
+import '../../core/services/meta_ads_service.dart';
 import '../providers/banner_provider.dart';
 
 class BannerAdWidget extends ConsumerStatefulWidget {
@@ -16,7 +17,6 @@ class BannerAdWidget extends ConsumerStatefulWidget {
 class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     with SingleTickerProviderStateMixin {
   static const double _bannerHeight = 52;
-  static const MethodChannel _metaChannel = MethodChannel('meta_ads_channel');
 
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
@@ -30,7 +30,7 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   @override
   void initState() {
     super.initState();
-    _metaChannel.setMethodCallHandler(_handleMetaCallback);
+    MetaAdsService.onBannerResult = _onMetaBannerResult;
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -47,23 +47,16 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     _startRotation();
   }
 
-  Future<void> _handleMetaCallback(MethodCall call) async {
+  void _onMetaBannerResult(bool loaded) {
     if (!mounted) return;
-    switch (call.method) {
-      case 'onBannerLoaded':
-        setState(() => _metaLoaded = true);
-      case 'onBannerLoadFailed':
-        setState(() {
-          _metaLoaded = false;
-          if (_showMeta) _showMeta = false;
-        });
-    }
+    setState(() {
+      _metaLoaded = loaded;
+      if (!loaded && _showMeta) _showMeta = false;
+    });
   }
 
   Future<void> _loadMetaBanner() async {
-    try {
-      await _metaChannel.invokeMethod('loadBanner');
-    } catch (_) {}
+    await MetaAdsService.loadBanner();
   }
 
   void _startRotation() {
@@ -78,9 +71,10 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
 
   @override
   void dispose() {
+    MetaAdsService.onBannerResult = null;
     _rotateTimer?.cancel();
     _animationController.dispose();
-    _metaChannel.invokeMethod('destroyBanner').catchError((_) {});
+    MetaAdsService.destroyBanner();
     super.dispose();
   }
 

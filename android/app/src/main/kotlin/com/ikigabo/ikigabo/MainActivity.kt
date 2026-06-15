@@ -60,6 +60,8 @@ class MainActivity : FlutterFragmentActivity() {
 
         flutterEngine.platformViewsController.registry
             .registerViewFactory("meta_banner_view", MetaBannerViewFactory(metaAdsPlugin!!))
+        flutterEngine.platformViewsController.registry
+            .registerViewFactory("meta_rectangle_view", MetaRectangleViewFactory(metaAdsPlugin!!))
     }
 
     private fun scheduleAlarm(call: MethodCall, result: MethodChannel.Result) {

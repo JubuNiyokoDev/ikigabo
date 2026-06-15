@@ -12,7 +12,7 @@ import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
 import '../../widgets/inline_banner_ad.dart';
-import '../../widgets/native_ad_list_item.dart';
+import '../../widgets/meta_rectangle_ad.dart';
 import 'add_debt_screen.dart';
 import 'debt_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -493,7 +493,7 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
             final bannerIndex = items.length > 2 ? 2 : items.length;
             final nativeIndex = items.length > 5 ? 5 : -1;
             if (index == bannerIndex) return const InlineBannerAd();
-            if (nativeIndex > 0 && index == nativeIndex) return const NativeAdListItem();
+            if (nativeIndex > 0 && index == nativeIndex) return const MetaRectangleAd();
             int offset = 0;
             if (index > bannerIndex) offset++;
             if (nativeIndex > 0 && index > nativeIndex) offset++;

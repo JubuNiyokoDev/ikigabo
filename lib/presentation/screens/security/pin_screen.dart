@@ -10,7 +10,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/pin_provider.dart';
 import '../../providers/biometric_provider.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/services/ad_manager.dart';
+import '../../../core/services/ads_service.dart';
 
 class PinScreen extends ConsumerStatefulWidget {
   final PinMode mode;
@@ -73,9 +73,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         if (_pin == _confirmPin) {
           final success = await ref.read(pinProvider.notifier).setPin(_pin);
           if (success) {
-            // Montrer rewarded pour configuration PIN
-            await AdManager.showRewardedForPinSetup();
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            await AdsService.showInterstitial();
+            if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
           }
         } else {
           setState(() {
@@ -101,7 +100,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           .read(pinProvider.notifier)
           .changePin(widget.oldPin!, _pin);
       if (success) {
-        Navigator.pop(context);
+        await AdsService.showInterstitial();
+        if (mounted) Navigator.pop(context);
       } else {
         setState(() {
           _hasError = true;

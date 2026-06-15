@@ -15,6 +15,10 @@ class MetaAdsService {
   static Completer<void>? _rewardedShowCompleter;
   static VoidCallback? _pendingReward;
 
+  // Listeners pour banner et rectangle (widgets externes)
+  static void Function(bool)? onBannerResult;
+  static void Function(bool)? onRectangleResult;
+
   // ── Init ──────────────────────────────────────────────────────────────────
   static Future<void> initialize() async {
     if (_isInitialized) return;
@@ -84,7 +88,47 @@ class MetaAdsService {
           _rewardedShowCompleter = null;
         }
         unawaited(loadRewarded());
+      case 'onBannerLoaded':
+        onBannerResult?.call(true);
+      case 'onBannerLoadFailed':
+        print('❌ Meta Banner failed: ${call.arguments}');
+        onBannerResult?.call(false);
+      case 'onRectangleLoaded':
+        onRectangleResult?.call(true);
+      case 'onRectangleLoadFailed':
+        print('❌ Meta Rectangle failed: ${call.arguments}');
+        onRectangleResult?.call(false);
     }
+  }
+
+  static Future<void> loadBanner() async {
+    if (!_isInitialized) await initialize();
+    try {
+      await _channel.invokeMethod('loadBanner');
+    } catch (e) {
+      print('❌ Meta loadBanner error: $e');
+    }
+  }
+
+  static Future<void> destroyBanner() async {
+    try {
+      await _channel.invokeMethod('destroyBanner');
+    } catch (_) {}
+  }
+
+  static Future<void> loadRectangle() async {
+    if (!_isInitialized) await initialize();
+    try {
+      await _channel.invokeMethod('loadRectangle');
+    } catch (e) {
+      print('❌ Meta loadRectangle error: $e');
+    }
+  }
+
+  static Future<void> destroyRectangle() async {
+    try {
+      await _channel.invokeMethod('destroyRectangle');
+    } catch (_) {}
   }
 
   // ── Interstitial ──────────────────────────────────────────────────────────
