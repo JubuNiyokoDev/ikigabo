@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_icons.dart';
 import 'core/services/ads_service.dart';
+import 'core/services/in_app_update_service.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/fallback_material_localizations.dart';
 import 'presentation/providers/theme_provider.dart';
@@ -50,11 +51,34 @@ void main() async {
   runApp(const ProviderScope(child: IkigaboApp()));
 }
 
-class IkigaboApp extends ConsumerWidget {
+class IkigaboApp extends ConsumerStatefulWidget {
   const IkigaboApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IkigaboApp> createState() => _IkigaboAppState();
+}
+
+class _IkigaboAppState extends ConsumerState<IkigaboApp> {
+  final InAppUpdateService _inAppUpdateService = InAppUpdateService();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 1200), () {
+        unawaited(_inAppUpdateService.checkForUpdate());
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_inAppUpdateService.dispose());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
 

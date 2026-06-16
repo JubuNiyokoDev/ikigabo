@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
+import '../../core/services/ad_network_config.dart';
 import '../../core/services/meta_ads_service.dart';
 import '../providers/banner_provider.dart';
 
@@ -22,15 +23,17 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
 
-  bool _showMeta = false;
+  bool _showMeta = AdNetworkConfig.canUseMeta;
   bool _metaLoaded = false;
   bool _unityLoaded = false;
-  Timer? _rotateTimer;
+  Timer? _metaRetryTimer;
 
   @override
   void initState() {
     super.initState();
-    MetaAdsService.onBannerResult = _onMetaBannerResult;
+    if (AdNetworkConfig.canUseMeta) {
+      MetaAdsService.onBannerResult = _onMetaBannerResult;
+    }
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -43,15 +46,17 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _loadMetaBanner();
-    _startRotation();
+    if (AdNetworkConfig.canUseMeta) {
+      _loadMetaBanner();
+      _startMetaRetry();
+    }
   }
 
   void _onMetaBannerResult(bool loaded) {
     if (!mounted) return;
     setState(() {
       _metaLoaded = loaded;
-      if (!loaded && _showMeta) _showMeta = false;
+      _showMeta = loaded;
     });
   }
 
@@ -59,20 +64,21 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     await MetaAdsService.loadBanner();
   }
 
-  void _startRotation() {
-    _rotateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+  void _startMetaRetry() {
+    _metaRetryTimer = Timer.periodic(AdNetworkConfig.bannerRetryDelay, (_) {
       if (!mounted) return;
-      setState(() {
-        _showMeta = !_showMeta;
-        if (_showMeta && !_metaLoaded) _showMeta = false;
-      });
+      if (!_metaLoaded) {
+        unawaited(_loadMetaBanner());
+      }
     });
   }
 
   @override
   void dispose() {
-    MetaAdsService.onBannerResult = null;
-    _rotateTimer?.cancel();
+    if (AdNetworkConfig.canUseMeta) {
+      MetaAdsService.onBannerResult = null;
+    }
+    _metaRetryTimer?.cancel();
     _animationController.dispose();
     MetaAdsService.destroyBanner();
     super.dispose();
