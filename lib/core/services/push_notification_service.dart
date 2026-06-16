@@ -29,16 +29,19 @@ class PushNotificationService {
     await messaging.requestPermission(alert: true, badge: true, sound: true);
 
     // Canal Android haute priorité
-    await _localNotif.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        importance: Importance.max,
-        enableVibration: true,
-        playSound: true,
-      ),
-    );
+    await _localNotif
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            _channelId,
+            _channelName,
+            importance: Importance.max,
+            enableVibration: true,
+            playSound: true,
+          ),
+        );
 
     await _localNotif.initialize(
       const InitializationSettings(
