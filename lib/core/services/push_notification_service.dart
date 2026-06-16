@@ -16,7 +16,7 @@ class PushNotificationService {
   static const String _deviceIdKey = 'push_device_id';
 
   static final _localNotif = FlutterLocalNotificationsPlugin();
-  static const _channelId = 'ikigabo_push';
+  static const _channelId = 'ikigabo_notifications';
   static const _channelName = 'Ikigabo Notifications';
 
   static String? _cachedToken;
