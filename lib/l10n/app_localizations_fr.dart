@@ -1299,28 +1299,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingDesc1 =>
-      'Gérez votre patrimoine facilement : sources de revenus, banques, actifs et dettes en un seul endroit.';
+      'Ikigabo vous aide à connaître exactement ce que vous possédez, ce que vous devez et où va votre argent.';
 
   @override
   String get onboardingTitle2 => 'Suivez vos finances';
 
   @override
   String get onboardingDesc2 =>
-      'Enregistrez vos transactions, suivez vos revenus et dépenses avec des statistiques détaillées.';
+      'Ajoutez vos revenus, dépenses et transferts au quotidien. L’app calcule les soldes et les statistiques pour vous.';
 
   @override
   String get onboardingTitle3 => 'Gérez vos dettes';
 
   @override
   String get onboardingDesc3 =>
-      'Suivez vos créances et vos dettes, définissez des rappels pour ne jamais manquer un paiement.';
+      'Notez ce que vous devez et ce qu’on vous doit. Ikigabo vous rappelle les échéances importantes.';
 
   @override
   String get onboardingTitle4 => 'Sécurisé et privé';
 
   @override
   String get onboardingDesc4 =>
-      'Vos données restent sur votre appareil. Sauvegardez et restaurez en toute sécurité avec un code PIN.';
+      'Protégez l’accès par code PIN, sauvegardez vos données et recevez des rappels intelligents quand il faut revenir.';
 
   @override
   String get skip => 'Passer';

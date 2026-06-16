@@ -32,7 +32,7 @@ class NotificationsScreen extends ConsumerWidget {
           ),
         ),
         title: Text(
-          'Notifications',
+          l10n.notifications,
           style: TextStyle(
             color: isDark ? AppColors.textDark : Colors.black87,
             fontWeight: FontWeight.w600,
@@ -70,7 +70,8 @@ class NotificationsScreen extends ConsumerWidget {
         valueListenable: notificationService.notificationCount,
         builder: (context, count, child) {
           // Toujours afficher toutes les notifications (lues et non lues)
-          final notifications = notificationService.notifications;
+          final notifications = notificationService.notifications.toList()
+            ..sort((a, b) => b.scheduledDate.compareTo(a.scheduledDate));
 
           if (notifications.isEmpty) {
             return Center(
@@ -260,6 +261,7 @@ class _NotificationCard extends StatelessWidget {
       case NotificationType.lowBalance:
         return AppIcons.warning;
       case NotificationType.smartReminder:
+      case NotificationType.pushNotification:
         return AppIcons.notification;
     }
   }
@@ -283,6 +285,7 @@ class _NotificationCard extends StatelessWidget {
       case NotificationType.lowBalance:
         return AppColors.warning;
       case NotificationType.smartReminder:
+      case NotificationType.pushNotification:
         return AppColors.primary;
     }
   }

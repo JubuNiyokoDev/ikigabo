@@ -132,6 +132,7 @@ class NotificationDetailBottomSheet extends StatelessWidget {
       case NotificationType.lowBalance:
         return AppIcons.warning;
       case NotificationType.smartReminder:
+      case NotificationType.pushNotification:
         return AppIcons.notification;
     }
   }
@@ -155,6 +156,7 @@ class NotificationDetailBottomSheet extends StatelessWidget {
       case NotificationType.lowBalance:
         return AppColors.warning;
       case NotificationType.smartReminder:
+      case NotificationType.pushNotification:
         return AppColors.primary;
     }
   }

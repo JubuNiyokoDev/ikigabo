@@ -7,10 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/transaction_model.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/budget_model.dart';
+import 'preferences_service.dart';
 import 'push_notification_service.dart';
 
 class HabitSyncService {
-  static const String _serverUrl = 'https://push-notification-server-k5ev.onrender.com';
+  static const String _serverUrl =
+      'https://push-notification-server-k5ev.onrender.com';
   static const String _lastSyncKey = 'habit_sync_last_at';
   static const Duration _syncCooldown = Duration(hours: 6);
 
@@ -30,11 +32,13 @@ class HabitSyncService {
   static Future<void> updateFcmToken(String token) async {
     final deviceId = await PushNotificationService.getDeviceId();
     try {
-      await http.post(
-        Uri.parse('$_serverUrl/update-token'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'deviceId': deviceId, 'fcmToken': token}),
-      ).timeout(const Duration(seconds: 10));
+      await http
+          .post(
+            Uri.parse('$_serverUrl/update-token'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'deviceId': deviceId, 'fcmToken': token}),
+          )
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('⚠️ Token update failed: $e');
     }
@@ -54,20 +58,44 @@ class HabitSyncService {
         'platform': 'android',
         'lastActiveAt': DateTime.now().millisecondsSinceEpoch,
         'locale': _detectLocale(),
+        'notificationPreferences': await _notificationPreferences(),
         'habits': habits,
       };
 
-      final response = await http.post(
-        Uri.parse('$_serverUrl/heartbeat'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 15));
+      final response = await http
+          .post(
+            Uri.parse('$_serverUrl/heartbeat'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         debugPrint('✅ Heartbeat envoyé au serveur push');
       }
     } catch (e) {
       debugPrint('⚠️ Heartbeat failed (offline?): $e');
+    }
+  }
+
+  static Future<void> syncNotificationPreferences() async {
+    try {
+      final deviceId = await PushNotificationService.getDeviceId();
+      final fcmToken = await PushNotificationService.getFcmToken();
+
+      await http
+          .post(
+            Uri.parse('$_serverUrl/notification-preferences'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'deviceId': deviceId,
+              if (fcmToken != null) 'fcmToken': fcmToken,
+              'notificationPreferences': await _notificationPreferences(),
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } catch (e) {
+      debugPrint('⚠️ Preferences push sync failed: $e');
     }
   }
 
@@ -168,5 +196,19 @@ class HabitSyncService {
     } catch (_) {
       return 'fr';
     }
+  }
+
+  static Future<Map<String, dynamic>> _notificationPreferences() async {
+    final prefs = await PreferencesService.init();
+    final values = {
+      'debtReminders': prefs.getDebtRemindersEnabled(),
+      'bankFeeReminders': prefs.getBankFeesEnabled(),
+      'wealthMilestones': prefs.getWealthMilestonesEnabled(),
+      'backupReminders': prefs.getBackupRemindersEnabled(),
+      'overdueAlerts': prefs.getOverdueAlertsEnabled(),
+      'smartReminders': prefs.getSmartRemindersEnabled(),
+    };
+
+    return {...values, 'pushEnabled': values.values.any((enabled) => enabled)};
   }
 }

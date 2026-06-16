@@ -19,6 +19,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const int _pageCount = 4;
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isLoading = false;
@@ -50,7 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < _pageCount - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -124,6 +125,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _buildPage1(isDark, l10n),
                   _buildPage2(isDark, l10n),
                   _buildPage3(isDark, l10n),
+                  _buildPage4(isDark, l10n),
                 ],
               ),
             ),
@@ -131,7 +133,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             // Page indicators
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
+              children: List.generate(_pageCount, (index) {
                 return Container(
                   margin: EdgeInsets.symmetric(horizontal: 4.w),
                   width: _currentPage == index ? 24.w : 8.w,
@@ -154,7 +156,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
               child: LoadingButton(
-                text: _currentPage == 2 ? l10n.getStarted : l10n.next,
+                text: _currentPage == _pageCount - 1
+                    ? l10n.getStarted
+                    : l10n.next,
                 onPressed: _isLoading ? null : _nextPage,
                 isLoading: _isLoading,
               ),
@@ -204,6 +208,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 600.ms),
+
+          SizedBox(height: 24.h),
+
+          _buildQuickPoints(isDark: isDark, points: _quickPoints(l10n, 1)),
         ],
       ),
     );
@@ -248,12 +256,64 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 600.ms),
+
+          SizedBox(height: 24.h),
+
+          _buildQuickPoints(isDark: isDark, points: _quickPoints(l10n, 2)),
         ],
       ),
     );
   }
 
   Widget _buildPage3(bool isDark, AppLocalizations l10n) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120.w,
+            height: 120.h,
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(60.r),
+            ),
+            child: Icon(AppIcons.debt, size: 60.sp, color: AppColors.warning),
+          ).animate().scale(delay: 200.ms),
+
+          SizedBox(height: 32.h),
+
+          Text(
+            l10n.onboardingTitle3,
+            style: TextStyle(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+              color: isDark ? AppColors.textDark : Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ).animate().fadeIn(delay: 400.ms),
+
+          SizedBox(height: 16.h),
+
+          Text(
+            l10n.onboardingDesc3,
+            style: TextStyle(
+              fontSize: AppSizes.textMedium,
+              color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ).animate().fadeIn(delay: 600.ms),
+
+          SizedBox(height: 24.h),
+
+          _buildQuickPoints(isDark: isDark, points: _quickPoints(l10n, 3)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPage4(bool isDark, AppLocalizations l10n) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
@@ -296,8 +356,154 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 600.ms),
+
+          SizedBox(height: 24.h),
+
+          _buildQuickPoints(isDark: isDark, points: _quickPoints(l10n, 4)),
         ],
       ),
     );
+  }
+
+  Widget _buildQuickPoints({
+    required bool isDark,
+    required List<String> points,
+  }) {
+    return Column(
+      children: points
+          .map(
+            (point) => Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: Row(
+                children: [
+                  Container(
+                    width: 22.w,
+                    height: 22.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Icon(
+                      AppIcons.success,
+                      color: AppColors.primary,
+                      size: 13.sp,
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Text(
+                      point,
+                      style: TextStyle(
+                        fontSize: 12.5.sp,
+                        height: 1.25,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    ).animate().fadeIn(delay: 750.ms);
+  }
+
+  List<String> _quickPoints(AppLocalizations l10n, int page) {
+    final language = l10n.localeName.split('_').first;
+
+    const points = {
+      'fr': {
+        1: [
+          'Sources, banques, actifs et dettes',
+          'Solde total et historique au même endroit',
+          'Fonctionne même sans connexion',
+        ],
+        2: [
+          'Ajoutez chaque revenu ou dépense',
+          'Faites des transferts entre comptes',
+          'Suivez les statistiques automatiquement',
+        ],
+        3: [
+          'Rappels avant les échéances',
+          'Suivi des montants déjà payés',
+          'Alertes quand une dette devient urgente',
+        ],
+        4: [
+          'Code PIN pour protéger l’accès',
+          'Sauvegarde locale ou Google Drive',
+          'Notifications intelligentes si vous oubliez',
+        ],
+      },
+      'en': {
+        1: [
+          'Sources, banks, assets and debts',
+          'Total balance and history in one place',
+          'Works even without internet',
+        ],
+        2: [
+          'Add every income or expense',
+          'Transfer money between accounts',
+          'Track statistics automatically',
+        ],
+        3: [
+          'Reminders before due dates',
+          'Track amounts already paid',
+          'Alerts when a debt becomes urgent',
+        ],
+        4: [
+          'PIN code to protect access',
+          'Local or Google Drive backup',
+          'Smart reminders when you forget',
+        ],
+      },
+      'rn': {
+        1: [
+          'Inkomoko, amabanki, itunga n’amadeni',
+          'Igiteranyo n’amateka ahantu hamwe',
+          'Bikora no ata internet ihari',
+        ],
+        2: [
+          'Andika ayinjiye n’ayasohotse',
+          'Rungika amahera hagati ya konti',
+          'Raba ibiharuro vyikora',
+        ],
+        3: [
+          'Ivyibutso imbere y’itariki',
+          'Kurikirana ayamaze kwishyurwa',
+          'Imenyesha iyo ideni ryihutirwa',
+        ],
+        4: [
+          'PIN yo gukingira app',
+          'Backup kuri telefone canke Google Drive',
+          'Ivyibutso vy’ubwenge iyo wibagiye',
+        ],
+      },
+      'sw': {
+        1: [
+          'Vyanzo, benki, mali na madeni',
+          'Salio na historia mahali pamoja',
+          'Inafanya kazi bila intaneti',
+        ],
+        2: [
+          'Ongeza kila mapato au matumizi',
+          'Hamisha fedha kati ya akaunti',
+          'Fuatilia takwimu kiotomatiki',
+        ],
+        3: [
+          'Vikumbusho kabla ya tarehe',
+          'Fuatilia kiasi kilicholipwa',
+          'Arifa deni likiwa la haraka',
+        ],
+        4: [
+          'PIN kulinda ufikiaji',
+          'Backup ya ndani au Google Drive',
+          'Vikumbusho mahiri ukisahau',
+        ],
+      },
+    };
+
+    return points[language]?[page] ?? points['fr']![page]!;
   }
 }

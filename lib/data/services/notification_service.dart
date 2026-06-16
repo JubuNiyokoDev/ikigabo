@@ -47,6 +47,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _flutterNotifications =
       FlutterLocalNotificationsPlugin();
   PreferencesService? _prefsService;
+  bool _notificationsLoaded = false;
 
   ValueNotifier<int> get notificationCount => _notificationCount;
   List<NotificationItem> get notifications => List.unmodifiable(_notifications);
@@ -444,7 +445,7 @@ class NotificationService {
       _addNotification(
         NotificationItem(
           id: 'wealth_milestone_$achievedMilestone',
-          title: '🎉 Nouveau Palier Atteint !',
+          title: 'Nouveau palier atteint !',
           body:
               'Votre patrimoine total est maintenant de ${newWealth.toStringAsFixed(0)} $currency (palier ${achievedMilestone ~/ 1000}K franchi)',
           type: NotificationType.wealthMilestone,
@@ -569,11 +570,31 @@ class NotificationService {
     await _clearSmartHabitReminders();
   }
 
+  Future<void> recordPushNotification({
+    required String id,
+    required String title,
+    required String body,
+    DateTime? receivedAt,
+    bool isRead = false,
+  }) async {
+    await _ensureReadyForExternalMutation();
+    _addNotification(
+      NotificationItem(
+        id: id,
+        title: _stripVisibleEmoji(title),
+        body: _stripVisibleEmoji(body),
+        type: NotificationType.pushNotification,
+        scheduledDate: receivedAt ?? DateTime.now(),
+        isRead: isRead,
+      ),
+    );
+  }
+
   Future<void> _scheduleGlobalInactivityReminder(
     List<TransactionModel> transactions,
     DateTime now,
   ) async {
-    await _clearSmartInactivityReminders();
+    await _clearSmartInactivityReminders(removeCards: false);
 
     if (transactions.length < 3) return;
 
@@ -636,7 +657,7 @@ class NotificationService {
     DateTime now,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    await _clearSmartHabitReminders(prefs: prefs);
+    await _clearSmartHabitReminders(prefs: prefs, removeCards: false);
 
     final cutoff = now.subtract(
       const Duration(days: _smartReminderLookbackDays),
@@ -808,9 +829,11 @@ class NotificationService {
     return 'Revenez faire un point: revenus, dépenses et transferts restent plus utiles quand ils sont à jour.';
   }
 
-  Future<void> _clearSmartInactivityReminders() async {
+  Future<void> _clearSmartInactivityReminders({bool removeCards = true}) async {
     await RealAlarmService.cancelAlarm(_legacySmartGlobalInactivityAlarmId);
-    removeNotification('smart_global_inactivity');
+    if (removeCards) {
+      removeNotification('smart_global_inactivity');
+    }
 
     for (
       var index = 0;
@@ -818,17 +841,24 @@ class NotificationService {
       index++
     ) {
       await RealAlarmService.cancelAlarm(_smartInactivityAlarmBaseId + index);
-      removeNotification('smart_global_inactivity_$index');
+      if (removeCards) {
+        removeNotification('smart_global_inactivity_$index');
+      }
     }
   }
 
-  Future<void> _clearSmartHabitReminders({SharedPreferences? prefs}) async {
+  Future<void> _clearSmartHabitReminders({
+    SharedPreferences? prefs,
+    bool removeCards = true,
+  }) async {
     final preferences = prefs ?? await SharedPreferences.getInstance();
     final alarmIds = _readSmartHabitAlarmIds(preferences);
 
     for (final alarmId in alarmIds) {
       await RealAlarmService.cancelAlarm(alarmId);
-      removeNotification('smart_habit_$alarmId');
+      if (removeCards) {
+        removeNotification('smart_habit_$alarmId');
+      }
     }
 
     await preferences.remove(_smartHabitAlarmIdsKey);
@@ -870,17 +900,44 @@ class NotificationService {
     return '${budget.period.name}_${start}_$end';
   }
 
+  String _stripVisibleEmoji(String value) {
+    return value
+        .replaceAll(
+          RegExp(r'[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]', unicode: true),
+          '',
+        )
+        .replaceAll(RegExp(r'[\uFE0F\u200D]'), '')
+        .replaceAll(RegExp(r'\s{2,}'), ' ')
+        .trim();
+  }
+
   void _addNotification(NotificationItem notification) {
     // Vérifier si le type de notification est activé avant d'ajouter
     if (!_isNotificationTypeEnabled(notification.type)) {
       return;
     }
 
-    // Remove existing notification with same ID
-    _notifications.removeWhere((n) => n.id == notification.id);
+    final existingIndex = _notifications.indexWhere(
+      (n) => n.id == notification.id,
+    );
+    final existing = existingIndex == -1 ? null : _notifications[existingIndex];
+    final nextNotification = existing == null
+        ? notification.copyWith(
+            title: _stripVisibleEmoji(notification.title),
+            body: _stripVisibleEmoji(notification.body),
+          )
+        : notification.copyWith(
+            title: _stripVisibleEmoji(notification.title),
+            body: _stripVisibleEmoji(notification.body),
+            isRead: existing.isRead,
+            createdAt: existing.createdAt,
+          );
 
-    // Add new notification
-    _notifications.add(notification);
+    if (existingIndex == -1) {
+      _notifications.add(nextNotification);
+    } else {
+      _notifications[existingIndex] = nextNotification;
+    }
     _saveNotifications();
     _updateNotificationCount();
   }
@@ -905,6 +962,7 @@ class NotificationService {
       case NotificationType.lowBalance:
         return _prefsService!.getOverdueAlertsEnabled();
       case NotificationType.smartReminder:
+      case NotificationType.pushNotification:
         return _prefsService!.getSmartRemindersEnabled();
     }
   }
@@ -1043,6 +1101,14 @@ class NotificationService {
             .toList(),
       );
     }
+    _notificationsLoaded = true;
+  }
+
+  Future<void> _ensureReadyForExternalMutation() async {
+    _prefsService ??= await PreferencesService.init();
+    if (!_notificationsLoaded) {
+      await _loadNotifications();
+    }
   }
 }
 
@@ -1063,11 +1129,34 @@ class NotificationItem {
     required this.type,
     this.relatedId,
     required this.scheduledDate,
+    DateTime? createdAt,
     this.isRead = false,
-  }) : createdAt = DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now();
 
   void markAsRead() {
     isRead = true;
+  }
+
+  NotificationItem copyWith({
+    String? id,
+    String? title,
+    String? body,
+    NotificationType? type,
+    int? relatedId,
+    DateTime? scheduledDate,
+    DateTime? createdAt,
+    bool? isRead,
+  }) {
+    return NotificationItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      type: type ?? this.type,
+      relatedId: relatedId ?? this.relatedId,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      createdAt: createdAt ?? this.createdAt,
+      isRead: isRead ?? this.isRead,
+    );
   }
 
   Map<String, dynamic> toJson() => {
@@ -1091,6 +1180,9 @@ class NotificationItem {
         scheduledDate: DateTime.fromMillisecondsSinceEpoch(
           json['scheduledDate'],
         ),
+        createdAt: json['createdAt'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
         isRead: json['isRead'] ?? false,
       );
 }
@@ -1105,6 +1197,7 @@ enum NotificationType {
   budgetExceeded,
   lowBalance,
   smartReminder,
+  pushNotification,
 }
 
 class _TransactionHabit {

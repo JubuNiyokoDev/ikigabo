@@ -1293,28 +1293,28 @@ class AppLocalizationsRn extends AppLocalizations {
 
   @override
   String get onboardingDesc1 =>
-      'Gucunga itunga ryawe vyoroshe: Inkomoko y\'amahera, amabanki, itunga n\'Amadeni ahantu hamwe.';
+      'Ikigabo igufasha kumenya ivyo ufise, amadeni ufise n’aho amahera yawe aja.';
 
   @override
   String get onboardingTitle2 => 'Gukurikirana amahera yawe';
 
   @override
   String get onboardingDesc2 =>
-      'Andika ibikorwa vyawe, kwitondera amahera yinjira n\'asohoka hamwe n\'ibiharuro birambuye.';
+      'Andika ayinjira, ayasohoka n’ayarungitswe buri musi. App iharura ibisigaye n’ibiharuro ubwayo.';
 
   @override
   String get onboardingTitle3 => 'Gucunga Amadeni yawe';
 
   @override
   String get onboardingDesc3 =>
-      'Kwitondera Amadeni n\'ideni, shiraho ivyibutso kugira utibagira kwishyura.';
+      'Andika ivyo ugomba kwishyura n’ivyo abandi bakugomba. Ikigabo ikwibutsa amatariki ahambaye.';
 
   @override
   String get onboardingTitle4 => 'Irabitswe kandi irakingiwe';
 
   @override
   String get onboardingDesc4 =>
-      'Amakuru yawe aguma kuri telefone yawe. Bika kandi ugarure mu mutekano hamwe na code PIN.';
+      'Kingira app ukoresheje PIN, bika amakuru yawe kandi uronke ivyibutso vy’ubwenge igihe bikenewe.';
 
   @override
   String get skip => 'Simba';

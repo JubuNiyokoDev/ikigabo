@@ -1294,28 +1294,28 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get onboardingDesc1 =>
-      'Simamia mali yako kwa urahisi: vyanzo vya mapato, benki, mali na madeni mahali pamoja.';
+      'Ikigabo hukusaidia kujua unachomiliki, unachodaiwa na pesa zako zinakoenda.';
 
   @override
   String get onboardingTitle2 => 'Fuatilia fedha zako';
 
   @override
   String get onboardingDesc2 =>
-      'Rekodi shughuli zako, fuatilia mapato na matumizi yako kwa takwimu za kina.';
+      'Ongeza mapato, matumizi na miamala kila siku. App hukokotoa salio na takwimu kwa ajili yako.';
 
   @override
   String get onboardingTitle3 => 'Simamia madeni yako';
 
   @override
   String get onboardingDesc3 =>
-      'Fuatilia madeni yako, weka vikumbusho ili usisahau malipo.';
+      'Andika unachodaiwa na unachodai. Ikigabo hukukumbusha kabla ya tarehe muhimu.';
 
   @override
   String get onboardingTitle4 => 'Salama na faragha';
 
   @override
   String get onboardingDesc4 =>
-      'Data yako inabaki kwenye kifaa chako. Hifadhi na rejesha kwa usalama na msimbo wa PIN.';
+      'Linda ufikiaji kwa PIN, hifadhi data zako na pokea vikumbusho mahiri unapohitaji kurudi.';
 
   @override
   String get skip => 'Ruka';

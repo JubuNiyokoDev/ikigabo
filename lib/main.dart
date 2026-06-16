@@ -7,7 +7,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_icons.dart';
 import 'core/services/ads_service.dart';
+import 'core/services/habit_sync_service.dart';
 import 'core/services/in_app_update_service.dart';
+import 'core/services/notification_navigation_service.dart';
 import 'core/services/push_notification_service.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/fallback_material_localizations.dart';
@@ -42,6 +44,7 @@ void main() async {
   await NotificationService().initialize();
 
   // Firebase + Push Notifications FCM
+  PushNotificationService.onTokenUpdated = HabitSyncService.updateFcmToken;
   unawaited(PushNotificationService.initialize());
 
   // Initialiser les services publicitaires
@@ -92,6 +95,7 @@ class _IkigaboAppState extends ConsumerState<IkigaboApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
+          navigatorKey: NotificationNavigationService.navigatorKey,
           title: 'Ikigabo',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
@@ -208,6 +212,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ref.read(bannerProvider);
       // Initialiser le provider auto-backup avec callback actif
       ref.read(autoBackupProvider);
+      NotificationNavigationService.openPendingIfPossible();
     });
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ikigabo/core/services/preferences_service.dart';
+import '../../core/services/habit_sync_service.dart';
 import '../../data/services/notification_service.dart';
 import '../../data/models/debt_model.dart';
 import '../../data/models/bank_model.dart';
@@ -79,30 +80,35 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     final newValue = !state.debtReminders;
     state = state.copyWith(debtReminders: newValue);
     _prefsService?.setDebtRemindersEnabled(newValue);
+    _syncPushPreferences();
   }
 
   void toggleBankFeeReminders() {
     final newValue = !state.bankFeeReminders;
     state = state.copyWith(bankFeeReminders: newValue);
     _prefsService?.setBankFeesEnabled(newValue);
+    _syncPushPreferences();
   }
 
   void toggleWealthMilestones() {
     final newValue = !state.wealthMilestones;
     state = state.copyWith(wealthMilestones: newValue);
     _prefsService?.setWealthMilestonesEnabled(newValue);
+    _syncPushPreferences();
   }
 
   void toggleBackupReminders() {
     final newValue = !state.backupReminders;
     state = state.copyWith(backupReminders: newValue);
     _prefsService?.setBackupRemindersEnabled(newValue);
+    _syncPushPreferences();
   }
 
   void toggleOverdueAlerts() {
     final newValue = !state.overdueAlerts;
     state = state.copyWith(overdueAlerts: newValue);
     _prefsService?.setOverdueAlertsEnabled(newValue);
+    _syncPushPreferences();
   }
 
   void toggleSmartReminders() {
@@ -112,6 +118,11 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     if (!newValue) {
       unawaited(NotificationService().cancelSmartReminders());
     }
+    _syncPushPreferences();
+  }
+
+  void _syncPushPreferences() {
+    unawaited(HabitSyncService.syncNotificationPreferences());
   }
 }
 

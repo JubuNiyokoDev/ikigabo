@@ -1291,28 +1291,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingDesc1 =>
-      'Manage your wealth easily: income sources, banks, assets and debts all in one place.';
+      'Ikigabo helps you understand what you own, what you owe, and where your money goes.';
 
   @override
   String get onboardingTitle2 => 'Track your finances';
 
   @override
   String get onboardingDesc2 =>
-      'Record your transactions, track your income and expenses with detailed statistics.';
+      'Add income, expenses and transfers every day. The app calculates balances and statistics for you.';
 
   @override
   String get onboardingTitle3 => 'Manage your debts';
 
   @override
   String get onboardingDesc3 =>
-      'Track your receivables and debts, set reminders to never miss a payment.';
+      'Record what you owe and what others owe you. Ikigabo reminds you before important due dates.';
 
   @override
   String get onboardingTitle4 => 'Secure and private';
 
   @override
   String get onboardingDesc4 =>
-      'Your data stays on your device. Backup and restore securely with a PIN code.';
+      'Protect access with a PIN, back up your data, and receive smart reminders when it is time to come back.';
 
   @override
   String get skip => 'Skip';
