@@ -27,6 +27,8 @@ import '../transactions/transactions_list_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../../../core/services/ads_service.dart';
 import '../../../core/services/ad_manager.dart';
+import '../../../core/services/habit_sync_service.dart';
+import '../../providers/isar_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -47,6 +49,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         AdsService.initialize();
         AdManager.showDashboardAd();
         _hasTriggeredAd = true;
+
+        // Synchroniser les habitudes avec le serveur push
+        final isarAsync = ref.read(isarProvider);
+        isarAsync.whenData((isar) {
+          HabitSyncService.syncOnAppOpen(isar);
+        });
       }
     });
   }

@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'core/constants/app_icons.dart';
 import 'core/services/ads_service.dart';
 import 'core/services/in_app_update_service.dart';
+import 'core/services/push_notification_service.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/fallback_material_localizations.dart';
 import 'presentation/providers/theme_provider.dart';
@@ -39,6 +40,9 @@ void main() async {
   // Initialiser les services d'alarme et notifications
   await RealAlarmService.initialize();
   await NotificationService().initialize();
+
+  // Firebase + Push Notifications FCM
+  unawaited(PushNotificationService.initialize());
 
   // Initialiser les services publicitaires
   await AdsService.initialize();
