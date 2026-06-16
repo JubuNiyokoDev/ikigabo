@@ -19,6 +19,11 @@ class MetaAdsService {
   static void Function(bool)? onBannerResult;
   static void Function(bool)? onRectangleResult;
 
+  // Rate-limiting pour éviter "Ad was re-loaded too frequently"
+  static DateTime? _lastBannerLoadAt;
+  static DateTime? _lastRectangleLoadAt;
+  static const Duration _bannerLoadThrottle = Duration(seconds: 60);
+
   // ── Init ──────────────────────────────────────────────────────────────────
   static Future<void> initialize() async {
     if (_isInitialized) return;
@@ -115,6 +120,13 @@ class MetaAdsService {
 
   static Future<void> loadBanner() async {
     if (!_isInitialized) await initialize();
+    // Rate-limit : Meta rejette les reloads < 60s (plusieurs widgets simultanés)
+    final now = DateTime.now();
+    if (_lastBannerLoadAt != null &&
+        now.difference(_lastBannerLoadAt!) < _bannerLoadThrottle) {
+      return;
+    }
+    _lastBannerLoadAt = now;
     try {
       await _channel.invokeMethod('loadBanner');
     } catch (e) {
@@ -130,6 +142,12 @@ class MetaAdsService {
 
   static Future<void> loadRectangle() async {
     if (!_isInitialized) await initialize();
+    final now = DateTime.now();
+    if (_lastRectangleLoadAt != null &&
+        now.difference(_lastRectangleLoadAt!) < _bannerLoadThrottle) {
+      return;
+    }
+    _lastRectangleLoadAt = now;
     try {
       await _channel.invokeMethod('loadRectangle');
     } catch (e) {

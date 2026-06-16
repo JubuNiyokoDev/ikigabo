@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../js/push-notification-server"
+		}
+	],
+	"settings": {}
+}
