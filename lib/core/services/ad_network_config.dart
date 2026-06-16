@@ -36,6 +36,7 @@ class AdNetworkConfig {
   // Cooldown 3 min entre 2 pubs plein écran
   static const Duration interstitialCooldown = Duration(minutes: 3);
   static const Duration adLoadTimeout = Duration(seconds: 30);
+  static const Duration bannerInitialFallbackDelay = Duration(seconds: 5);
   static const Duration bannerRetryDelay = Duration(seconds: 20);
   static const Duration bannerRotationInterval = Duration(seconds: 30);
 

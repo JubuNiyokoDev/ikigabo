@@ -1,16 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'ad_network_config.dart';
 import 'admob_service.dart';
 import 'meta_ads_service.dart';
-
-/// Alternance plein écran sur 6 tours :
-/// 0=Meta Interstitial, 1=Unity Interstitial, 2=AdMob Interstitial,
-/// 3=Meta Interstitial, 4=Unity Interstitial, 5=AdMob Interstitial.
-const String _turnKey = 'ad_turn_index';
-const int _totalFormats = 6;
 
 class AdsService {
   static const String _gameId = '6021741';
@@ -60,41 +53,24 @@ class AdsService {
     }
   }
 
-  // ── Tour suivant ──────────────────────────────────────────────────────────
-  static Future<int> _nextTurn() async {
-    final prefs = await SharedPreferences.getInstance();
-    final current = prefs.getInt(_turnKey) ?? 0;
-    await prefs.setInt(_turnKey, (current + 1) % _totalFormats);
-    return current;
-  }
-
-  // ── Interstitial (sans récompense) ────────────────────────────────────────
+  // ── Interstitial: Meta d'abord, Unity ensuite, AdMob dernier ──────────────
   static Future<void> showInterstitial() async {
     if (!_isInitialized) await initialize();
-    final turn = await _nextTurn();
 
-    switch (turn) {
-      case 0:
-      case 3: // Meta → AdMob → Unity
-        if (await _showMetaInterstitialIfReady()) break;
-        if (await _showAdMobInterstitialIfReady()) break;
-        await _showUnityInterstitialIfReady();
-      case 1:
-      case 4: // Unity → Meta → AdMob
-        if (await _showUnityInterstitialIfReady()) break;
-        if (await _showMetaInterstitialIfReady()) break;
-        await _showAdMobInterstitialIfReady();
-      case 2:
-      case 5: // AdMob → Meta → Unity
-        if (await _showAdMobInterstitialIfReady()) break;
-        if (await _showMetaInterstitialIfReady()) break;
-        await _showUnityInterstitialIfReady();
+    if (await _showMetaInterstitialIfReady()) {
+      _preloadAll();
+      return;
     }
+    if (await _showUnityInterstitialIfReady()) {
+      _preloadAll();
+      return;
+    }
+    await _showAdMobInterstitialIfReady();
 
     _preloadAll();
   }
 
-  // ── Rewarded (avec gate) ──────────────────────────────────────────────────
+  // ── Rewarded: Meta d'abord, Unity ensuite, AdMob dernier ──────────────────
   static Future<void> showRewarded({required VoidCallback onReward}) async {
     if (!_isInitialized) await initialize();
 
@@ -105,63 +81,34 @@ class AdsService {
       onReward();
     }
 
-    final turn = await _nextTurn();
+    if (AdNetworkConfig.canUseMeta) {
+      final ok = await MetaAdsService.loadRewarded();
+      if (ok) {
+        await MetaAdsService.showRewardedAndWait(onReward: grantOnce);
+        _preloadAll();
+        return;
+      }
+    }
 
-    switch (turn % 6) {
-      case 0: // Meta Rewarded → Unity fallback
-        if (AdNetworkConfig.canUseMeta) {
-          final ok = await MetaAdsService.loadRewarded();
-          if (ok) {
-            await MetaAdsService.showRewardedAndWait(onReward: grantOnce);
-            break;
-          }
-        }
-        await _showUnityRewardedAndWait(onReward: grantOnce);
-      case 1: // Unity Rewarded → Meta fallback
-        final ok = await _loadUnityRewarded();
-        if (ok) {
-          await _showUnityRewardedAndWait(onReward: grantOnce);
-        } else if (AdNetworkConfig.canUseMeta) {
-          await MetaAdsService.showRewardedAndWait(onReward: grantOnce);
-        }
-      case 2: // AdMob RewardedInterstitial → Meta fallback
-        if (AdNetworkConfig.canUseAdMob) {
-          final ok = await AdMobService.loadRewardedInterstitial();
-          if (ok) {
-            await AdMobService.showRewardedInterstitialAndWait(
-              onReward: grantOnce,
-            );
-            break;
-          }
-        }
-        await _showUnityRewardedAndWait(onReward: grantOnce);
-      case 3: // Meta Rewarded → AdMob fallback
-        if (AdNetworkConfig.canUseMeta) {
-          final ok = await MetaAdsService.loadRewarded();
-          if (ok) {
-            await MetaAdsService.showRewardedAndWait(onReward: grantOnce);
-            break;
-          }
-        }
-        if (AdNetworkConfig.canUseAdMob) {
-          await AdMobService.showRewardedAndWait(onReward: grantOnce);
-        }
-      case 4: // Unity Rewarded → AdMob fallback
-        final ok2 = await _loadUnityRewarded();
-        if (ok2) {
-          await _showUnityRewardedAndWait(onReward: grantOnce);
-        } else if (AdNetworkConfig.canUseAdMob) {
-          await AdMobService.showRewardedAndWait(onReward: grantOnce);
-        }
-      case 5: // AdMob Rewarded → Unity fallback
-        if (AdNetworkConfig.canUseAdMob) {
-          final ok = await AdMobService.loadRewarded();
-          if (ok) {
-            await AdMobService.showRewardedAndWait(onReward: grantOnce);
-            break;
-          }
-        }
-        await _showUnityRewardedAndWait(onReward: grantOnce);
+    final unityOk = await _loadUnityRewarded();
+    if (unityOk) {
+      await _showUnityRewardedAndWait(onReward: grantOnce);
+      _preloadAll();
+      return;
+    }
+
+    if (AdNetworkConfig.canUseAdMob) {
+      final rewardedInterstitialOk =
+          await AdMobService.loadRewardedInterstitial();
+      if (rewardedInterstitialOk) {
+        await AdMobService.showRewardedInterstitialAndWait(onReward: grantOnce);
+        _preloadAll();
+        return;
+      }
+      final rewardedOk = await AdMobService.loadRewarded();
+      if (rewardedOk) {
+        await AdMobService.showRewardedAndWait(onReward: grantOnce);
+      }
     }
 
     _preloadAll();

@@ -9,7 +9,7 @@ import '../../core/services/meta_ads_service.dart';
 import '../providers/banner_provider.dart';
 import 'admob_banner_widget.dart';
 
-enum _BannerNetwork { meta, admob, unity }
+enum _BannerNetwork { meta, unity, admob }
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
@@ -28,12 +28,11 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
 
   _BannerNetwork _network = AdNetworkConfig.canUseMeta
       ? _BannerNetwork.meta
-      : AdNetworkConfig.canUseAdMob
-      ? _BannerNetwork.admob
       : _BannerNetwork.unity;
   bool _metaLoaded = false;
   bool _unityLoaded = false;
   Timer? _metaRetryTimer;
+  Timer? _metaFallbackTimer;
 
   @override
   void initState() {
@@ -55,6 +54,7 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
 
     if (AdNetworkConfig.canUseMeta) {
       _loadMetaBanner();
+      _startMetaFallback();
       _startMetaRetry();
     }
   }
@@ -66,15 +66,13 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
       if (loaded) {
         _network = _BannerNetwork.meta;
       } else if (_network == _BannerNetwork.meta) {
-        _network = AdNetworkConfig.canUseAdMob
-            ? _BannerNetwork.admob
-            : _BannerNetwork.unity;
+        _network = _BannerNetwork.unity;
       }
     });
   }
 
   void _onAdMobBannerLoaded() {
-    if (!mounted || _metaLoaded) return;
+    if (!mounted || _metaLoaded || _unityLoaded) return;
     setState(() => _network = _BannerNetwork.admob);
   }
 
@@ -85,6 +83,14 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
 
   Future<void> _loadMetaBanner() async {
     await MetaAdsService.loadBanner();
+  }
+
+  void _startMetaFallback() {
+    _metaFallbackTimer?.cancel();
+    _metaFallbackTimer = Timer(AdNetworkConfig.bannerInitialFallbackDelay, () {
+      if (!mounted || _metaLoaded || _network != _BannerNetwork.meta) return;
+      setState(() => _network = _BannerNetwork.unity);
+    });
   }
 
   void _startMetaRetry() {
@@ -102,6 +108,7 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
       MetaAdsService.onBannerResult = null;
     }
     _metaRetryTimer?.cancel();
+    _metaFallbackTimer?.cancel();
     _animationController.dispose();
     MetaAdsService.destroyBanner();
     super.dispose();
@@ -145,6 +152,8 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
           return _MetaBannerView(key: const ValueKey('meta-banner'));
         }
         return const SizedBox.shrink(key: ValueKey('banner-loading'));
+      case _BannerNetwork.unity:
+        return _buildUnityBanner();
       case _BannerNetwork.admob:
         if (AdNetworkConfig.canUseAdMob) {
           return AdMobBannerWidget(
@@ -153,8 +162,6 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
             onFailed: _onAdMobBannerFailed,
           );
         }
-        return _buildUnityBanner();
-      case _BannerNetwork.unity:
         return _buildUnityBanner();
     }
   }
@@ -170,7 +177,13 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
         if (mounted) setState(() => _unityLoaded = true);
       },
       onFailed: (_, __, ___) {
-        if (mounted) setState(() => _unityLoaded = false);
+        if (!mounted) return;
+        setState(() {
+          _unityLoaded = false;
+          if (AdNetworkConfig.canUseAdMob) {
+            _network = _BannerNetwork.admob;
+          }
+        });
       },
       onClick: (_) {},
     );
