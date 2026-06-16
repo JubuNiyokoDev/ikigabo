@@ -7,6 +7,9 @@ import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import '../../core/services/ad_network_config.dart';
 import '../../core/services/meta_ads_service.dart';
 import '../providers/banner_provider.dart';
+import 'admob_banner_widget.dart';
+
+enum _BannerNetwork { meta, admob, unity }
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
@@ -23,7 +26,11 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
 
-  bool _showMeta = AdNetworkConfig.canUseMeta;
+  _BannerNetwork _network = AdNetworkConfig.canUseMeta
+      ? _BannerNetwork.meta
+      : AdNetworkConfig.canUseAdMob
+      ? _BannerNetwork.admob
+      : _BannerNetwork.unity;
   bool _metaLoaded = false;
   bool _unityLoaded = false;
   Timer? _metaRetryTimer;
@@ -56,8 +63,24 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
     if (!mounted) return;
     setState(() {
       _metaLoaded = loaded;
-      _showMeta = loaded;
+      if (loaded) {
+        _network = _BannerNetwork.meta;
+      } else if (_network == _BannerNetwork.meta) {
+        _network = AdNetworkConfig.canUseAdMob
+            ? _BannerNetwork.admob
+            : _BannerNetwork.unity;
+      }
     });
+  }
+
+  void _onAdMobBannerLoaded() {
+    if (!mounted || _metaLoaded) return;
+    setState(() => _network = _BannerNetwork.admob);
+  }
+
+  void _onAdMobBannerFailed() {
+    if (!mounted || _metaLoaded) return;
+    setState(() => _network = _BannerNetwork.unity);
   }
 
   Future<void> _loadMetaBanner() async {
@@ -106,32 +129,50 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget>
               height: _bannerHeight.h,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
-                child: _showMeta && _metaLoaded
-                    ? _MetaBannerView(key: const ValueKey('meta-banner'))
-                    : UnityBannerAd(
-                        key: const ValueKey('unity-banner'),
-                        placementId: 'Banner_Android',
-                        onLoad: (_) {
-                          if (mounted) setState(() => _unityLoaded = true);
-                        },
-                        onShown: (_) {
-                          if (mounted) setState(() => _unityLoaded = true);
-                        },
-                        onFailed: (_, __, ___) {
-                          if (mounted) {
-                            setState(() {
-                              _unityLoaded = false;
-                              if (_metaLoaded) _showMeta = true;
-                            });
-                          }
-                        },
-                        onClick: (_) {},
-                      ),
+                child: _buildBanner(),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBanner() {
+    switch (_network) {
+      case _BannerNetwork.meta:
+        if (_metaLoaded) {
+          return _MetaBannerView(key: const ValueKey('meta-banner'));
+        }
+        return const SizedBox.shrink(key: ValueKey('banner-loading'));
+      case _BannerNetwork.admob:
+        if (AdNetworkConfig.canUseAdMob) {
+          return AdMobBannerWidget(
+            key: const ValueKey('admob-banner'),
+            onLoaded: _onAdMobBannerLoaded,
+            onFailed: _onAdMobBannerFailed,
+          );
+        }
+        return _buildUnityBanner();
+      case _BannerNetwork.unity:
+        return _buildUnityBanner();
+    }
+  }
+
+  Widget _buildUnityBanner() {
+    return UnityBannerAd(
+      key: const ValueKey('unity-banner'),
+      placementId: 'Banner_Android',
+      onLoad: (_) {
+        if (mounted) setState(() => _unityLoaded = true);
+      },
+      onShown: (_) {
+        if (mounted) setState(() => _unityLoaded = true);
+      },
+      onFailed: (_, __, ___) {
+        if (mounted) setState(() => _unityLoaded = false);
+      },
+      onClick: (_) {},
     );
   }
 }

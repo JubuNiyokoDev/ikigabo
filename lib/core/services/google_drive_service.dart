@@ -82,12 +82,15 @@ class GoogleDriveService {
     }
   }
 
-  static Future<String?> _getOrCreateAppFolder(String accessToken) async {
+  static Future<String?> _findAppFolder(String accessToken) async {
     const query =
         "name='IkigaboBackups' and mimeType='application/vnd.google-apps.folder' and trashed=false";
-    final searchUrl = Uri.parse(
-      'https://www.googleapis.com/drive/v3/files?q=${Uri.encodeComponent(query)}&spaces=drive',
-    );
+    final searchUrl = Uri.https('www.googleapis.com', '/drive/v3/files', {
+      'q': query,
+      'spaces': 'drive',
+      'pageSize': '1',
+      'fields': 'files(id,name)',
+    });
 
     final searchResponse = await http.get(
       searchUrl,
@@ -100,6 +103,13 @@ class GoogleDriveService {
         return data['files'][0]['id'];
       }
     }
+
+    return null;
+  }
+
+  static Future<String?> _getOrCreateAppFolder(String accessToken) async {
+    final existingFolder = await _findAppFolder(accessToken);
+    if (existingFolder != null) return existingFolder;
 
     final createUrl = Uri.parse('https://www.googleapis.com/drive/v3/files');
     final folderMetadata = jsonEncode({
@@ -129,6 +139,99 @@ class GoogleDriveService {
     return null;
   }
 
+  static Future<List<DriveBackupInfo>> listBackups({int pageSize = 10}) async {
+    if (_currentUser == null && !await isUserSignedIn()) {
+      return const [];
+    }
+
+    try {
+      final accessToken = await _getAccessToken();
+      if (accessToken == null) return const [];
+
+      final folderId = await _findAppFolder(accessToken);
+      if (folderId == null) return const [];
+
+      final query =
+          "'$folderId' in parents and trashed=false and name contains 'ikigabo_backup_'";
+      final url = Uri.https('www.googleapis.com', '/drive/v3/files', {
+        'q': query,
+        'spaces': 'drive',
+        'orderBy': 'createdTime desc',
+        'pageSize': pageSize.toString(),
+        'fields': 'files(id,name,createdTime,modifiedTime,size)',
+      });
+
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode != 200) {
+        developer.log(
+          'Erreur liste backups Drive: ${response.statusCode} ${response.body}',
+          name: 'GoogleDriveService',
+        );
+        return const [];
+      }
+
+      final data = jsonDecode(response.body);
+      final files = data['files'] as List<dynamic>? ?? const [];
+      return files
+          .whereType<Map<String, dynamic>>()
+          .map(DriveBackupInfo.fromDriveFile)
+          .toList();
+    } catch (e) {
+      developer.log(
+        'Erreur liste backups Drive: $e',
+        name: 'GoogleDriveService',
+        error: e,
+      );
+      return const [];
+    }
+  }
+
+  static Future<DriveBackupInfo?> getLatestBackup() async {
+    final backups = await listBackups(pageSize: 1);
+    if (backups.isEmpty) return null;
+    return backups.first;
+  }
+
+  static Future<String?> downloadBackup(String fileId) async {
+    if (_currentUser == null && !await isUserSignedIn()) {
+      return null;
+    }
+
+    try {
+      final accessToken = await _getAccessToken();
+      if (accessToken == null) return null;
+
+      final url = Uri.https('www.googleapis.com', '/drive/v3/files/$fileId', {
+        'alt': 'media',
+      });
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        return utf8.decode(response.bodyBytes);
+      }
+
+      developer.log(
+        'Erreur download Drive: ${response.statusCode} ${response.body}',
+        name: 'GoogleDriveService',
+      );
+      return null;
+    } catch (e) {
+      developer.log(
+        'Erreur download Drive: $e',
+        name: 'GoogleDriveService',
+        error: e,
+      );
+      return null;
+    }
+  }
+
   /// Calcule la taille en MB du backup avant upload.
   static double calculateBackupSizeMB(String backupData) {
     final bytes = utf8.encode(backupData);
@@ -137,7 +240,8 @@ class GoogleDriveService {
 
   static Future<bool> uploadBackup(
     String backupData, {
-    void Function(double uploadedMB, double totalMB, double percent)? onProgress,
+    void Function(double uploadedMB, double totalMB, double percent)?
+    onProgress,
   }) async {
     if (_currentUser == null && !await isUserSignedIn()) return false;
 
@@ -151,8 +255,6 @@ class GoogleDriveService {
       final now = DateTime.now();
       final filename =
           'ikigabo_backup_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}.json';
-
-      await _cleanOldBackups(accessToken, folderId);
 
       final uploadUrl = Uri.https(
         'www.googleapis.com',
@@ -199,6 +301,7 @@ class GoogleDriveService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         onProgress?.call(totalMB, totalMB, 100);
+        await _cleanOldBackups(accessToken, folderId);
         developer.log(
           'Backup uploadé sur Drive: $filename',
           name: 'GoogleDriveService',
@@ -268,4 +371,38 @@ class GoogleDriveService {
       );
     }
   }
+}
+
+class DriveBackupInfo {
+  final String id;
+  final String name;
+  final DateTime? createdTime;
+  final DateTime? modifiedTime;
+  final int? sizeBytes;
+
+  const DriveBackupInfo({
+    required this.id,
+    required this.name,
+    this.createdTime,
+    this.modifiedTime,
+    this.sizeBytes,
+  });
+
+  factory DriveBackupInfo.fromDriveFile(Map<String, dynamic> file) {
+    int? parseSize(dynamic value) {
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    return DriveBackupInfo(
+      id: file['id'] as String? ?? '',
+      name: file['name'] as String? ?? 'ikigabo_backup.json',
+      createdTime: DateTime.tryParse(file['createdTime'] as String? ?? ''),
+      modifiedTime: DateTime.tryParse(file['modifiedTime'] as String? ?? ''),
+      sizeBytes: parseSize(file['size']),
+    );
+  }
+
+  double? get sizeMB => sizeBytes == null ? null : sizeBytes! / (1024 * 1024);
 }

@@ -8,6 +8,7 @@ import '../../data/models/debt_model.dart';
 import '../../data/models/source_model.dart';
 import '../../data/models/transaction_model.dart';
 import '../../data/services/auto_backup_service.dart';
+import '../../data/services/backup_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/services/ad_manager.dart';
 import '../../core/services/google_drive_service.dart';
@@ -31,6 +32,9 @@ class AutoBackupState {
   final bool isDriveConnected;
   final String? driveUserEmail;
   final bool isDriveBusy;
+  final bool isRestoringFromDrive;
+  final bool hasLocalData;
+  final DriveBackupInfo? latestDriveBackup;
 
   // Taille du backup en MB (calculée en background)
   final double? pendingSyncMB;
@@ -44,6 +48,9 @@ class AutoBackupState {
     this.isDriveConnected = false,
     this.driveUserEmail,
     this.isDriveBusy = false,
+    this.isRestoringFromDrive = false,
+    this.hasLocalData = false,
+    this.latestDriveBackup,
     this.pendingSyncMB,
     this.pendingBackupData,
   });
@@ -56,6 +63,9 @@ class AutoBackupState {
     bool? isDriveConnected,
     Object? driveUserEmail = _unset,
     bool? isDriveBusy,
+    bool? isRestoringFromDrive,
+    bool? hasLocalData,
+    Object? latestDriveBackup = _unset,
     Object? pendingSyncMB = _unset,
     Object? pendingBackupData = _unset,
   }) {
@@ -69,6 +79,11 @@ class AutoBackupState {
           ? this.driveUserEmail
           : driveUserEmail as String?,
       isDriveBusy: isDriveBusy ?? this.isDriveBusy,
+      isRestoringFromDrive: isRestoringFromDrive ?? this.isRestoringFromDrive,
+      hasLocalData: hasLocalData ?? this.hasLocalData,
+      latestDriveBackup: identical(latestDriveBackup, _unset)
+          ? this.latestDriveBackup
+          : latestDriveBackup as DriveBackupInfo?,
       pendingSyncMB: identical(pendingSyncMB, _unset)
           ? this.pendingSyncMB
           : pendingSyncMB as double?,
@@ -89,9 +104,20 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
   Future<void> _bootstrap() async {
     await _loadSettings();
     await refreshDriveStatus();
+    state = state.copyWith(hasLocalData: await _hasLocalData());
+
+    final shouldAutoRestore =
+        state.isDriveConnected &&
+        !state.hasLocalData &&
+        state.latestDriveBackup != null;
+    if (shouldAutoRestore) {
+      unawaited(restoreLatestDriveBackup());
+    }
 
     if (state.isEnabled) {
-      await _initializeAutoBackup();
+      await _initializeAutoBackup(
+        runImmediately: !shouldAutoRestore && await _needsDriveSync(),
+      );
     } else {
       AutoBackupService.dispose();
     }
@@ -118,36 +144,59 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
 
     final txList = await isar.transactionModels
         .filter()
-        .isDeletedEqualTo(false).sortByCreatedAtDesc()
+        .isDeletedEqualTo(false)
+        .sortByCreatedAtDesc()
         .findAll();
     for (final e in txList) {
       check(e.updatedAt ?? e.createdAt);
     }
 
-    final srcList = await isar.sourceModels.filter().isDeletedEqualTo(false).sortByCreatedAtDesc().findAll();
+    final srcList = await isar.sourceModels
+        .filter()
+        .isDeletedEqualTo(false)
+        .sortByCreatedAtDesc()
+        .findAll();
     for (final e in srcList) {
       check(e.updatedAt ?? e.createdAt);
     }
 
-    final bankList = await isar.bankModels.filter().isDeletedEqualTo(false).sortByCreatedAtDesc().findAll();
+    final bankList = await isar.bankModels
+        .filter()
+        .isDeletedEqualTo(false)
+        .sortByCreatedAtDesc()
+        .findAll();
     for (final e in bankList) {
       check(e.updatedAt ?? e.createdAt);
     }
 
-    final debtList = await isar.debtModels.filter().isDeletedEqualTo(false).sortByCreatedAtDesc().findAll();
+    final debtList = await isar.debtModels
+        .filter()
+        .isDeletedEqualTo(false)
+        .sortByCreatedAtDesc()
+        .findAll();
     for (final e in debtList) {
       check(e.updatedAt ?? e.createdAt);
     }
 
     final assetList = await isar.assetModels
         .filter()
-        .isDeletedEqualTo(false).sortByCreatedAtDesc()
+        .isDeletedEqualTo(false)
+        .sortByCreatedAtDesc()
         .findAll();
     for (final e in assetList) {
       check(e.updatedAt ?? e.createdAt);
     }
 
     return latest;
+  }
+
+  Future<bool> _needsDriveSync() async {
+    if (!await GoogleDriveService.isUserSignedIn()) return false;
+    final lastChange = await _getLastDataChangeDate();
+    if (lastChange == null) return false;
+    final prefs = await PreferencesService.init();
+    final lastSync = prefs.getLastDriveSyncDate();
+    return lastSync == null || lastChange.isAfter(lastSync);
   }
 
   Future<void> computePendingSyncSize() async {
@@ -165,7 +214,31 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
     state = state.copyWith(
       isDriveConnected: connected,
       driveUserEmail: connected ? GoogleDriveService.userEmail : null,
+      latestDriveBackup: connected ? state.latestDriveBackup : null,
     );
+    if (connected) {
+      await refreshDriveBackups();
+    }
+  }
+
+  Future<void> refreshDriveBackups() async {
+    final latestBackup = await GoogleDriveService.getLatestBackup();
+    state = state.copyWith(
+      latestDriveBackup: latestBackup,
+      hasLocalData: await _hasLocalData(),
+    );
+  }
+
+  Future<bool> _hasLocalData() async {
+    final isar = await _ref.read(isarProvider.future);
+    final counts = await Future.wait<int>([
+      isar.sourceModels.filter().isDeletedEqualTo(false).count(),
+      isar.transactionModels.filter().isDeletedEqualTo(false).count(),
+      isar.bankModels.filter().isDeletedEqualTo(false).count(),
+      isar.assetModels.filter().isDeletedEqualTo(false).count(),
+      isar.debtModels.filter().isDeletedEqualTo(false).count(),
+    ]);
+    return counts.any((count) => count > 0);
   }
 
   Future<void> _initializeAutoBackup({bool runImmediately = false}) async {
@@ -216,7 +289,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
       state = state.copyWith(isEnabled: enabled, isBackingUp: false);
 
       if (enabled) {
-        await _initializeAutoBackup(runImmediately: true);
+        await _initializeAutoBackup(runImmediately: await _needsDriveSync());
       } else {
         AutoBackupService.dispose();
       }
@@ -239,16 +312,25 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
       }
 
       final backupData = await _performAutoBackupInternal();
+      final prefs = await PreferencesService.init();
+      var latestBackup = state.latestDriveBackup;
 
-      // Upload Drive si connecté
-      if (GoogleDriveService.isSignedIn) {
-        await GoogleDriveService.uploadBackup(backupData);
+      // Upload Drive si une session Google peut être restaurée.
+      if (await GoogleDriveService.isUserSignedIn()) {
+        final uploaded = await GoogleDriveService.uploadBackup(backupData);
+        if (uploaded) {
+          await prefs.setLastDriveSyncDate(DateTime.now());
+          latestBackup = await GoogleDriveService.getLatestBackup();
+        }
       }
 
-      final prefs = await PreferencesService.init();
       final lastBackup = prefs.getLastBackupDate();
 
-      state = state.copyWith(isBackingUp: false, lastBackupDate: lastBackup);
+      state = state.copyWith(
+        isBackingUp: false,
+        lastBackupDate: lastBackup,
+        latestDriveBackup: latestBackup,
+      );
     } catch (e) {
       state = state.copyWith(isBackingUp: false, error: e.toString());
     }
@@ -267,8 +349,18 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
         isDriveConnected: success,
         driveUserEmail: success ? GoogleDriveService.userEmail : null,
         error: success ? null : 'Connexion Google échouée',
+        latestDriveBackup: success ? state.latestDriveBackup : null,
       );
-      if (success) unawaited(computePendingSyncSize());
+      if (success) {
+        await refreshDriveBackups();
+        final prefs = await PreferencesService.init();
+        if (!prefs.isAutoBackupEnabled()) {
+          await prefs.setAutoBackupEnabled(true);
+          state = state.copyWith(isEnabled: true);
+        }
+        await _initializeAutoBackup(runImmediately: await _needsDriveSync());
+        unawaited(computePendingSyncSize());
+      }
       return success;
     } catch (e) {
       state = state.copyWith(isDriveBusy: false, error: 'Erreur connexion: $e');
@@ -283,6 +375,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
       isDriveBusy: false,
       isDriveConnected: false,
       driveUserEmail: null,
+      latestDriveBackup: null,
       pendingSyncMB: null,
       pendingBackupData: null,
     );
@@ -307,8 +400,7 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
         return false;
       }
 
-      final backupData =
-          state.pendingBackupData ?? await _performAutoBackupInternal();
+      final backupData = await _performAutoBackupInternal();
       final uploaded = await GoogleDriveService.uploadBackup(
         backupData,
         onProgress: onProgress,
@@ -316,6 +408,9 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
       final prefs = await PreferencesService.init();
       final lastBackup = prefs.getLastBackupDate();
       if (uploaded) await prefs.setLastDriveSyncDate(DateTime.now());
+      final latestBackup = uploaded
+          ? await GoogleDriveService.getLatestBackup()
+          : state.latestDriveBackup;
 
       state = state.copyWith(
         isBackingUp: false,
@@ -323,6 +418,8 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
         isDriveConnected: true,
         driveUserEmail: GoogleDriveService.userEmail,
         error: uploaded ? null : 'Upload Google Drive échoué',
+        latestDriveBackup: latestBackup,
+        hasLocalData: true,
         pendingSyncMB: uploaded ? 0.0 : state.pendingSyncMB,
         pendingBackupData: uploaded ? null : state.pendingBackupData,
       );
@@ -337,7 +434,136 @@ class AutoBackupNotifier extends StateNotifier<AutoBackupState> {
     }
   }
 
+  Future<DriveRestoreResult> restoreLatestDriveBackup({
+    bool overwriteConflicts = false,
+  }) async {
+    if (state.isDriveBusy || state.isRestoringFromDrive) {
+      return const DriveRestoreResult(
+        success: false,
+        error: 'Une opération Drive est déjà en cours',
+      );
+    }
+
+    state = state.copyWith(
+      isDriveBusy: true,
+      isRestoringFromDrive: true,
+      error: null,
+    );
+
+    try {
+      final connected = await GoogleDriveService.isUserSignedIn();
+      if (!connected) {
+        state = state.copyWith(
+          isDriveBusy: false,
+          isRestoringFromDrive: false,
+          isDriveConnected: false,
+          driveUserEmail: null,
+          error: 'Connectez Google Drive avant de restaurer',
+        );
+        return const DriveRestoreResult(
+          success: false,
+          error: 'Google Drive non connecté',
+        );
+      }
+
+      final backup =
+          state.latestDriveBackup ?? await GoogleDriveService.getLatestBackup();
+      if (backup == null) {
+        state = state.copyWith(
+          isDriveBusy: false,
+          isRestoringFromDrive: false,
+          latestDriveBackup: null,
+          error: 'Aucune sauvegarde trouvée sur Drive',
+        );
+        return const DriveRestoreResult(
+          success: false,
+          error: 'Aucune sauvegarde Drive trouvée',
+        );
+      }
+
+      final content = await GoogleDriveService.downloadBackup(backup.id);
+      if (content == null || content.isEmpty) {
+        state = state.copyWith(
+          isDriveBusy: false,
+          isRestoringFromDrive: false,
+          error: 'Téléchargement Drive échoué',
+        );
+        return DriveRestoreResult(
+          success: false,
+          error: 'Téléchargement Drive échoué',
+          backup: backup,
+        );
+      }
+
+      final backupService = _ref.read(backupServiceProvider);
+      final importResult = await backupService.importData(content);
+      if (!importResult.success || importResult.data == null) {
+        state = state.copyWith(
+          isDriveBusy: false,
+          isRestoringFromDrive: false,
+          error: importResult.error ?? 'Sauvegarde Drive invalide',
+        );
+        return DriveRestoreResult(
+          success: false,
+          error: importResult.error ?? 'Sauvegarde Drive invalide',
+          backup: backup,
+        );
+      }
+
+      await _ref
+          .read(backupControllerProvider.notifier)
+          .applyImport(
+            importResult.data!,
+            overwriteConflicts: overwriteConflicts,
+            strategy: ImportConflictStrategy.smartMerge,
+          );
+
+      final prefs = await PreferencesService.init();
+      await prefs.setLastDriveSyncDate(DateTime.now());
+
+      state = state.copyWith(
+        isDriveBusy: false,
+        isRestoringFromDrive: false,
+        isDriveConnected: true,
+        driveUserEmail: GoogleDriveService.userEmail,
+        latestDriveBackup: backup,
+        hasLocalData: true,
+        error: null,
+        pendingSyncMB: null,
+        pendingBackupData: null,
+      );
+
+      return DriveRestoreResult(success: true, backup: backup);
+    } catch (e) {
+      state = state.copyWith(
+        isDriveBusy: false,
+        isRestoringFromDrive: false,
+        error: 'Erreur restauration Drive: $e',
+      );
+      return DriveRestoreResult(
+        success: false,
+        error: 'Erreur restauration Drive: $e',
+      );
+    }
+  }
+
   Future<void> importBackup() async {
     state = state.copyWith(error: 'Utilisez le menu Sauvegarde pour importer');
   }
+}
+
+class DriveRestoreResult {
+  final bool success;
+  final bool requiresOverwrite;
+  final List<String> conflicts;
+  final String? error;
+  final DriveBackupInfo? backup;
+
+  const DriveRestoreResult({
+    required this.success,
+    this.requiresOverwrite = false,
+    this.conflicts = const [],
+    this.error,
+    this.backup,
+  });
 }

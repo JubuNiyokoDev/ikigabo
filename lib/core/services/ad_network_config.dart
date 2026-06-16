@@ -5,7 +5,7 @@ enum AdNetwork { unity, meta, admob }
 class AdNetworkConfig {
   const AdNetworkConfig._();
 
-  static const bool isAdMobEnabled = false;
+  static const bool isAdMobEnabled = true;
   static const bool isMetaEnabled = true;
   static const String metaTestDeviceId = '';
   static const bool useTestAds = bool.fromEnvironment(

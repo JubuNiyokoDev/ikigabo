@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/preferences_service.dart';
-import '../../core/services/ad_manager.dart';
 import '../../core/services/google_drive_service.dart';
 
 class AutoBackupService {
@@ -32,20 +31,22 @@ class AutoBackupService {
     if (!prefs.isAutoBackupEnabled()) return;
 
     final lastBackup = prefs.getLastBackupDate();
+    final lastDriveSync = prefs.getLastDriveSyncDate();
     final now = DateTime.now();
+    final shouldRefreshLocalBackup =
+        lastBackup == null || now.difference(lastBackup).inHours >= 1;
+    final shouldRefreshDrive =
+        await GoogleDriveService.isUserSignedIn() &&
+        (lastDriveSync == null ||
+            (lastBackup != null && lastBackup.isAfter(lastDriveSync)));
 
-    // Vérifier si 1h s'est écoulée (backup auto chaque heure)
-    if (lastBackup == null || now.difference(lastBackup).inHours >= 1) {
+    if (shouldRefreshLocalBackup || shouldRefreshDrive) {
       await _performAutoBackup(prefs);
     }
   }
 
   static Future<void> _performAutoBackup(PreferencesService prefs) async {
     try {
-      // Vérifier les ads si nécessaire
-      final canProceed = await AdManager.showRewardedForImportExport();
-      if (!canProceed) return;
-
       // Déclencher le callback pour que le provider fasse le backup local
       if (_backupCallback == null) {
         developer.log(
@@ -58,10 +59,11 @@ class AutoBackupService {
       final backupData = await _backupCallback!.call();
       developer.log('Auto-backup local effectué', name: 'AutoBackupService');
 
-      // Upload vers Google Drive si l'utilisateur est connecté
-      if (GoogleDriveService.isSignedIn) {
+      // Upload vers Google Drive si une session peut être restaurée.
+      if (await GoogleDriveService.isUserSignedIn()) {
         final driveSuccess = await GoogleDriveService.uploadBackup(backupData);
         if (driveSuccess) {
+          await prefs.setLastDriveSyncDate(DateTime.now());
           developer.log('Auto-backup Drive réussi', name: 'AutoBackupService');
         } else {
           developer.log('Auto-backup Drive échoué', name: 'AutoBackupService');

@@ -19,6 +19,8 @@ import '../repositories/debt_repository.dart';
 import '../repositories/source_repository.dart';
 import '../repositories/transaction_repository.dart';
 
+enum ImportConflictStrategy { skipExisting, overwrite, smartMerge }
+
 class BackupService {
   static const int _encryptionVersion = 2;
   static const int _pbkdf2Iterations = 100000;
@@ -109,7 +111,11 @@ class BackupService {
   Future<void> applyImport(
     Map<String, dynamic> data, {
     bool overwriteConflicts = false,
+    ImportConflictStrategy strategy = ImportConflictStrategy.skipExisting,
   }) async {
+    final effectiveStrategy = overwriteConflicts
+        ? ImportConflictStrategy.overwrite
+        : strategy;
     final sourceIdMap = <int, int>{};
     final bankIdMap = <int, int>{};
     final assetIdMap = <int, int>{};
@@ -119,32 +125,29 @@ class BackupService {
       sourceIdMap.addAll(
         await _importSources(
           data['sources'] as List<dynamic>,
-          overwriteConflicts,
+          effectiveStrategy,
         ),
       );
     }
     if (data['banks'] is List<dynamic>) {
       bankIdMap.addAll(
-        await _importBanks(data['banks'] as List<dynamic>, overwriteConflicts),
+        await _importBanks(data['banks'] as List<dynamic>, effectiveStrategy),
       );
     }
     if (data['assets'] is List<dynamic>) {
       assetIdMap.addAll(
-        await _importAssets(
-          data['assets'] as List<dynamic>,
-          overwriteConflicts,
-        ),
+        await _importAssets(data['assets'] as List<dynamic>, effectiveStrategy),
       );
     }
     if (data['debts'] is List<dynamic>) {
       debtIdMap.addAll(
-        await _importDebts(data['debts'] as List<dynamic>, overwriteConflicts),
+        await _importDebts(data['debts'] as List<dynamic>, effectiveStrategy),
       );
     }
     if (data['transactions'] is List<dynamic>) {
       await _importTransactions(
         data['transactions'] as List<dynamic>,
-        overwriteConflicts,
+        effectiveStrategy,
         sourceIdMap: sourceIdMap,
         bankIdMap: bankIdMap,
         assetIdMap: assetIdMap,
@@ -506,9 +509,11 @@ class BackupService {
 
   Future<Map<int, int>> _importSources(
     List<dynamic> sourcesData,
-    bool overwrite,
+    ImportConflictStrategy strategy,
   ) async {
     final isar = _sourceRepository.isar;
+    final overwrite = strategy == ImportConflictStrategy.overwrite;
+    final smartMerge = strategy == ImportConflictStrategy.smartMerge;
     final existingSources = overwrite
         ? <src.SourceModel>[]
         : await _sourceRepository.getAllSources();
@@ -537,11 +542,47 @@ class BackupService {
       );
 
       final importedId = _toInt(sourceData['id']);
-      if (importedId != null && importedId > 0) {
-        source.id = importedId;
+
+      if (smartMerge) {
+        final byNaturalKey = existingSources.where(
+          (s) =>
+              _sameText(s.name, source.name) &&
+              s.type == source.type &&
+              _sameText(s.currency, source.currency),
+        );
+        final byId = importedId == null
+            ? null
+            : await isar.sourceModels.get(importedId);
+        final existing = byNaturalKey.isNotEmpty
+            ? byNaturalKey.first
+            : (byId != null && _sameText(byId.name, source.name) ? byId : null);
+
+        if (existing != null) {
+          if (importedId != null && importedId > 0) {
+            idMap[importedId] = existing.id;
+          }
+          if (_isImportedNewer(
+            importedCreatedAt: source.createdAt,
+            importedUpdatedAt: source.updatedAt,
+            existingCreatedAt: existing.createdAt,
+            existingUpdatedAt: existing.updatedAt,
+          )) {
+            source.id = existing.id;
+            await isar.writeTxn(() async => isar.sourceModels.put(source));
+          }
+          continue;
+        }
+
+        if (importedId != null && importedId > 0 && byId == null) {
+          source.id = importedId;
+        }
+      } else {
+        if (importedId != null && importedId > 0) {
+          source.id = importedId;
+        }
       }
 
-      if (!overwrite) {
+      if (strategy == ImportConflictStrategy.skipExisting) {
         final existing = existingSources.where((s) => s.name == source.name);
         if (existing.isNotEmpty) {
           if (importedId != null && importedId > 0) {
@@ -564,9 +605,11 @@ class BackupService {
 
   Future<Map<int, int>> _importBanks(
     List<dynamic> banksData,
-    bool overwrite,
+    ImportConflictStrategy strategy,
   ) async {
     final isar = _bankRepository.isar;
+    final overwrite = strategy == ImportConflictStrategy.overwrite;
+    final smartMerge = strategy == ImportConflictStrategy.smartMerge;
     final existingBanks = overwrite
         ? <BankModel>[]
         : await _bankRepository.getAllBanks();
@@ -604,11 +647,47 @@ class BackupService {
       );
 
       final importedId = _toInt(bankData['id']);
-      if (importedId != null && importedId > 0) {
-        bank.id = importedId;
+
+      if (smartMerge) {
+        final byNaturalKey = existingBanks.where(
+          (b) =>
+              _sameText(b.name, bank.name) &&
+              _sameText(b.accountNumber ?? '', bank.accountNumber ?? '') &&
+              _sameText(b.currency, bank.currency),
+        );
+        final byId = importedId == null
+            ? null
+            : await isar.bankModels.get(importedId);
+        final existing = byNaturalKey.isNotEmpty
+            ? byNaturalKey.first
+            : (byId != null && _sameText(byId.name, bank.name) ? byId : null);
+
+        if (existing != null) {
+          if (importedId != null && importedId > 0) {
+            idMap[importedId] = existing.id;
+          }
+          if (_isImportedNewer(
+            importedCreatedAt: bank.createdAt,
+            importedUpdatedAt: bank.updatedAt,
+            existingCreatedAt: existing.createdAt,
+            existingUpdatedAt: existing.updatedAt,
+          )) {
+            bank.id = existing.id;
+            await isar.writeTxn(() async => isar.bankModels.put(bank));
+          }
+          continue;
+        }
+
+        if (importedId != null && importedId > 0 && byId == null) {
+          bank.id = importedId;
+        }
+      } else {
+        if (importedId != null && importedId > 0) {
+          bank.id = importedId;
+        }
       }
 
-      if (!overwrite) {
+      if (strategy == ImportConflictStrategy.skipExisting) {
         final existing = existingBanks.where(
           (b) =>
               b.name == bank.name &&
@@ -635,9 +714,11 @@ class BackupService {
 
   Future<Map<int, int>> _importAssets(
     List<dynamic> assetsData,
-    bool overwrite,
+    ImportConflictStrategy strategy,
   ) async {
     final isar = _assetRepository.isar;
+    final overwrite = strategy == ImportConflictStrategy.overwrite;
+    final smartMerge = strategy == ImportConflictStrategy.smartMerge;
     final existingAssets = overwrite
         ? <AssetModel>[]
         : await _assetRepository.getAllAssets();
@@ -675,11 +756,47 @@ class BackupService {
       );
 
       final importedId = _toInt(assetData['id']);
-      if (importedId != null && importedId > 0) {
-        asset.id = importedId;
+
+      if (smartMerge) {
+        final byNaturalKey = existingAssets.where(
+          (a) =>
+              _sameText(a.name, asset.name) &&
+              a.type == asset.type &&
+              _sameDay(a.purchaseDate, asset.purchaseDate),
+        );
+        final byId = importedId == null
+            ? null
+            : await isar.assetModels.get(importedId);
+        final existing = byNaturalKey.isNotEmpty
+            ? byNaturalKey.first
+            : (byId != null && _sameText(byId.name, asset.name) ? byId : null);
+
+        if (existing != null) {
+          if (importedId != null && importedId > 0) {
+            idMap[importedId] = existing.id;
+          }
+          if (_isImportedNewer(
+            importedCreatedAt: asset.createdAt,
+            importedUpdatedAt: asset.updatedAt,
+            existingCreatedAt: existing.createdAt,
+            existingUpdatedAt: existing.updatedAt,
+          )) {
+            asset.id = existing.id;
+            await isar.writeTxn(() async => isar.assetModels.put(asset));
+          }
+          continue;
+        }
+
+        if (importedId != null && importedId > 0 && byId == null) {
+          asset.id = importedId;
+        }
+      } else {
+        if (importedId != null && importedId > 0) {
+          asset.id = importedId;
+        }
       }
 
-      if (!overwrite) {
+      if (strategy == ImportConflictStrategy.skipExisting) {
         final existing = existingAssets.where(
           (a) =>
               a.name == asset.name &&
@@ -706,9 +823,11 @@ class BackupService {
 
   Future<Map<int, int>> _importDebts(
     List<dynamic> debtsData,
-    bool overwrite,
+    ImportConflictStrategy strategy,
   ) async {
     final isar = _debtRepository.isar;
+    final overwrite = strategy == ImportConflictStrategy.overwrite;
+    final smartMerge = strategy == ImportConflictStrategy.smartMerge;
     final existingDebts = overwrite
         ? <DebtModel>[]
         : await _debtRepository.getAllDebts();
@@ -750,11 +869,50 @@ class BackupService {
       );
 
       final importedId = _toInt(debtData['id']);
-      if (importedId != null && importedId > 0) {
-        debt.id = importedId;
+
+      if (smartMerge) {
+        final byNaturalKey = existingDebts.where(
+          (d) =>
+              _sameText(d.personName, debt.personName) &&
+              d.type == debt.type &&
+              d.totalAmount == debt.totalAmount &&
+              _sameDay(d.date, debt.date),
+        );
+        final byId = importedId == null
+            ? null
+            : await isar.debtModels.get(importedId);
+        final existing = byNaturalKey.isNotEmpty
+            ? byNaturalKey.first
+            : (byId != null && _sameText(byId.personName, debt.personName)
+                  ? byId
+                  : null);
+
+        if (existing != null) {
+          if (importedId != null && importedId > 0) {
+            idMap[importedId] = existing.id;
+          }
+          if (_isImportedNewer(
+            importedCreatedAt: debt.createdAt,
+            importedUpdatedAt: debt.updatedAt,
+            existingCreatedAt: existing.createdAt,
+            existingUpdatedAt: existing.updatedAt,
+          )) {
+            debt.id = existing.id;
+            await isar.writeTxn(() async => isar.debtModels.put(debt));
+          }
+          continue;
+        }
+
+        if (importedId != null && importedId > 0 && byId == null) {
+          debt.id = importedId;
+        }
+      } else {
+        if (importedId != null && importedId > 0) {
+          debt.id = importedId;
+        }
       }
 
-      if (!overwrite) {
+      if (strategy == ImportConflictStrategy.skipExisting) {
         final existing = existingDebts.where(
           (d) =>
               d.personName == debt.personName &&
@@ -782,13 +940,18 @@ class BackupService {
 
   Future<void> _importTransactions(
     List<dynamic> transactionsData,
-    bool overwrite, {
+    ImportConflictStrategy strategy, {
     required Map<int, int> sourceIdMap,
     required Map<int, int> bankIdMap,
     required Map<int, int> assetIdMap,
     required Map<int, int> debtIdMap,
   }) async {
     final isar = _transactionRepository.isar;
+    final overwrite = strategy == ImportConflictStrategy.overwrite;
+    final smartMerge = strategy == ImportConflictStrategy.smartMerge;
+    final existingTransactions = smartMerge
+        ? await _transactionRepository.getAllTransactions()
+        : <tx.TransactionModel>[];
 
     for (final transactionData in transactionsData) {
       if (transactionData is! Map<String, dynamic>) continue;
@@ -871,11 +1034,47 @@ class BackupService {
       );
 
       final importedId = _toInt(transactionData['id']);
-      if (importedId != null && importedId > 0) {
-        transaction.id = importedId;
+
+      if (smartMerge) {
+        final byId = importedId == null
+            ? null
+            : await isar.transactionModels.get(importedId);
+        final bySignature = existingTransactions.where(
+          (existing) => _sameTransactionSignature(existing, transaction),
+        );
+        final existing = bySignature.isNotEmpty
+            ? bySignature.first
+            : (byId != null && _sameTransactionSignature(byId, transaction)
+                  ? byId
+                  : null);
+
+        if (existing != null) {
+          if (_isImportedNewer(
+            importedCreatedAt: transaction.createdAt,
+            importedUpdatedAt: transaction.updatedAt,
+            existingCreatedAt: existing.createdAt,
+            existingUpdatedAt: existing.updatedAt,
+          )) {
+            transaction.id = existing.id;
+            await isar.writeTxn(
+              () async => isar.transactionModels.put(transaction),
+            );
+          }
+          continue;
+        }
+
+        if (importedId != null && importedId > 0 && byId == null) {
+          transaction.id = importedId;
+        }
+      } else {
+        if (importedId != null && importedId > 0) {
+          transaction.id = importedId;
+        }
       }
 
-      if (!overwrite && importedId != null) {
+      if (!overwrite &&
+          strategy == ImportConflictStrategy.skipExisting &&
+          importedId != null) {
         final existing = await isar.transactionModels.get(importedId);
         if (existing != null) continue;
       }
@@ -925,6 +1124,40 @@ class BackupService {
   int? _mapIdWithMap(int? id, Map<int, int> mapping) {
     if (id == null) return null;
     return mapping[id] ?? id;
+  }
+
+  bool _sameText(String a, String b) =>
+      a.trim().toLowerCase() == b.trim().toLowerCase();
+
+  bool _sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  DateTime _lastTouched(DateTime createdAt, DateTime? updatedAt) {
+    return updatedAt ?? createdAt;
+  }
+
+  bool _isImportedNewer({
+    required DateTime importedCreatedAt,
+    required DateTime? importedUpdatedAt,
+    required DateTime existingCreatedAt,
+    required DateTime? existingUpdatedAt,
+  }) {
+    return _lastTouched(
+      importedCreatedAt,
+      importedUpdatedAt,
+    ).isAfter(_lastTouched(existingCreatedAt, existingUpdatedAt));
+  }
+
+  bool _sameTransactionSignature(tx.TransactionModel a, tx.TransactionModel b) {
+    return a.type == b.type &&
+        a.amount == b.amount &&
+        _sameText(a.currency, b.currency) &&
+        a.date.isAtSameMomentAs(b.date) &&
+        a.createdAt.isAtSameMomentAs(b.createdAt) &&
+        _sameText(a.sourceName ?? '', b.sourceName ?? '') &&
+        _sameText(a.targetSourceName ?? '', b.targetSourceName ?? '') &&
+        _sameText(a.description ?? '', b.description ?? '') &&
+        _sameText(a.note ?? '', b.note ?? '');
   }
 
   T _parseEnum<T extends Enum>(List<T> values, dynamic value, T fallback) {

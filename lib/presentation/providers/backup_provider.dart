@@ -24,7 +24,8 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
   final BackupService _backupService;
   final Ref _ref;
 
-  BackupController(this._backupService, this._ref) : super(const AsyncValue.data(null));
+  BackupController(this._backupService, this._ref)
+    : super(const AsyncValue.data(null));
 
   Future<String> exportData({String? password}) async {
     state = const AsyncValue.loading();
@@ -50,11 +51,19 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> applyImport(Map<String, dynamic> data, {bool overwriteConflicts = false}) async {
+  Future<void> applyImport(
+    Map<String, dynamic> data, {
+    bool overwriteConflicts = false,
+    ImportConflictStrategy strategy = ImportConflictStrategy.skipExisting,
+  }) async {
     state = const AsyncValue.loading();
     try {
-      await _backupService.applyImport(data, overwriteConflicts: overwriteConflicts);
-      
+      await _backupService.applyImport(
+        data,
+        overwriteConflicts: overwriteConflicts,
+        strategy: strategy,
+      );
+
       // Invalider tous les providers pour refresh automatique
       _ref.invalidate(sourcesStreamProvider);
       _ref.invalidate(banksStreamProvider);
@@ -69,7 +78,7 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(dashboard.weeklyActivityProvider);
       _ref.invalidate(dashboard.thisMonthIncomeProvider);
       _ref.invalidate(dashboard.thisMonthExpenseProvider);
-      
+
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -87,7 +96,8 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
 
   Future<bool> uploadToDrive(
     String backupData, {
-    void Function(double uploadedMB, double totalMB, double percent)? onProgress,
+    void Function(double uploadedMB, double totalMB, double percent)?
+    onProgress,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -104,7 +114,8 @@ class BackupController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final backupControllerProvider = StateNotifierProvider<BackupController, AsyncValue<void>>((ref) {
-  final backupService = ref.watch(backupServiceProvider);
-  return BackupController(backupService, ref);
-});
+final backupControllerProvider =
+    StateNotifierProvider<BackupController, AsyncValue<void>>((ref) {
+      final backupService = ref.watch(backupServiceProvider);
+      return BackupController(backupService, ref);
+    });

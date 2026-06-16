@@ -10,9 +10,11 @@ import '../../../core/constants/app_icons.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/backup_provider.dart';
+import '../../providers/auto_backup_provider.dart';
 import '../../providers/biometric_provider.dart';
 import '../../providers/preferences_provider.dart';
 import '../../../core/services/ad_manager.dart';
+import '../../../core/services/google_drive_service.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -25,6 +27,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   final _passwordController = TextEditingController();
   bool _usePassword = false;
   bool _isAuthenticating = false;
+  String? _operationLabel;
 
   @override
   void initState() {
@@ -41,6 +44,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
     final backupState = ref.watch(backupControllerProvider);
+    final isBusy =
+        backupState.isLoading || _isAuthenticating || _operationLabel != null;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : Colors.grey[50],
@@ -65,12 +70,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          if (_operationLabel != null) ...[
+            _buildOperationBanner(
+              _operationLabel!,
+              isDark,
+            ).animate().fadeIn(delay: 80.ms),
+            const SizedBox(height: 20),
+          ],
+
           _buildSection(l10n.backup, isDark),
           _buildActionCard(
             icon: AppIcons.export,
             title: l10n.createBackup,
             subtitle: l10n.exportAllData,
-            onTap: () => _showExportDialog(context, l10n, isDark),
+            onTap: isBusy
+                ? null
+                : () => _showExportDialog(context, l10n, isDark),
             isDark: isDark,
           ).animate().fadeIn(delay: 100.ms),
 
@@ -81,14 +96,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             icon: AppIcons.import,
             title: l10n.restoreBackup,
             subtitle: l10n.importFromFile,
-            onTap: () => _showImportDialog(context, l10n, isDark),
+            onTap: isBusy
+                ? null
+                : () => _showImportDialog(context, l10n, isDark),
             isDark: isDark,
           ).animate().fadeIn(delay: 200.ms),
-
-          if (backupState.isLoading || _isAuthenticating) ...[
-            const SizedBox(height: 20),
-            const Center(child: CircularProgressIndicator()),
-          ],
         ],
       ),
     );
@@ -113,65 +125,70 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
     required bool isDark,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
+    return Opacity(
+      opacity: onTap == null ? 0.58 : 1,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, color: AppColors.primary, size: 20),
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.textDark : Colors.black87,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? AppColors.textDark : Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : Colors.black54,
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : Colors.black54,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Icon(
-                  AppIcons.back,
-                  color: isDark ? AppColors.textSecondaryDark : Colors.black54,
-                  size: 20,
-                ),
-              ],
+                  Icon(
+                    AppIcons.back,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : Colors.black54,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -179,7 +196,45 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
-  void _showExportDialog(BuildContext context, AppLocalizations l10n, bool isDark) {
+  Widget _buildOperationBanner(String label, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.textDark : Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showExportDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
     _authenticateUser(context, l10n, () {
       _showExportOptionsDialog(context, l10n, isDark);
     });
@@ -190,7 +245,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     AppLocalizations l10n,
     VoidCallback onSuccess,
   ) async {
-    setState(() => _isAuthenticating = true);
+    setState(() {
+      _isAuthenticating = true;
+      _operationLabel = 'Vérification sécurisée';
+    });
 
     try {
       final biometricState = ref.read(biometricProvider);
@@ -223,7 +281,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
       onSuccess();
     } finally {
-      setState(() => _isAuthenticating = false);
+      if (mounted) {
+        setState(() {
+          _isAuthenticating = false;
+          _operationLabel = null;
+        });
+      }
     }
   }
 
@@ -278,7 +341,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
   }
 
-  void _showImportDialog(BuildContext context, AppLocalizations l10n, bool isDark) {
+  void _showImportDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -336,7 +403,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   void _processImport(String content, AppLocalizations l10n) async {
-    setState(() => _isAuthenticating = true);
+    setState(() {
+      _isAuthenticating = true;
+      _operationLabel = 'Restauration de la sauvegarde';
+    });
 
     try {
       final importResult = await ref
@@ -348,19 +418,24 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         return;
       }
 
-      if (importResult.conflicts.isNotEmpty) {
-        _showConflictDialog(importResult, l10n);
-      } else {
-        await ref
-            .read(backupControllerProvider.notifier)
-            .applyImport(importResult.data!);
-        await AdManager.showRewardedForImportExport();
-        _showSuccessDialog(l10n.dataImportedSuccess);
-      }
+      await ref
+          .read(backupControllerProvider.notifier)
+          .applyImport(
+            importResult.data!,
+            strategy: ImportConflictStrategy.smartMerge,
+          );
+      await AdManager.showRewardedForImportExport();
+      await _syncDriveAfterChange();
+      _showSuccessDialog(l10n.dataImportedSuccess);
     } catch (e) {
       _showErrorDialog('${l10n.error}: $e');
     } finally {
-      setState(() => _isAuthenticating = false);
+      if (mounted) {
+        setState(() {
+          _isAuthenticating = false;
+          _operationLabel = null;
+        });
+      }
     }
   }
 
@@ -387,25 +462,38 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              if (mounted) {
+                setState(() {
+                  _isAuthenticating = true;
+                  _operationLabel = 'Déchiffrement de la sauvegarde';
+                });
+              }
               try {
                 final importResult = await ref
                     .read(backupControllerProvider.notifier)
                     .importData(content, password: passwordController.text);
 
                 if (importResult.success) {
-                  if (importResult.conflicts.isNotEmpty) {
-                    _showConflictDialog(importResult, l10n);
-                  } else {
-                    await ref
-                        .read(backupControllerProvider.notifier)
-                        .applyImport(importResult.data!);
-                    _showSuccessDialog(l10n.dataImportedSuccess);
-                  }
+                  await ref
+                      .read(backupControllerProvider.notifier)
+                      .applyImport(
+                        importResult.data!,
+                        strategy: ImportConflictStrategy.smartMerge,
+                      );
+                  await _syncDriveAfterChange();
+                  _showSuccessDialog(l10n.dataImportedSuccess);
                 } else {
                   _showErrorDialog(importResult.error ?? l10n.unknownError);
                 }
               } catch (e) {
                 _showErrorDialog('${l10n.error}: $e');
+              } finally {
+                if (mounted) {
+                  setState(() {
+                    _isAuthenticating = false;
+                    _operationLabel = null;
+                  });
+                }
               }
             },
             child: Text(l10n.ok),
@@ -462,7 +550,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   void _exportData() async {
     final l10n = AppLocalizations.of(context)!;
 
-    setState(() => _isAuthenticating = true);
+    setState(() {
+      _isAuthenticating = true;
+      _operationLabel = 'Création de la sauvegarde';
+    });
 
     try {
       final password = _usePassword ? _passwordController.text : null;
@@ -476,6 +567,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       await ref
           .read(backupControllerProvider.notifier)
           .saveBackupToStorage(backupData);
+      await _syncDriveAfterChange();
 
       if (mounted) {
         await AdManager.showRewardedForImportExport();
@@ -488,8 +580,20 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         _showErrorDialog('${l10n.error}: $e');
       }
     } finally {
-      setState(() => _isAuthenticating = false);
+      if (mounted) {
+        setState(() {
+          _isAuthenticating = false;
+          _operationLabel = null;
+        });
+      }
     }
+  }
+
+  Future<void> _syncDriveAfterChange() async {
+    if (!await GoogleDriveService.isUserSignedIn()) return;
+    if (!mounted) return;
+    setState(() => _operationLabel = 'Synchronisation Google Drive');
+    await ref.read(autoBackupProvider.notifier).performDriveSync();
   }
 
   void _showSuccessDialog(String message) {
