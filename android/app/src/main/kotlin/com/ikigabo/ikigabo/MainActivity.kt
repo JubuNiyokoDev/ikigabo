@@ -1,11 +1,8 @@
 package com.ikigabo.ikigabo
 
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.core.view.WindowCompat
@@ -94,28 +91,17 @@ class MainActivity : FlutterFragmentActivity() {
             return
         }
 
-        val pendingIntent = buildAlarmPendingIntent(
+        val scheduled = AlarmScheduler.scheduleAlarm(
+            context = this,
             id = id,
+            timeMillis = calendar.timeInMillis,
             title = title,
             message = message,
-            flags = PendingIntent.FLAG_UPDATE_CURRENT,
-        ) ?: run {
-            result.error("PENDING_INTENT_ERROR", "Impossible de créer PendingIntent", null)
+        )
+
+        if (!scheduled) {
+            result.error("SCHEDULE_ERROR", "Impossible de programmer l'alarme", null)
             return
-        }
-
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent,
-            )
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
         }
 
         result.success(true)
@@ -128,46 +114,7 @@ class MainActivity : FlutterFragmentActivity() {
             return
         }
 
-        val pendingIntent = buildAlarmPendingIntent(
-            id = id,
-            title = "",
-            message = "",
-            flags = PendingIntent.FLAG_NO_CREATE,
-        )
-
-        if (pendingIntent == null) {
-            result.success(false)
-            return
-        }
-
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingIntent)
-        pendingIntent.cancel()
-        result.success(true)
-    }
-
-    private fun buildAlarmPendingIntent(
-        id: Int,
-        title: String,
-        message: String,
-        flags: Int,
-    ): PendingIntent? {
-        val intent = Intent(this, AlarmReceiver::class.java).apply {
-            putExtra(EXTRA_ALARM_ID, id)
-            putExtra(EXTRA_TITLE, title)
-            putExtra(EXTRA_MESSAGE, message)
-        }
-
-        return PendingIntent.getBroadcast(
-            this,
-            id,
-            intent,
-            flags or pendingIntentMutabilityFlag(),
-        )
-    }
-
-    private fun pendingIntentMutabilityFlag(): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        result.success(AlarmScheduler.cancelAlarm(this, id))
     }
 
     private fun createNotificationChannel() {

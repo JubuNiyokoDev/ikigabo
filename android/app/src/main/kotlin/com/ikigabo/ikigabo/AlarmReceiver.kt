@@ -14,6 +14,8 @@ class AlarmReceiver : BroadcastReceiver() {
         val title = intent.getStringExtra(MainActivity.EXTRA_TITLE) ?: "Rappel"
         val message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE) ?: "Rappel de dette"
 
+        AlarmScheduler.removeSavedAlarm(context, id)
+
         val launchIntent = context.packageManager
             .getLaunchIntentForPackage(context.packageName)
             ?.apply {

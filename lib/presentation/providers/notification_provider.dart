@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ikigabo/core/services/preferences_service.dart';
 import '../../data/services/notification_service.dart';
@@ -107,6 +109,9 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     final newValue = !state.smartReminders;
     state = state.copyWith(smartReminders: newValue);
     _prefsService?.setSmartRemindersEnabled(newValue);
+    if (!newValue) {
+      unawaited(NotificationService().cancelSmartReminders());
+    }
   }
 }
 

@@ -28,13 +28,19 @@ class NotificationService {
   static const int _smartReminderLookbackDays = 60;
   static const int _smartReminderMinEvents = 4;
   static const int _maxSmartHabitReminders = 3;
-  static const int _smartGlobalInactivityAlarmId = 860001;
+  static const int _legacySmartGlobalInactivityAlarmId = 860001;
+  static const int _smartInactivityAlarmBaseId = 860100;
+  static const List<int> _smartInactivityReminderOffsetsDays = [3, 5, 8, 14];
   static const Duration _backupReminderCooldown = Duration(hours: 24);
 
   static const String _wealthLastMilestoneKey =
       'notification_state_wealth_last_milestone';
   static const String _backupLastReminderAtKey =
       'notification_state_backup_last_reminder_at';
+  static const String _smartHabitAlarmIdsKey =
+      'notification_state_smart_habit_alarm_ids';
+  static const String _smartInactivityCatchupDayKey =
+      'notification_state_smart_inactivity_catchup_day';
 
   final List<NotificationItem> _notifications = [];
   final ValueNotifier<int> _notificationCount = ValueNotifier(0);
@@ -537,7 +543,10 @@ class NotificationService {
   Future<void> scheduleSmartBehaviorReminders(
     List<TransactionModel> transactions,
   ) async {
-    if (_prefsService?.getSmartRemindersEnabled() != true) return;
+    if (_prefsService?.getSmartRemindersEnabled() != true) {
+      await cancelSmartReminders();
+      return;
+    }
 
     final now = DateTime.now();
     final activeTransactions =
@@ -555,40 +564,70 @@ class NotificationService {
     await _scheduleHabitReminders(activeTransactions, now);
   }
 
+  Future<void> cancelSmartReminders() async {
+    await _clearSmartInactivityReminders();
+    await _clearSmartHabitReminders();
+  }
+
   Future<void> _scheduleGlobalInactivityReminder(
     List<TransactionModel> transactions,
     DateTime now,
   ) async {
+    await _clearSmartInactivityReminders();
+
     if (transactions.length < 3) return;
 
     final lastTransaction = transactions.last;
-    if (now.difference(lastTransaction.date).inDays < 3) return;
-
-    final scheduledAt = _nextReminderTime(now.add(const Duration(hours: 3)));
-    final scheduledDayKey = _dayKey(scheduledAt);
     final prefs = await SharedPreferences.getInstance();
-    const stateKey = 'notification_state_smart_global_scheduled_day';
-    if (prefs.getInt(stateKey) == scheduledDayKey) return;
+    final preferredHour = _preferredNotificationHour(transactions);
+    final todayKey = _dayKey(now);
+    final lastCatchupDay = prefs.getInt(_smartInactivityCatchupDayKey);
+    var catchupUsed = false;
 
-    await RealAlarmService.cancelAlarm(_smartGlobalInactivityAlarmId);
-    final result = await RealAlarmService.scheduleRealAlarm(
-      id: _smartGlobalInactivityAlarmId,
-      dateTime: scheduledAt,
-      title: 'Ikigabo vous attend',
-      message: 'Vos comptes n’ont pas été mis à jour depuis quelques jours.',
-    );
-
-    if (result.success) {
-      _addNotification(
-        NotificationItem(
-          id: 'smart_global_inactivity',
-          title: 'Rappel intelligent',
-          body: 'Vos comptes n’ont pas été mis à jour depuis quelques jours.',
-          type: NotificationType.smartReminder,
-          scheduledDate: scheduledAt,
-        ),
+    for (
+      var index = 0;
+      index < _smartInactivityReminderOffsetsDays.length;
+      index++
+    ) {
+      final offsetDays = _smartInactivityReminderOffsetsDays[index];
+      final expectedAt = lastTransaction.date.add(Duration(days: offsetDays));
+      var scheduledAt = _nextReminderTime(
+        expectedAt,
+        preferredHour: preferredHour,
       );
-      await prefs.setInt(stateKey, scheduledDayKey);
+
+      if (scheduledAt.isBefore(now.add(const Duration(hours: 1)))) {
+        if (catchupUsed || lastCatchupDay == todayKey) continue;
+        scheduledAt = _nextReminderTime(
+          now.add(const Duration(hours: 3)),
+          preferredHour: preferredHour,
+        );
+        catchupUsed = true;
+      }
+
+      final alarmId = _smartInactivityAlarmBaseId + index;
+      final result = await RealAlarmService.scheduleRealAlarm(
+        id: alarmId,
+        dateTime: scheduledAt,
+        title: _inactivityTitle(offsetDays),
+        message: _inactivityBody(offsetDays, lastTransaction),
+      );
+
+      if (result.success) {
+        _addNotification(
+          NotificationItem(
+            id: 'smart_global_inactivity_$index',
+            title: _inactivityTitle(offsetDays),
+            body: _inactivityBody(offsetDays, lastTransaction),
+            type: NotificationType.smartReminder,
+            scheduledDate: scheduledAt,
+          ),
+        );
+      }
+    }
+
+    if (catchupUsed) {
+      await prefs.setInt(_smartInactivityCatchupDayKey, todayKey);
     }
   }
 
@@ -596,6 +635,9 @@ class NotificationService {
     List<TransactionModel> transactions,
     DateTime now,
   ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await _clearSmartHabitReminders(prefs: prefs);
+
     final cutoff = now.subtract(
       const Duration(days: _smartReminderLookbackDays),
     );
@@ -618,11 +660,10 @@ class NotificationService {
               (habit) => habit.transactions.length >= _smartReminderMinEvents,
             )
             .toList()
-          ..sort(
-            (a, b) => b.transactions.length.compareTo(a.transactions.length),
-          );
+          ..sort((a, b) => _habitScore(b).compareTo(_habitScore(a)));
 
     var scheduledCount = 0;
+    final scheduledAlarmIds = <int>[];
     for (final habit in habits) {
       if (scheduledCount >= _maxSmartHabitReminders) break;
 
@@ -633,16 +674,12 @@ class NotificationService {
       final lastTransaction = habit.transactions.last;
       final nextGapDays = averageGapDays.clamp(1, 10);
       final expectedAt = lastTransaction.date.add(Duration(days: nextGapDays));
-      final scheduledAt = _nextReminderTime(expectedAt);
-      if (scheduledAt.isBefore(now.add(const Duration(hours: 1)))) continue;
+      final scheduledAt = _nextReminderTime(
+        expectedAt,
+        preferredHour: _preferredNotificationHour(habit.transactions),
+      );
 
       final alarmId = 870000 + (_stablePositiveHash(habit.key) % 20000);
-      final scheduledDayKey = _dayKey(scheduledAt);
-      final prefs = await SharedPreferences.getInstance();
-      final stateKey = 'notification_state_smart_habit_${alarmId}_day';
-      if (prefs.getInt(stateKey) == scheduledDayKey) continue;
-
-      await RealAlarmService.cancelAlarm(alarmId);
       final result = await RealAlarmService.scheduleRealAlarm(
         id: alarmId,
         dateTime: scheduledAt,
@@ -660,10 +697,15 @@ class NotificationService {
             scheduledDate: scheduledAt,
           ),
         );
-        await prefs.setInt(stateKey, scheduledDayKey);
+        scheduledAlarmIds.add(alarmId);
         scheduledCount++;
       }
     }
+
+    await prefs.setString(
+      _smartHabitAlarmIdsKey,
+      jsonEncode(scheduledAlarmIds),
+    );
   }
 
   int _averageGapDays(List<TransactionModel> transactions) {
@@ -683,13 +725,125 @@ class NotificationService {
     return gapCount == 0 ? 0 : (totalDays / gapCount).round();
   }
 
-  DateTime _nextReminderTime(DateTime candidate) {
-    final now = DateTime.now();
-    var date = DateTime(candidate.year, candidate.month, candidate.day, 9, 0);
-    if (date.isBefore(now.add(const Duration(hours: 1)))) {
-      date = now.add(const Duration(hours: 3));
+  int _habitScore(_TransactionHabit habit) {
+    if (habit.transactions.isEmpty) return 0;
+    final sortedTransactions = [...habit.transactions]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final averageGapDays = _averageGapDays(sortedTransactions);
+    final frequencyScore = habit.transactions.length * 10;
+    final recencyScore = averageGapDays <= 0 ? 0 : (20 - averageGapDays);
+    return frequencyScore + recencyScore;
+  }
+
+  int _preferredNotificationHour(List<TransactionModel> transactions) {
+    final hourCounts = <int, int>{};
+    final cutoff = DateTime.now().subtract(
+      const Duration(days: _smartReminderLookbackDays),
+    );
+
+    for (final transaction in transactions.where(
+      (t) => t.date.isAfter(cutoff),
+    )) {
+      final hour = transaction.date.hour.clamp(8, 20).toInt();
+      hourCounts.update(hour, (count) => count + 1, ifAbsent: () => 1);
     }
+
+    if (hourCounts.isEmpty) return 9;
+
+    final entries = hourCounts.entries.toList()
+      ..sort((a, b) {
+        final countCompare = b.value.compareTo(a.value);
+        if (countCompare != 0) return countCompare;
+        return a.key.compareTo(b.key);
+      });
+
+    return entries.first.key;
+  }
+
+  DateTime _nextReminderTime(DateTime candidate, {int preferredHour = 9}) {
+    final now = DateTime.now();
+    final hour = preferredHour.clamp(8, 20).toInt();
+    final minimum = now.add(const Duration(hours: 1));
+    var date = DateTime(candidate.year, candidate.month, candidate.day, hour);
+
+    if (date.isBefore(minimum)) {
+      final soon = now.add(const Duration(hours: 3));
+      if (soon.hour >= 8 && soon.hour <= 20) {
+        return soon;
+      }
+
+      final today = DateTime(now.year, now.month, now.day, hour);
+      if (today.isAfter(minimum)) {
+        return today;
+      }
+
+      final tomorrow = now.add(const Duration(days: 1));
+      date = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, hour);
+    }
+
     return date;
+  }
+
+  String _inactivityTitle(int offsetDays) {
+    if (offsetDays <= 3) return 'Petit contrôle Ikigabo';
+    if (offsetDays <= 5) return 'Vos comptes attendent';
+    if (offsetDays <= 8) return 'Bilan rapide recommandé';
+    return 'Gardez votre historique vivant';
+  }
+
+  String _inactivityBody(int offsetDays, TransactionModel lastTransaction) {
+    final accountName =
+        lastTransaction.targetSourceName ?? lastTransaction.sourceName;
+    final suffix = accountName == null ? '' : ' pour $accountName';
+
+    if (offsetDays <= 3) {
+      return 'Vous aviez l’habitude de mettre Ikigabo à jour$suffix. Un petit mouvement à vérifier ?';
+    }
+    if (offsetDays <= 5) {
+      return 'Quelques jours sans mouvement. Gardez vos soldes fiables avec une vérification rapide.';
+    }
+    if (offsetDays <= 8) {
+      return 'Votre historique devient moins précis si les mouvements restent dans votre tête.';
+    }
+    return 'Revenez faire un point: revenus, dépenses et transferts restent plus utiles quand ils sont à jour.';
+  }
+
+  Future<void> _clearSmartInactivityReminders() async {
+    await RealAlarmService.cancelAlarm(_legacySmartGlobalInactivityAlarmId);
+    removeNotification('smart_global_inactivity');
+
+    for (
+      var index = 0;
+      index < _smartInactivityReminderOffsetsDays.length;
+      index++
+    ) {
+      await RealAlarmService.cancelAlarm(_smartInactivityAlarmBaseId + index);
+      removeNotification('smart_global_inactivity_$index');
+    }
+  }
+
+  Future<void> _clearSmartHabitReminders({SharedPreferences? prefs}) async {
+    final preferences = prefs ?? await SharedPreferences.getInstance();
+    final alarmIds = _readSmartHabitAlarmIds(preferences);
+
+    for (final alarmId in alarmIds) {
+      await RealAlarmService.cancelAlarm(alarmId);
+      removeNotification('smart_habit_$alarmId');
+    }
+
+    await preferences.remove(_smartHabitAlarmIdsKey);
+  }
+
+  List<int> _readSmartHabitAlarmIds(SharedPreferences prefs) {
+    final rawIds = prefs.getString(_smartHabitAlarmIdsKey);
+    if (rawIds == null || rawIds.isEmpty) return const [];
+
+    try {
+      final decoded = jsonDecode(rawIds) as List<dynamic>;
+      return decoded.whereType<int>().toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   int _dayKey(DateTime date) => date.year * 10000 + date.month * 100 + date.day;
