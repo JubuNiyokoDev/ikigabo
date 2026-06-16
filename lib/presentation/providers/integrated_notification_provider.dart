@@ -11,6 +11,7 @@ import 'source_provider.dart';
 import 'bank_provider.dart';
 import 'debt_provider.dart';
 import 'dashboard_provider.dart';
+import 'transaction_provider.dart';
 
 final integratedNotificationProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -99,6 +100,14 @@ class NotificationWatcher {
       }
     });
 
+    // Watch transaction habits for smart reminders
+    _ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((transactions) async {
+        final notificationService = _ref.read(integratedNotificationProvider);
+        await notificationService.scheduleSmartBehaviorReminders(transactions);
+      });
+    });
+
     _runChecksFromCurrentState();
     _startPeriodicChecks();
   }
@@ -148,6 +157,11 @@ class NotificationWatcher {
 
     await notificationService.checkLowBalanceAlerts(_lastSources, _lastBanks);
     await notificationService.showBackupReminder();
+
+    final transactions = _ref.read(transactionsStreamProvider).valueOrNull;
+    if (transactions != null) {
+      await notificationService.scheduleSmartBehaviorReminders(transactions);
+    }
   }
 
   void dispose() {

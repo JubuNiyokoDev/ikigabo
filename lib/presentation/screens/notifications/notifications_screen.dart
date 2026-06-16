@@ -44,7 +44,9 @@ class NotificationsScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const NotificationSettingsScreen(),
+                ),
               );
             },
             icon: Icon(
@@ -59,10 +61,7 @@ class NotificationsScreen extends ConsumerWidget {
               },
               child: Text(
                 'Tout lire',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 14.sp,
-                ),
+                style: TextStyle(color: AppColors.primary, fontSize: 14.sp),
               ),
             ),
         ],
@@ -72,7 +71,7 @@ class NotificationsScreen extends ConsumerWidget {
         builder: (context, count, child) {
           // Toujours afficher toutes les notifications (lues et non lues)
           final notifications = notificationService.notifications;
-          
+
           if (notifications.isEmpty) {
             return Center(
               child: Column(
@@ -109,7 +108,7 @@ class NotificationsScreen extends ConsumerWidget {
                   if (!notification.isRead) {
                     notificationService.markNotificationAsRead(notification.id);
                   }
-                  
+
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
@@ -145,12 +144,14 @@ class _NotificationCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
-        color: notification.isRead 
+        color: notification.isRead
             ? (isDark ? AppColors.surfaceDark : Colors.white)
-            : (isDark ? AppColors.primary.withOpacity(0.1) : AppColors.primary.withOpacity(0.05)),
+            : (isDark
+                  ? AppColors.primary.withOpacity(0.1)
+                  : AppColors.primary.withOpacity(0.05)),
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(
-          color: notification.isRead 
+          color: notification.isRead
               ? (isDark ? AppColors.borderDark : Colors.grey.shade200)
               : AppColors.primary.withOpacity(0.3),
         ),
@@ -188,8 +189,12 @@ class _NotificationCard extends StatelessWidget {
                             notification.title,
                             style: TextStyle(
                               fontSize: 13.sp,
-                              fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                              color: isDark ? AppColors.textDark : Colors.black87,
+                              fontWeight: notification.isRead
+                                  ? FontWeight.w500
+                                  : FontWeight.w600,
+                              color: isDark
+                                  ? AppColors.textDark
+                                  : Colors.black87,
                             ),
                           ),
                         ),
@@ -209,7 +214,9 @@ class _NotificationCard extends StatelessWidget {
                       notification.body,
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade600,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -219,7 +226,9 @@ class _NotificationCard extends StatelessWidget {
                       _formatDate(notification.scheduledDate),
                       style: TextStyle(
                         fontSize: 10.sp,
-                        color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade500,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade500,
                       ),
                     ),
                   ],
@@ -250,6 +259,8 @@ class _NotificationCard extends StatelessWidget {
         return AppIcons.warning;
       case NotificationType.lowBalance:
         return AppIcons.warning;
+      case NotificationType.smartReminder:
+        return AppIcons.notification;
     }
   }
 
@@ -271,6 +282,8 @@ class _NotificationCard extends StatelessWidget {
         return AppColors.error;
       case NotificationType.lowBalance:
         return AppColors.warning;
+      case NotificationType.smartReminder:
+        return AppColors.primary;
     }
   }
 

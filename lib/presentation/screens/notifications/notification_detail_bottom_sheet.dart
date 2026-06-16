@@ -21,9 +21,7 @@ class NotificationDetailBottomSheet extends StatelessWidget {
     final maxHeight = screenHeight - safeAreaTop - 80;
 
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
+      constraints: BoxConstraints(maxHeight: maxHeight),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
@@ -45,7 +43,7 @@ class NotificationDetailBottomSheet extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          
+
           // Icon et titre
           Row(
             children: [
@@ -80,7 +78,9 @@ class NotificationDetailBottomSheet extends StatelessWidget {
                       _formatDate(notification.scheduledDate),
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: isDark ? AppColors.textSecondaryDark : Colors.grey.shade600,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -88,9 +88,9 @@ class NotificationDetailBottomSheet extends StatelessWidget {
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // Message
           Flexible(
             child: SingleChildScrollView(
@@ -104,9 +104,9 @@ class NotificationDetailBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          
+
           SizedBox(height: 20.h),
-          
+
           SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
       ),
@@ -131,6 +131,8 @@ class NotificationDetailBottomSheet extends StatelessWidget {
         return AppIcons.warning;
       case NotificationType.lowBalance:
         return AppIcons.warning;
+      case NotificationType.smartReminder:
+        return AppIcons.notification;
     }
   }
 
@@ -152,6 +154,8 @@ class NotificationDetailBottomSheet extends StatelessWidget {
         return AppColors.error;
       case NotificationType.lowBalance:
         return AppColors.warning;
+      case NotificationType.smartReminder:
+        return AppColors.primary;
     }
   }
 

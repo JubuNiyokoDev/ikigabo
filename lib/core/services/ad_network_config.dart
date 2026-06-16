@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum AdNetwork { unity, admob }
+enum AdNetwork { unity, meta, admob }
 
 class AdNetworkConfig {
   const AdNetworkConfig._();
@@ -18,8 +18,8 @@ class AdNetworkConfig {
     'A13309D31987749D96D20C4C55979E7F',
   ];
 
-  static const AdNetwork bannerPrimaryNetwork = AdNetwork.admob;
-  static const AdNetwork fullScreenPrimaryNetwork = AdNetwork.admob;
+  static const AdNetwork bannerPrimaryNetwork = AdNetwork.meta;
+  static const AdNetwork fullScreenPrimaryNetwork = AdNetwork.meta;
 
   static const bool useRewardedForCoreActions = false;
   static const bool showDashboardInterstitial = true;

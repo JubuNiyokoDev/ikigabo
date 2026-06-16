@@ -7,6 +7,7 @@ import '../models/debt_model.dart';
 import '../models/bank_model.dart';
 import '../models/budget_model.dart';
 import '../models/source_model.dart';
+import '../models/transaction_model.dart';
 import '../../core/services/real_alarm_service.dart';
 import '../../core/services/preferences_service.dart';
 
@@ -24,6 +25,10 @@ class NotificationService {
 
   static const int _dueSoonDays = 3;
   static const int _backupReminderAfterDays = 3;
+  static const int _smartReminderLookbackDays = 60;
+  static const int _smartReminderMinEvents = 4;
+  static const int _maxSmartHabitReminders = 3;
+  static const int _smartGlobalInactivityAlarmId = 860001;
   static const Duration _backupReminderCooldown = Duration(hours: 24);
 
   static const String _wealthLastMilestoneKey =
@@ -529,6 +534,174 @@ class NotificationService {
     await prefs.setInt(_backupLastReminderAtKey, now.millisecondsSinceEpoch);
   }
 
+  Future<void> scheduleSmartBehaviorReminders(
+    List<TransactionModel> transactions,
+  ) async {
+    if (_prefsService?.getSmartRemindersEnabled() != true) return;
+
+    final now = DateTime.now();
+    final activeTransactions =
+        transactions
+            .where(
+              (transaction) =>
+                  !transaction.isDeleted &&
+                  transaction.status == TransactionStatus.active &&
+                  !transaction.date.isAfter(now),
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+
+    await _scheduleGlobalInactivityReminder(activeTransactions, now);
+    await _scheduleHabitReminders(activeTransactions, now);
+  }
+
+  Future<void> _scheduleGlobalInactivityReminder(
+    List<TransactionModel> transactions,
+    DateTime now,
+  ) async {
+    if (transactions.length < 3) return;
+
+    final lastTransaction = transactions.last;
+    if (now.difference(lastTransaction.date).inDays < 3) return;
+
+    final scheduledAt = _nextReminderTime(now.add(const Duration(hours: 3)));
+    final scheduledDayKey = _dayKey(scheduledAt);
+    final prefs = await SharedPreferences.getInstance();
+    const stateKey = 'notification_state_smart_global_scheduled_day';
+    if (prefs.getInt(stateKey) == scheduledDayKey) return;
+
+    await RealAlarmService.cancelAlarm(_smartGlobalInactivityAlarmId);
+    final result = await RealAlarmService.scheduleRealAlarm(
+      id: _smartGlobalInactivityAlarmId,
+      dateTime: scheduledAt,
+      title: 'Ikigabo vous attend',
+      message: 'Vos comptes n’ont pas été mis à jour depuis quelques jours.',
+    );
+
+    if (result.success) {
+      _addNotification(
+        NotificationItem(
+          id: 'smart_global_inactivity',
+          title: 'Rappel intelligent',
+          body: 'Vos comptes n’ont pas été mis à jour depuis quelques jours.',
+          type: NotificationType.smartReminder,
+          scheduledDate: scheduledAt,
+        ),
+      );
+      await prefs.setInt(stateKey, scheduledDayKey);
+    }
+  }
+
+  Future<void> _scheduleHabitReminders(
+    List<TransactionModel> transactions,
+    DateTime now,
+  ) async {
+    final cutoff = now.subtract(
+      const Duration(days: _smartReminderLookbackDays),
+    );
+    final groups = <String, _TransactionHabit>{};
+
+    for (final transaction in transactions.where(
+      (t) => t.date.isAfter(cutoff),
+    )) {
+      final habit = _TransactionHabit.fromTransaction(transaction);
+      groups.update(
+        habit.key,
+        (existing) => existing..transactions.add(transaction),
+        ifAbsent: () => habit..transactions.add(transaction),
+      );
+    }
+
+    final habits =
+        groups.values
+            .where(
+              (habit) => habit.transactions.length >= _smartReminderMinEvents,
+            )
+            .toList()
+          ..sort(
+            (a, b) => b.transactions.length.compareTo(a.transactions.length),
+          );
+
+    var scheduledCount = 0;
+    for (final habit in habits) {
+      if (scheduledCount >= _maxSmartHabitReminders) break;
+
+      habit.transactions.sort((a, b) => a.date.compareTo(b.date));
+      final averageGapDays = _averageGapDays(habit.transactions);
+      if (averageGapDays <= 0 || averageGapDays > 10) continue;
+
+      final lastTransaction = habit.transactions.last;
+      final nextGapDays = averageGapDays.clamp(1, 10);
+      final expectedAt = lastTransaction.date.add(Duration(days: nextGapDays));
+      final scheduledAt = _nextReminderTime(expectedAt);
+      if (scheduledAt.isBefore(now.add(const Duration(hours: 1)))) continue;
+
+      final alarmId = 870000 + (_stablePositiveHash(habit.key) % 20000);
+      final scheduledDayKey = _dayKey(scheduledAt);
+      final prefs = await SharedPreferences.getInstance();
+      final stateKey = 'notification_state_smart_habit_${alarmId}_day';
+      if (prefs.getInt(stateKey) == scheduledDayKey) continue;
+
+      await RealAlarmService.cancelAlarm(alarmId);
+      final result = await RealAlarmService.scheduleRealAlarm(
+        id: alarmId,
+        dateTime: scheduledAt,
+        title: habit.title,
+        message: habit.body,
+      );
+
+      if (result.success) {
+        _addNotification(
+          NotificationItem(
+            id: 'smart_habit_$alarmId',
+            title: habit.title,
+            body: habit.body,
+            type: NotificationType.smartReminder,
+            scheduledDate: scheduledAt,
+          ),
+        );
+        await prefs.setInt(stateKey, scheduledDayKey);
+        scheduledCount++;
+      }
+    }
+  }
+
+  int _averageGapDays(List<TransactionModel> transactions) {
+    if (transactions.length < 2) return 0;
+
+    var totalDays = 0;
+    var gapCount = 0;
+    for (var i = 1; i < transactions.length; i++) {
+      final gapDays = transactions[i].date
+          .difference(transactions[i - 1].date)
+          .inDays
+          .clamp(1, 30);
+      totalDays += gapDays;
+      gapCount++;
+    }
+
+    return gapCount == 0 ? 0 : (totalDays / gapCount).round();
+  }
+
+  DateTime _nextReminderTime(DateTime candidate) {
+    final now = DateTime.now();
+    var date = DateTime(candidate.year, candidate.month, candidate.day, 9, 0);
+    if (date.isBefore(now.add(const Duration(hours: 1)))) {
+      date = now.add(const Duration(hours: 3));
+    }
+    return date;
+  }
+
+  int _dayKey(DateTime date) => date.year * 10000 + date.month * 100 + date.day;
+
+  int _stablePositiveHash(String value) {
+    var hash = 0;
+    for (final codeUnit in value.codeUnits) {
+      hash = (hash * 31 + codeUnit) & 0x7fffffff;
+    }
+    return hash;
+  }
+
   String _budgetPeriodKey(BudgetModel budget) {
     final start = DateTime(
       budget.startDate.year,
@@ -577,6 +750,8 @@ class NotificationService {
         return true; // Toujours activé pour les budgets
       case NotificationType.lowBalance:
         return _prefsService!.getOverdueAlertsEnabled();
+      case NotificationType.smartReminder:
+        return _prefsService!.getSmartRemindersEnabled();
     }
   }
 
@@ -775,4 +950,56 @@ enum NotificationType {
   budgetWarning,
   budgetExceeded,
   lowBalance,
+  smartReminder,
+}
+
+class _TransactionHabit {
+  final String key;
+  final String title;
+  final String body;
+  final List<TransactionModel> transactions = [];
+
+  _TransactionHabit({
+    required this.key,
+    required this.title,
+    required this.body,
+  });
+
+  factory _TransactionHabit.fromTransaction(TransactionModel transaction) {
+    switch (transaction.type) {
+      case TransactionType.income:
+        final targetName =
+            transaction.targetSourceName ??
+            transaction.sourceName ??
+            'ce compte';
+        final targetId = transaction.targetSourceId ?? transaction.sourceId;
+        final targetType =
+            transaction.targetSourceType?.name ?? transaction.sourceType.name;
+        return _TransactionHabit(
+          key:
+              'income:$targetType:$targetId:${transaction.incomeCategory.name}',
+          title: 'Entrée à suivre',
+          body:
+              'Vous ajoutez souvent de l’argent sur $targetName. Pensez à mettre Ikigabo à jour.',
+        );
+      case TransactionType.expense:
+        final sourceName = transaction.sourceName ?? 'ce compte';
+        return _TransactionHabit(
+          key:
+              'expense:${transaction.sourceType.name}:${transaction.sourceId}:${transaction.expenseCategory.name}',
+          title: 'Dépense à noter',
+          body:
+              'Vous notez souvent des dépenses depuis $sourceName. Gardez vos comptes à jour.',
+        );
+      case TransactionType.transfer:
+        final targetName = transaction.targetSourceName ?? 'la destination';
+        return _TransactionHabit(
+          key:
+              'transfer:${transaction.sourceType.name}:${transaction.sourceId}:${transaction.targetSourceId ?? 0}',
+          title: 'Transfert habituel',
+          body:
+              'Vous faites souvent des transferts vers $targetName. Un petit contrôle aujourd’hui ?',
+        );
+    }
+  }
 }

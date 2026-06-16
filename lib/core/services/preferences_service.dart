@@ -20,6 +20,8 @@ class PreferencesService {
   static const String _notificationWealthKey = 'notification_wealth';
   static const String _notificationBackupKey = 'notification_backup';
   static const String _notificationOverdueKey = 'notification_overdue';
+  static const String _notificationSmartRemindersKey =
+      'notification_smart_reminders';
   static const String _autoBackupEnabledKey = 'auto_backup_enabled';
   static const String _lastBackupDateKey = 'last_backup_date';
   static const String _lastDriveSyncDateKey = 'last_drive_sync_date';
@@ -184,6 +186,8 @@ class PreferencesService {
       _prefs.getBool(_notificationBackupKey) ?? true;
   bool getOverdueAlertsEnabled() =>
       _prefs.getBool(_notificationOverdueKey) ?? true;
+  bool getSmartRemindersEnabled() =>
+      _prefs.getBool(_notificationSmartRemindersKey) ?? true;
 
   /// Sauvegarder les préférences de notifications
   Future<bool> setDebtRemindersEnabled(bool enabled) =>
@@ -196,6 +200,8 @@ class PreferencesService {
       _prefs.setBool(_notificationBackupKey, enabled);
   Future<bool> setOverdueAlertsEnabled(bool enabled) =>
       _prefs.setBool(_notificationOverdueKey, enabled);
+  Future<bool> setSmartRemindersEnabled(bool enabled) =>
+      _prefs.setBool(_notificationSmartRemindersKey, enabled);
 
   // === BACKUP ===
 
@@ -220,7 +226,9 @@ class PreferencesService {
 
   DateTime? getLastDriveSyncDate() {
     final timestamp = _prefs.getInt(_lastDriveSyncDateKey);
-    return timestamp == null ? null : DateTime.fromMillisecondsSinceEpoch(timestamp);
+    return timestamp == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(timestamp);
   }
 
   Future<bool> setLastDriveSyncDate(DateTime date) =>

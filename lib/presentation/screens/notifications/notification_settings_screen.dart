@@ -91,6 +91,16 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 .toggleWealthMilestones(),
             isDark: isDark,
           ),
+          _buildNotificationTile(
+            icon: AppIcons.chart,
+            title: 'Rappels intelligents',
+            subtitle: 'Rappels basés sur vos habitudes',
+            value: settings.smartReminders,
+            onChanged: (value) => ref
+                .read(notificationSettingsProvider.notifier)
+                .toggleSmartReminders(),
+            isDark: isDark,
+          ),
 
           SizedBox(height: 8.h),
 

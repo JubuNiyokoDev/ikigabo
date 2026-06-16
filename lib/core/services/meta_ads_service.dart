@@ -24,7 +24,9 @@ class MetaAdsService {
     if (_isInitialized) return;
     _channel.setMethodCallHandler(_handleNativeCallback);
     await _channel.invokeMethod('initialize', {
-      'testDeviceId': AdNetworkConfig.useTestAds ? AdNetworkConfig.metaTestDeviceId : null,
+      'testDeviceId': AdNetworkConfig.useTestAds
+          ? AdNetworkConfig.metaTestDeviceId
+          : null,
     });
     _isInitialized = true;
     print('✅ Meta AN initialized');
@@ -59,6 +61,8 @@ class MetaAdsService {
           _interstitialShowCompleter = null;
         }
         unawaited(loadInterstitial());
+      case 'onInterstitialImpression':
+        print('📊 Meta Interstitial impression');
       case 'onRewardedLoaded':
         _isRewardedLoaded = true;
         print('✅ Meta Rewarded loaded');
@@ -88,16 +92,24 @@ class MetaAdsService {
           _rewardedShowCompleter = null;
         }
         unawaited(loadRewarded());
+      case 'onRewardedImpression':
+        print('📊 Meta Rewarded impression');
       case 'onBannerLoaded':
+        print('✅ Meta Banner loaded');
         onBannerResult?.call(true);
       case 'onBannerLoadFailed':
         print('❌ Meta Banner failed: ${call.arguments}');
         onBannerResult?.call(false);
+      case 'onBannerImpression':
+        print('📊 Meta Banner impression');
       case 'onRectangleLoaded':
+        print('✅ Meta Rectangle loaded');
         onRectangleResult?.call(true);
       case 'onRectangleLoadFailed':
         print('❌ Meta Rectangle failed: ${call.arguments}');
         onRectangleResult?.call(false);
+      case 'onRectangleImpression':
+        print('📊 Meta Rectangle impression');
     }
   }
 
@@ -150,12 +162,15 @@ class MetaAdsService {
       return false;
     }
 
-    return completer.future.timeout(AdNetworkConfig.adLoadTimeout, onTimeout: () {
-      _interstitialLoadCompleter = null;
-      if (!completer.isCompleted) completer.complete(false);
-      print('⚠️ Meta Interstitial load timeout');
-      return false;
-    });
+    return completer.future.timeout(
+      AdNetworkConfig.adLoadTimeout,
+      onTimeout: () {
+        _interstitialLoadCompleter = null;
+        if (!completer.isCompleted) completer.complete(false);
+        print('⚠️ Meta Interstitial load timeout');
+        return false;
+      },
+    );
   }
 
   static Future<void> showInterstitialAndWait() async {
@@ -179,10 +194,13 @@ class MetaAdsService {
       return;
     }
 
-    await completer.future.timeout(const Duration(minutes: 2), onTimeout: () {
-      _interstitialShowCompleter = null;
-      print('⚠️ Meta Interstitial show timeout');
-    });
+    await completer.future.timeout(
+      const Duration(minutes: 2),
+      onTimeout: () {
+        _interstitialShowCompleter = null;
+        print('⚠️ Meta Interstitial show timeout');
+      },
+    );
   }
 
   // ── Rewarded ──────────────────────────────────────────────────────────────
@@ -204,15 +222,20 @@ class MetaAdsService {
       return false;
     }
 
-    return completer.future.timeout(AdNetworkConfig.adLoadTimeout, onTimeout: () {
-      _rewardedLoadCompleter = null;
-      if (!completer.isCompleted) completer.complete(false);
-      print('⚠️ Meta Rewarded load timeout');
-      return false;
-    });
+    return completer.future.timeout(
+      AdNetworkConfig.adLoadTimeout,
+      onTimeout: () {
+        _rewardedLoadCompleter = null;
+        if (!completer.isCompleted) completer.complete(false);
+        print('⚠️ Meta Rewarded load timeout');
+        return false;
+      },
+    );
   }
 
-  static Future<void> showRewardedAndWait({required VoidCallback onReward}) async {
+  static Future<void> showRewardedAndWait({
+    required VoidCallback onReward,
+  }) async {
     if (!_isRewardedLoaded) {
       final loaded = await loadRewarded();
       if (!loaded) {
@@ -235,11 +258,14 @@ class MetaAdsService {
       return;
     }
 
-    await completer.future.timeout(const Duration(minutes: 2), onTimeout: () {
-      _rewardedShowCompleter = null;
-      _pendingReward = null;
-      print('⚠️ Meta Rewarded show timeout');
-    });
+    await completer.future.timeout(
+      const Duration(minutes: 2),
+      onTimeout: () {
+        _rewardedShowCompleter = null;
+        _pendingReward = null;
+        print('⚠️ Meta Rewarded show timeout');
+      },
+    );
   }
 
   // ── Getters ───────────────────────────────────────────────────────────────

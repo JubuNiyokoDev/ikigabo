@@ -78,7 +78,11 @@ class MetaAdsPlugin(
                         }
                     }
                     override fun onAdClicked(ad: Ad?) {}
-                    override fun onLoggingImpression(ad: Ad?) {}
+                    override fun onLoggingImpression(ad: Ad?) {
+                        activity.runOnUiThread {
+                            channel.invokeMethod("onInterstitialImpression", null)
+                        }
+                    }
                 })
                 .build()
         )
@@ -107,7 +111,11 @@ class MetaAdsPlugin(
                             channel.invokeMethod("onRewardedComplete", null)
                         }
                     }
-                    override fun onLoggingImpression(ad: Ad?) {}
+                    override fun onLoggingImpression(ad: Ad?) {
+                        activity.runOnUiThread {
+                            channel.invokeMethod("onRewardedImpression", null)
+                        }
+                    }
                     override fun onRewardedVideoClosed() {
                         activity.runOnUiThread {
                             channel.invokeMethod("onRewardedClosed", null)
@@ -158,7 +166,11 @@ class MetaAdsPlugin(
                         }
                     }
                     override fun onAdClicked(ad: Ad?) {}
-                    override fun onLoggingImpression(ad: Ad?) {}
+                    override fun onLoggingImpression(ad: Ad?) {
+                        activity.runOnUiThread {
+                            channel.invokeMethod("onBannerImpression", null)
+                        }
+                    }
                 })
                 .build()
         )
@@ -189,7 +201,11 @@ class MetaAdsPlugin(
                         }
                     }
                     override fun onAdClicked(ad: Ad?) {}
-                    override fun onLoggingImpression(ad: Ad?) {}
+                    override fun onLoggingImpression(ad: Ad?) {
+                        activity.runOnUiThread {
+                            channel.invokeMethod("onRectangleImpression", null)
+                        }
+                    }
                 })
                 .build()
         )

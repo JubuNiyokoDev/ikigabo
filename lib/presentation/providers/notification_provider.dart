@@ -22,6 +22,7 @@ class NotificationSettings {
   final bool wealthMilestones;
   final bool backupReminders;
   final bool overdueAlerts;
+  final bool smartReminders;
 
   const NotificationSettings({
     this.debtReminders = true,
@@ -29,6 +30,7 @@ class NotificationSettings {
     this.wealthMilestones = true,
     this.backupReminders = true,
     this.overdueAlerts = true,
+    this.smartReminders = true,
   });
 
   NotificationSettings copyWith({
@@ -37,6 +39,7 @@ class NotificationSettings {
     bool? wealthMilestones,
     bool? backupReminders,
     bool? overdueAlerts,
+    bool? smartReminders,
   }) {
     return NotificationSettings(
       debtReminders: debtReminders ?? this.debtReminders,
@@ -44,6 +47,7 @@ class NotificationSettings {
       wealthMilestones: wealthMilestones ?? this.wealthMilestones,
       backupReminders: backupReminders ?? this.backupReminders,
       overdueAlerts: overdueAlerts ?? this.overdueAlerts,
+      smartReminders: smartReminders ?? this.smartReminders,
     );
   }
 }
@@ -64,6 +68,7 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
         wealthMilestones: _prefsService.getWealthMilestonesEnabled(),
         backupReminders: _prefsService.getBackupRemindersEnabled(),
         overdueAlerts: _prefsService.getOverdueAlertsEnabled(),
+        smartReminders: _prefsService.getSmartRemindersEnabled(),
       );
     }
   }
@@ -96,6 +101,12 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     final newValue = !state.overdueAlerts;
     state = state.copyWith(overdueAlerts: newValue);
     _prefsService?.setOverdueAlertsEnabled(newValue);
+  }
+
+  void toggleSmartReminders() {
+    final newValue = !state.smartReminders;
+    state = state.copyWith(smartReminders: newValue);
+    _prefsService?.setSmartRemindersEnabled(newValue);
   }
 }
 
