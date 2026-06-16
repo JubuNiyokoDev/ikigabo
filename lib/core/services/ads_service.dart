@@ -114,18 +114,25 @@ class AdsService {
     _preloadAll();
   }
 
-  // ── App Open ──────────────────────────────────────────────────────────────
+  // ── App Open: Meta d'abord, Unity ensuite, AdMob dernier ─────────────────
   static Future<void> showAppOpen() async {
     if (!_isInitialized) await initialize();
+    if (AdNetworkConfig.canUseMeta) {
+      final ok = await MetaAdsService.loadInterstitial();
+      if (ok) {
+        await MetaAdsService.showInterstitialAndWait();
+        return;
+      }
+    }
+    if (await _showUnityInterstitialIfReady()) {
+      return;
+    }
     if (AdNetworkConfig.canUseAdMob) {
       final ok = await AdMobService.loadAppOpen();
       if (ok) {
         await AdMobService.showAppOpenAndWait();
         return;
       }
-    }
-    if (AdNetworkConfig.canUseMeta) {
-      await MetaAdsService.showInterstitialAndWait();
     }
   }
 
