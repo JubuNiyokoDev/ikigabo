@@ -24,6 +24,7 @@ class AdsService {
   static bool _rewardGranted = false;
 
   static final Map<String, Completer<bool>> _bannerLoadCompleters = {};
+  static final Map<String, DateTime> _bannerRetryAfter = {};
   static Completer<bool>? _nativeLoadCompleter;
 
   static Future<bool> initialize() async {
@@ -223,8 +224,14 @@ class AdsService {
   }) async {
     if (!await initialize()) return false;
 
+    final retryAfter = _bannerRetryAfter[placementId];
+    if (retryAfter != null && DateTime.now().isBefore(retryAfter)) {
+      return false;
+    }
+
     try {
       if (await ATBannerManager.bannerAdReady(placementID: placementId)) {
+        _bannerRetryAfter.remove(placementId);
         return true;
       }
     } catch (_) {}
@@ -433,6 +440,14 @@ class AdsService {
   }
 
   static void _completeBannerLoad(String placementId, bool loaded) {
+    if (loaded) {
+      _bannerRetryAfter.remove(placementId);
+    } else {
+      _bannerRetryAfter[placementId] = DateTime.now().add(
+        AdPolicy.bannerRetryDelay,
+      );
+    }
+
     final completer = _bannerLoadCompleters.remove(placementId);
     if (completer != null && !completer.isCompleted) {
       completer.complete(loaded);
