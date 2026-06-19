@@ -3,9 +3,11 @@ package com.ikigabo.ikigabo
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Build
 import android.os.Bundle
 import androidx.core.view.WindowCompat
+import com.facebook.ads.AdSettings
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -18,19 +20,18 @@ class MainActivity : FlutterFragmentActivity() {
         const val EXTRA_ALARM_ID = "alarm_id"
         const val EXTRA_TITLE = "title"
         const val EXTRA_MESSAGE = "message"
+        const val META_TEST_DEVICE_HASH = "d9a7bc8a-979d-4dcc-962e-4ee04c2996e7"
     }
-
-    private var metaAdsPlugin: MetaAdsPlugin? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
+        val isDebuggable =
+            applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        if (isDebuggable) {
+            AdSettings.addTestDevice(META_TEST_DEVICE_HASH)
+        }
         createNotificationChannel()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        metaAdsPlugin?.destroy()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -41,24 +42,10 @@ class MainActivity : FlutterFragmentActivity() {
                 when (call.method) {
                     "setAlarm" -> scheduleAlarm(call, result)
                     "cancelAlarm" -> cancelAlarm(call, result)
-                    "testService" -> result.success(true)
                     else -> result.notImplemented()
                 }
             }
 
-        val metaChannel = MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            MetaAdsPlugin.CHANNEL_NAME,
-        )
-        metaAdsPlugin = MetaAdsPlugin(this, metaChannel)
-        metaChannel.setMethodCallHandler { call, result ->
-            metaAdsPlugin!!.handleMethodCall(call, result)
-        }
-
-        flutterEngine.platformViewsController.registry
-            .registerViewFactory("meta_banner_view", MetaBannerViewFactory(metaAdsPlugin!!))
-        flutterEngine.platformViewsController.registry
-            .registerViewFactory("meta_rectangle_view", MetaRectangleViewFactory(metaAdsPlugin!!))
     }
 
     private fun scheduleAlarm(call: MethodCall, result: MethodChannel.Result) {

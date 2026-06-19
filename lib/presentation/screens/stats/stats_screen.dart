@@ -26,7 +26,7 @@ import '../../../data/models/source_model.dart' as source_m;
 import 'advanced_export_screen.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/inline_banner_ad.dart';
-import '../../widgets/meta_rectangle_ad.dart';
+import '../../widgets/medium_rectangle_ad.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -73,7 +73,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   const SizedBox(height: 16),
                   _buildTrendChart(weeklyActivityAsync, l10n),
                   const SizedBox(height: 16),
-                  const MetaRectangleAd(),
+                  const MediumRectangleAd(),
                   const SizedBox(height: 8),
                   _buildCategoryBreakdown(categoryStatsAsync, l10n),
                   const SizedBox(height: 16),

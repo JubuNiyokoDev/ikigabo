@@ -16,7 +16,7 @@
 ## Q1 : Comment gagnez-vous de l'argent si l'app est gratuite ?
 
 > **Réponse :**
-> "Aujourd'hui, nous générons des revenus via la publicité intégrée — Google AdMob et Unity Ads. C'est un modèle qui fonctionne bien pour les apps gratuites avec un volume d'utilisateurs croissant.
+> "Aujourd'hui, nous générons des revenus via la médiation TopOn, avec Meta Audience Network en enchères et Unity Ads en complément. C'est un modèle qui fonctionne bien pour les apps gratuites avec un volume d'utilisateurs croissant.
 >
 > Notre prochaine étape est un modèle freemium : l'app reste gratuite, mais une version premium sans publicité, avec des rapports PDF avancés, sera disponible pour environ 1-2 dollars par mois. C'est un prix accessible au Burundi.
 >

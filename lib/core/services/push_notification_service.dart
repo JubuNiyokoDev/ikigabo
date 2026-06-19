@@ -28,8 +28,26 @@ class PushNotificationService {
 
   static String? _cachedToken;
   static Future<void> Function(String token)? onTokenUpdated;
+  static bool _isInitialized = false;
+  static Future<void>? _initializationFuture;
 
   static Future<void> initialize() async {
+    if (_isInitialized) return;
+    final pending = _initializationFuture;
+    if (pending != null) return pending;
+
+    final future = _initialize();
+    _initializationFuture = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_initializationFuture, future)) {
+        _initializationFuture = null;
+      }
+    }
+  }
+
+  static Future<void> _initialize() async {
     try {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp();
@@ -82,6 +100,7 @@ class PushNotificationService {
       messaging.onTokenRefresh.listen((token) {
         unawaited(_saveToken(token));
       });
+      _isInitialized = true;
     } catch (e, stackTrace) {
       debugPrint('⚠️ Push notification init failed: $e');
       debugPrint('$stackTrace');
@@ -150,7 +169,9 @@ class PushNotificationService {
     if (title.isEmpty || body.isEmpty) return;
 
     await _localNotif.show(
-      message.hashCode,
+      _numericNotificationId(
+        payload['notificationId']?.toString() ?? _messageId(message),
+      ),
       title,
       body,
       NotificationDetails(
@@ -191,7 +212,7 @@ class PushNotificationService {
     final notification = message.notification;
     final payload = <String, dynamic>{
       ...message.data,
-      'notificationId': _messageId(message),
+      'notificationId': message.data['notificationId'] ?? _messageId(message),
       'receivedAt': (message.sentTime ?? DateTime.now()).millisecondsSinceEpoch,
     };
 
@@ -244,6 +265,14 @@ class PushNotificationService {
       hash = (hash * 31 + codeUnit) & 0x7fffffff;
     }
     return 'push_$hash';
+  }
+
+  static int _numericNotificationId(String value) {
+    var hash = 0;
+    for (final codeUnit in value.codeUnits) {
+      hash = (hash * 31 + codeUnit) & 0x7fffffff;
+    }
+    return hash;
   }
 
   static DateTime? _dateFromPayload(Map<String, dynamic> payload) {

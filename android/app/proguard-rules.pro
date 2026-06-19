@@ -55,11 +55,23 @@
     public static *** log(...);
 }
 
+# TopOn mediation and adapters
+-keep class com.anythink.** { *; }
+-keep interface com.anythink.** { *; }
+-keep class com.secmtp.** { *; }
+-keep interface com.secmtp.** { *; }
+-dontwarn com.anythink.**
+-dontwarn com.secmtp.**
+
 # Meta Audience Network
 -keep class com.facebook.** { *; }
 -keep interface com.facebook.** { *; }
 -keepattributes *Annotation*
 -dontwarn com.facebook.ads.**
+
+# Unity Ads through TopOn
+-keep class com.unity3d.ads.** { *; }
+-dontwarn com.unity3d.ads.**
 
 # Ignorer warnings non critiques
 -dontwarn android.content.res.Resources$NotFoundException

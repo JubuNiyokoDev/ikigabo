@@ -114,5 +114,21 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // TopOn 6.5.73.3 core and reporting.
+    implementation("com.anythink.sdk:core-tpn:6.5.73.3")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.browser:browser:1.4.0")
+
+    // Networks selected in the TopOn SDK generator.
+    implementation("com.anythink.sdk:adapter-tpn-unityads:4.17.0.1.1")
+    implementation("com.unity3d.ads:unity-ads:4.17.0")
+    implementation("com.anythink.sdk:adapter-tpn-facebook:6.21.0.1.1")
     implementation("com.facebook.android:audience-network-sdk:6.21.0")
+    implementation("androidx.annotation:annotation:1.0.0")
+
+    // Required by the generated TopOn package. ADX remains disabled remotely.
+    implementation("com.anythink.sdk:adapter-tpn-sdm:6.5.68.1.0")
+    implementation("com.smartdigimkttech.sdk:smartdigimkttech-sdk:6.5.68")
+    implementation("com.anythink.sdk:tramini-plugin-tpn:6.5.73")
 }

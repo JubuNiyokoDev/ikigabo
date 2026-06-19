@@ -1,4 +1,3 @@
-google.com, pub-2300546388710165, DIRECT, f08c47fec0942fa0
 facebook.com, 153913390415003, DIRECT, c3e20eee3f780d68
 openx.com, 559912325, RESELLER, 6a698e2ec38604c6
 openx.com, 562174952, RESELLER, 6a698e2ec38604c6
@@ -79,6 +78,7 @@ loopme.com, 9621, RESELLER, 6c8d5f95897a5a3b
 lunamedia.io, 2fdb16a1-5025-4c41-9b17-e01e47ebc8b4, RESELLER, 524ecb396915caaf
 mars.media, 1010442, RESELLER
 media.net, 8cu12aq1y, RESELLER
+media.net, 8cu132ud6, RESELLER
 media.net, 8cu355vs4, RESELLER
 media.net, 8cu5l226o, RESELLER
 media.net, 8cu9b72o6, RESELLER
@@ -144,3 +144,4 @@ xandr.com, 15840, RESELLER
 xandr.com, 17779, RESELLER
 zetaglobal.net, 630, RESELLER
 zmaticoo.com, 5135195, RESELLER
+zmaticoo.com, 5135004, RESELLER

@@ -14,7 +14,7 @@ import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
 import '../../widgets/inline_banner_ad.dart';
-import '../../widgets/meta_rectangle_ad.dart';
+import '../../widgets/medium_rectangle_ad.dart';
 import 'add_source_screen.dart';
 import 'transfer_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -170,12 +170,16 @@ class _SourcesListScreenState extends ConsumerState<SourcesListScreen> {
         final bannerIndex = items.length > 2 ? 2 : items.length;
         final nativeIndex = items.length > 5 ? 5 : -1;
         if (index == bannerIndex) return const InlineBannerAd();
-        if (nativeIndex > 0 && index == nativeIndex) return const MetaRectangleAd();
+        if (nativeIndex > 0 && index == nativeIndex) {
+          return const MediumRectangleAd();
+        }
         int offset = 0;
         if (index > bannerIndex) offset++;
         if (nativeIndex > 0 && index > nativeIndex) offset++;
         final itemIndex = index - offset;
-        if (itemIndex < 0 || itemIndex >= items.length) return const SizedBox.shrink();
+        if (itemIndex < 0 || itemIndex >= items.length) {
+          return const SizedBox.shrink();
+        }
         return items[itemIndex];
       },
     );

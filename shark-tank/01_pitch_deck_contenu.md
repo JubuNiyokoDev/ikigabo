@@ -115,7 +115,7 @@
 
 | Phase | Revenus | Détail |
 |-------|---------|--------|
-| **Actuelle** | Publicités | Google AdMob + Unity Ads déjà intégrées |
+| **Actuelle** | Publicités | Médiation TopOn avec Meta Audience Network et Unity Ads |
 | **6-12 mois** | Freemium | Version premium sans pub (~$1-2/mois) + exports avancés |
 | **12-24 mois** | B2B | Licences pour IMF, coopératives, et organisations |
 

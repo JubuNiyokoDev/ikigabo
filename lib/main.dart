@@ -16,7 +16,6 @@ import 'l10n/fallback_material_localizations.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/pin_provider.dart';
-import 'presentation/providers/banner_provider.dart';
 import 'presentation/screens/security/pin_screen.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
 import 'presentation/screens/sources/sources_list_screen.dart';
@@ -36,25 +35,10 @@ import 'core/services/real_alarm_service.dart';
 import 'presentation/widgets/inline_banner_ad.dart';
 import 'presentation/widgets/shimmer_widget.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialiser les services d'alarme et notifications
-  await RealAlarmService.initialize();
-  await NotificationService().initialize();
-
-  // Firebase + Push Notifications FCM
-  PushNotificationService.onTokenUpdated = HabitSyncService.updateFcmToken;
-  unawaited(PushNotificationService.initialize());
-
-  // Initialiser les services publicitaires
-  await AdsService.initialize();
-  // App Open Ad au premier lancement
-  unawaited(AdsService.showAppOpen());
-
-  // Configuration edge-to-edge moderne pour Android 15+
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
   runApp(const ProviderScope(child: IkigaboApp()));
 }
 
@@ -67,19 +51,42 @@ class IkigaboApp extends ConsumerStatefulWidget {
 
 class _IkigaboAppState extends ConsumerState<IkigaboApp> {
   final InAppUpdateService _inAppUpdateService = InAppUpdateService();
+  Timer? _notificationInitTimer;
+  Timer? _adsInitTimer;
+  Timer? _updateCheckTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(milliseconds: 1200), () {
-        unawaited(_inAppUpdateService.checkForUpdate());
-      });
+      _scheduleDeferredServices();
     });
+  }
+
+  void _scheduleDeferredServices() {
+    PushNotificationService.onTokenUpdated = HabitSyncService.updateFcmToken;
+    _notificationInitTimer = Timer(const Duration(milliseconds: 250), () {
+      unawaited(_initializeNotifications());
+    });
+    _adsInitTimer = Timer(const Duration(milliseconds: 1500), () {
+      unawaited(AdsService.warmUp());
+    });
+    _updateCheckTimer = Timer(const Duration(milliseconds: 3000), () {
+      unawaited(_inAppUpdateService.checkForUpdate());
+    });
+  }
+
+  Future<void> _initializeNotifications() async {
+    await NotificationService().initialize();
+    await RealAlarmService.initialize();
+    await PushNotificationService.initialize();
   }
 
   @override
   void dispose() {
+    _notificationInitTimer?.cancel();
+    _adsInitTimer?.cancel();
+    _updateCheckTimer?.cancel();
     unawaited(_inAppUpdateService.dispose());
     super.dispose();
   }
@@ -200,20 +207,27 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
+  Timer? _backgroundSetupTimer;
 
   @override
   void initState() {
     super.initState();
-    // Initialiser les alarmes et notifications au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(debtAlarmsInitProvider);
-      ref.read(notificationWatcherProvider);
-      // Initialiser le banner provider
-      ref.read(bannerProvider);
-      // Initialiser le provider auto-backup avec callback actif
-      ref.read(autoBackupProvider);
       NotificationNavigationService.openPendingIfPossible();
+
+      _backgroundSetupTimer = Timer(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        ref.read(debtAlarmsInitProvider);
+        ref.read(notificationWatcherProvider);
+        ref.read(autoBackupProvider);
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _backgroundSetupTimer?.cancel();
+    super.dispose();
   }
 
   final List<Widget> _screens = [

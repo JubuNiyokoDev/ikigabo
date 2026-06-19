@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'ad_network_config.dart';
+import 'ad_policy.dart';
 import 'ads_service.dart';
 
 class AdManager {
@@ -20,7 +20,7 @@ class AdManager {
   static Future<void> showTransactionAd() async {
     await _showAdForAction(
       _transactionActionCount,
-      AdNetworkConfig.transactionInterstitialFrequency,
+      AdPolicy.transactionInterstitialFrequency,
     );
   }
 
@@ -28,7 +28,7 @@ class AdManager {
   static Future<void> showBankAd() async {
     await _showAdForAction(
       _bankActionCount,
-      AdNetworkConfig.bankInterstitialFrequency,
+      AdPolicy.bankInterstitialFrequency,
     );
   }
 
@@ -36,7 +36,7 @@ class AdManager {
   static Future<void> showSourceAd() async {
     await _showAdForAction(
       _sourceActionCount,
-      AdNetworkConfig.sourceInterstitialFrequency,
+      AdPolicy.sourceInterstitialFrequency,
     );
   }
 
@@ -44,7 +44,7 @@ class AdManager {
   static Future<void> showDebtAd() async {
     await _showAdForAction(
       _debtActionCount,
-      AdNetworkConfig.debtInterstitialFrequency,
+      AdPolicy.debtInterstitialFrequency,
     );
   }
 
@@ -52,25 +52,25 @@ class AdManager {
   static Future<void> showAssetAd() async {
     await _showAdForAction(
       _assetActionCount,
-      AdNetworkConfig.assetInterstitialFrequency,
+      AdPolicy.assetInterstitialFrequency,
     );
   }
 
   // Settings (ouverture)
   static Future<void> showSettingsAd() async {
-    if (!AdNetworkConfig.showSettingsInterstitial) return;
+    if (!AdPolicy.showSettingsInterstitial) return;
     await _showAdForAction(
       _settingsOpenCount,
-      AdNetworkConfig.bankInterstitialFrequency,
+      AdPolicy.bankInterstitialFrequency,
     );
   }
 
   // Dashboard (ouverture app)
   static Future<void> showDashboardAd() async {
-    if (!AdNetworkConfig.showDashboardInterstitial) return;
+    if (!AdPolicy.showDashboardInterstitial) return;
     await _showAdForAction(
       _dashboardOpenCount,
-      AdNetworkConfig.bankInterstitialFrequency,
+      AdPolicy.bankInterstitialFrequency,
     );
   }
 
@@ -78,13 +78,13 @@ class AdManager {
   static Future<void> showReportAd() async {
     await _showAdForAction(
       _reportViewCount,
-      AdNetworkConfig.reportInterstitialFrequency,
+      AdPolicy.reportInterstitialFrequency,
     );
   }
 
   // Rewarded automatique (toutes les 10 actions globales)
   static Future<void> showAutoRewardedAd() async {
-    if (!AdNetworkConfig.shouldGateCoreActions) return;
+    if (!AdPolicy.shouldGateCoreActions) return;
     await _showRewardedForAction(_rewardedActionCount, _rewardedAdFrequency);
   }
 
@@ -101,15 +101,17 @@ class AdManager {
       final now = DateTime.now().millisecondsSinceEpoch;
       final lastInterstitialAt = prefs.getInt(_lastInterstitialAtKey) ?? 0;
       if (now - lastInterstitialAt <
-          AdNetworkConfig.interstitialCooldown.inMilliseconds) {
+          AdPolicy.interstitialCooldown.inMilliseconds) {
         return;
       }
 
       print('Tentative d\'affichage interstitial pour $countKey');
       try {
-        await AdsService.showInterstitial();
-        await prefs.setInt(_lastInterstitialAtKey, now);
-        print('Interstitial affichée avec succès');
+        final shown = await AdsService.showInterstitial();
+        if (shown) {
+          await prefs.setInt(_lastInterstitialAtKey, now);
+          print('Interstitial affichée avec succès');
+        }
       } catch (e) {
         print('Erreur interstitial: $e');
       }
@@ -146,7 +148,7 @@ class AdManager {
 
   // Pub récompensée pour fonctionnalités importantes (simple avec cooldown)
   static Future<bool> showRewardedForImportantAction(String actionName) async {
-    if (!AdNetworkConfig.shouldGateCoreActions) return true;
+    if (!AdPolicy.shouldGateCoreActions) return true;
 
     final prefs = await SharedPreferences.getInstance();
     final lastRewardedKey = 'last_rewarded_$actionName';

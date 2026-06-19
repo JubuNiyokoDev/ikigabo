@@ -61,5 +61,5 @@
 | **Engagement** | DAU, MAU, sessions/jour |
 | **Qualité** | Crash rate, note moyenne |
 | **Avis** | 2-3 meilleurs commentaires à citer |
-| **Revenus** | Revenus AdMob (via console AdMob séparée) |
+| **Revenus** | Revenus publicitaires consolidés dans TopOn |
 | **Courbe** | Graphique de croissance des téléchargements |

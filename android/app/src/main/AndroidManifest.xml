@@ -11,10 +11,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <application
+        android:enableOnBackInvokedCallback="true"
         android:pageSizeCompat="enabled"
         android:label="ikigabo"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -42,30 +46,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-
-        <!-- Unity Ads Configuration -->
-        <meta-data
-            android:name="unity.ads.gameId"
-            android:value="6021741" />
-        <meta-data
-            android:name="unity.ads.testMode"
-            android:value="false" />
-
-        <!-- Google AdMob Configuration -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2300546388710165~5023194481"/>
-
-        <!-- Meta Audience Network Configuration -->
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="2120883338770182"/>
-        <meta-data
-            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
-            android:value="false"/>
-        <meta-data
-            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
-            android:value="true"/>
 
         <receiver
             android:name=".AlarmReceiver"

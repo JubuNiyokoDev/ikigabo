@@ -14,19 +14,20 @@ class RealAlarmService {
   static Future<AlarmStatus> initialize() async {
     try {
       _errorMessage = null;
-      
+
       // Vérifier la version Android
       final deviceInfo = DeviceInfoPlugin();
       final androidInfo = await deviceInfo.androidInfo;
       final sdkInt = androidInfo.version.sdkInt;
-      
+
       if (sdkInt < 23) {
         _errorMessage = 'Android 6.0+ requis pour les alarmes';
         return AlarmStatus.unsupported;
       }
 
-      // Vérifier les permissions
-      final permissionStatus = await _checkAndRequestPermissions();
+      // La demande est centralisée dans NotificationService afin d'éviter
+      // plusieurs dialogues système concurrents au lancement.
+      final permissionStatus = await _checkPermissions();
       if (permissionStatus != AlarmStatus.ready) {
         return permissionStatus;
       }
@@ -41,41 +42,24 @@ class RealAlarmService {
     }
   }
 
-  static Future<AlarmStatus> _checkAndRequestPermissions() async {
+  static Future<AlarmStatus> _checkPermissions() async {
     try {
-      // Permission alarmes exactes (Android 12+)
       final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
-      if (exactAlarmStatus.isDenied) {
-        final requested = await Permission.scheduleExactAlarm.request();
-        if (!requested.isGranted) {
-          _errorMessage = 'Permission alarmes exactes refusée';
-          return AlarmStatus.permissionDenied;
-        }
+      if (!exactAlarmStatus.isGranted) {
+        _errorMessage = 'Permission alarmes exactes refusée';
+        return AlarmStatus.permissionDenied;
       }
 
-      // Permission notifications
       final notificationStatus = await Permission.notification.status;
-      if (notificationStatus.isDenied) {
-        final requested = await Permission.notification.request();
-        if (!requested.isGranted) {
-          _errorMessage = 'Permission notifications refusée';
-          return AlarmStatus.permissionDenied;
-        }
+      if (!notificationStatus.isGranted) {
+        _errorMessage = 'Permission notifications refusée';
+        return AlarmStatus.permissionDenied;
       }
 
       return AlarmStatus.ready;
     } catch (e) {
       _errorMessage = 'Erreur permissions: $e';
       return AlarmStatus.error;
-    }
-  }
-
-  static Future<bool> _testAlarmService() async {
-    try {
-      final result = await _channel.invokeMethod('testService');
-      return result == true;
-    } catch (e) {
-      return false;
     }
   }
 
@@ -94,7 +78,7 @@ class RealAlarmService {
 
     try {
       print('🚨 Programmation alarme ID: $id pour: $dateTime');
-      
+
       final result = await _channel.invokeMethod('setAlarm', {
         'id': id,
         'hour': dateTime.hour,
@@ -105,22 +89,19 @@ class RealAlarmService {
         'title': title,
         'message': message,
       });
-      
+
       print('✅ Résultat alarme: $result');
-      
+
       return AlarmResult(success: true);
     } catch (e) {
       print('❌ Erreur alarme: $e');
-      return AlarmResult(
-        success: false,
-        error: 'Erreur: $e',
-      );
+      return AlarmResult(success: false, error: 'Erreur: $e');
     }
   }
 
   static Future<bool> cancelAlarm(int id) async {
     if (!isAvailable) return false;
-    
+
     try {
       final result = await _channel.invokeMethod('cancelAlarm', {'id': id});
       return result == true;
@@ -156,6 +137,6 @@ enum AlarmStatus {
 class AlarmResult {
   final bool success;
   final String? error;
-  
+
   AlarmResult({required this.success, this.error});
 }

@@ -27,7 +27,6 @@ class NotificationService {
   static const int _backupReminderAfterDays = 3;
   static const int _smartReminderLookbackDays = 60;
   static const int _smartReminderMinEvents = 4;
-  static const int _maxSmartHabitReminders = 3;
   static const int _legacySmartGlobalInactivityAlarmId = 860001;
   static const int _smartInactivityAlarmBaseId = 860100;
   static const List<int> _smartInactivityReminderOffsetsDays = [3, 5, 8, 14];
@@ -39,8 +38,10 @@ class NotificationService {
       'notification_state_backup_last_reminder_at';
   static const String _smartHabitAlarmIdsKey =
       'notification_state_smart_habit_alarm_ids';
-  static const String _smartInactivityCatchupDayKey =
-      'notification_state_smart_inactivity_catchup_day';
+  static const String _smartHabitSignatureKey =
+      'notification_state_smart_habit_signature';
+  static const String _smartInactivitySignatureKey =
+      'notification_state_smart_inactivity_signature';
 
   final List<NotificationItem> _notifications = [];
   final ValueNotifier<int> _notificationCount = ValueNotifier(0);
@@ -48,11 +49,29 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   PreferencesService? _prefsService;
   bool _notificationsLoaded = false;
+  bool _isInitialized = false;
+  Future<void>? _initializationFuture;
 
   ValueNotifier<int> get notificationCount => _notificationCount;
   List<NotificationItem> get notifications => List.unmodifiable(_notifications);
 
   Future<void> initialize() async {
+    if (_isInitialized) return;
+    final pending = _initializationFuture;
+    if (pending != null) return pending;
+
+    final future = _initialize();
+    _initializationFuture = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_initializationFuture, future)) {
+        _initializationFuture = null;
+      }
+    }
+  }
+
+  Future<void> _initialize() async {
     tz.initializeTimeZones();
 
     // Initialiser PreferencesService
@@ -91,6 +110,7 @@ class NotificationService {
 
     // Configurer le port pour recevoir les alarmes
     _setupAlarmPort();
+    _isInitialized = true;
   }
 
   void _setupAlarmPort() {
@@ -561,8 +581,16 @@ class NotificationService {
             .toList()
           ..sort((a, b) => a.date.compareTo(b.date));
 
+    final habitScheduled = await _scheduleHabitReminders(
+      activeTransactions,
+      now,
+    );
+    if (habitScheduled) {
+      await _clearSmartInactivityReminders();
+      return;
+    }
+
     await _scheduleGlobalInactivityReminder(activeTransactions, now);
-    await _scheduleHabitReminders(activeTransactions, now);
   }
 
   Future<void> cancelSmartReminders() async {
@@ -596,68 +624,82 @@ class NotificationService {
   ) async {
     await _clearSmartInactivityReminders(removeCards: false);
 
-    if (transactions.length < 3) return;
+    if (transactions.length < 3) {
+      _removeNotificationCardsByPrefix('smart_global_inactivity');
+      return;
+    }
 
     final lastTransaction = transactions.last;
     final prefs = await SharedPreferences.getInstance();
     final preferredHour = _preferredNotificationHour(transactions);
-    final todayKey = _dayKey(now);
-    final lastCatchupDay = prefs.getInt(_smartInactivityCatchupDayKey);
-    var catchupUsed = false;
+    final inactiveDays = now.difference(lastTransaction.date).inDays;
+    final previousSignature = prefs.getString(_smartInactivitySignatureKey);
 
-    for (
-      var index = 0;
-      index < _smartInactivityReminderOffsetsDays.length;
-      index++
-    ) {
-      final offsetDays = _smartInactivityReminderOffsetsDays[index];
-      final expectedAt = lastTransaction.date.add(Duration(days: offsetDays));
-      var scheduledAt = _nextReminderTime(
-        expectedAt,
-        preferredHour: preferredHour,
-      );
-
-      if (scheduledAt.isBefore(now.add(const Duration(hours: 1)))) {
-        if (catchupUsed || lastCatchupDay == todayKey) continue;
-        scheduledAt = _nextReminderTime(
-          now.add(const Duration(hours: 3)),
-          preferredHour: preferredHour,
-        );
-        catchupUsed = true;
-      }
-
-      final alarmId = _smartInactivityAlarmBaseId + index;
-      final result = await RealAlarmService.scheduleRealAlarm(
-        id: alarmId,
-        dateTime: scheduledAt,
-        title: _inactivityTitle(offsetDays),
-        message: _inactivityBody(offsetDays, lastTransaction),
-      );
-
-      if (result.success) {
-        _addNotification(
-          NotificationItem(
-            id: 'smart_global_inactivity_$index',
-            title: _inactivityTitle(offsetDays),
-            body: _inactivityBody(offsetDays, lastTransaction),
-            type: NotificationType.smartReminder,
-            scheduledDate: scheduledAt,
-          ),
-        );
+    int selectedIndex = -1;
+    final reachedIndex = _smartInactivityReminderOffsetsDays.lastIndexWhere(
+      (offset) => offset <= inactiveDays,
+    );
+    if (reachedIndex >= 0) {
+      final reachedOffset = _smartInactivityReminderOffsetsDays[reachedIndex];
+      final reachedSignature =
+          '${lastTransaction.date.millisecondsSinceEpoch}:$reachedOffset';
+      if (reachedSignature != previousSignature) {
+        selectedIndex = reachedIndex;
       }
     }
 
-    if (catchupUsed) {
-      await prefs.setInt(_smartInactivityCatchupDayKey, todayKey);
+    if (selectedIndex < 0) {
+      selectedIndex = _smartInactivityReminderOffsetsDays.indexWhere(
+        (offset) => offset > inactiveDays,
+      );
+    }
+
+    if (selectedIndex < 0) {
+      _removeNotificationCardsByPrefix('smart_global_inactivity');
+      return;
+    }
+
+    final offsetDays = _smartInactivityReminderOffsetsDays[selectedIndex];
+    final expectedAt = lastTransaction.date.add(Duration(days: offsetDays));
+    final scheduledAt = _nextReminderTime(
+      expectedAt.isBefore(now) ? now.add(const Duration(hours: 3)) : expectedAt,
+      preferredHour: preferredHour,
+    );
+    final alarmId = _smartInactivityAlarmBaseId + selectedIndex;
+    final cardId = 'smart_global_inactivity_$selectedIndex';
+    final result = await RealAlarmService.scheduleRealAlarm(
+      id: alarmId,
+      dateTime: scheduledAt,
+      title: _inactivityTitle(offsetDays),
+      message: _inactivityBody(offsetDays, lastTransaction),
+    );
+
+    if (result.success) {
+      _removeNotificationCardsByPrefix(
+        'smart_global_inactivity',
+        keepId: cardId,
+      );
+      _addNotification(
+        NotificationItem(
+          id: cardId,
+          title: _inactivityTitle(offsetDays),
+          body: _inactivityBody(offsetDays, lastTransaction),
+          type: NotificationType.smartReminder,
+          scheduledDate: scheduledAt,
+        ),
+      );
+      await prefs.setString(
+        _smartInactivitySignatureKey,
+        '${lastTransaction.date.millisecondsSinceEpoch}:$offsetDays',
+      );
     }
   }
 
-  Future<void> _scheduleHabitReminders(
+  Future<bool> _scheduleHabitReminders(
     List<TransactionModel> transactions,
     DateTime now,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    await _clearSmartHabitReminders(prefs: prefs, removeCards: false);
 
     final cutoff = now.subtract(
       const Duration(days: _smartReminderLookbackDays),
@@ -683,50 +725,68 @@ class NotificationService {
             .toList()
           ..sort((a, b) => _habitScore(b).compareTo(_habitScore(a)));
 
-    var scheduledCount = 0;
-    final scheduledAlarmIds = <int>[];
+    _TransactionHabit? selectedHabit;
+    int? selectedGapDays;
     for (final habit in habits) {
-      if (scheduledCount >= _maxSmartHabitReminders) break;
-
       habit.transactions.sort((a, b) => a.date.compareTo(b.date));
       final averageGapDays = _averageGapDays(habit.transactions);
       if (averageGapDays <= 0 || averageGapDays > 10) continue;
-
-      final lastTransaction = habit.transactions.last;
-      final nextGapDays = averageGapDays.clamp(1, 10);
-      final expectedAt = lastTransaction.date.add(Duration(days: nextGapDays));
-      final scheduledAt = _nextReminderTime(
-        expectedAt,
-        preferredHour: _preferredNotificationHour(habit.transactions),
-      );
-
-      final alarmId = 870000 + (_stablePositiveHash(habit.key) % 20000);
-      final result = await RealAlarmService.scheduleRealAlarm(
-        id: alarmId,
-        dateTime: scheduledAt,
-        title: habit.title,
-        message: habit.body,
-      );
-
-      if (result.success) {
-        _addNotification(
-          NotificationItem(
-            id: 'smart_habit_$alarmId',
-            title: habit.title,
-            body: habit.body,
-            type: NotificationType.smartReminder,
-            scheduledDate: scheduledAt,
-          ),
-        );
-        scheduledAlarmIds.add(alarmId);
-        scheduledCount++;
-      }
+      selectedHabit = habit;
+      selectedGapDays = averageGapDays.clamp(1, 10);
+      break;
     }
 
-    await prefs.setString(
-      _smartHabitAlarmIdsKey,
-      jsonEncode(scheduledAlarmIds),
+    if (selectedHabit == null || selectedGapDays == null) {
+      await _clearSmartHabitReminders(prefs: prefs);
+      return false;
+    }
+
+    final lastTransaction = selectedHabit.transactions.last;
+    final alarmId = 870000 + (_stablePositiveHash(selectedHabit.key) % 20000);
+    final cardId = 'smart_habit_$alarmId';
+    final signature =
+        '${selectedHabit.key}:${lastTransaction.date.millisecondsSinceEpoch}:$selectedGapDays';
+    final previousSignature = prefs.getString(_smartHabitSignatureKey);
+    final previousAlarmIds = _readSmartHabitAlarmIds(prefs);
+
+    if (previousSignature == signature && previousAlarmIds.contains(alarmId)) {
+      _removeNotificationCardsByPrefix('smart_habit_', keepId: cardId);
+      return true;
+    }
+
+    await _clearSmartHabitReminders(prefs: prefs);
+
+    final expectedAt = lastTransaction.date.add(
+      Duration(days: selectedGapDays),
     );
+    final scheduledAt = _nextReminderTime(
+      expectedAt,
+      preferredHour: _preferredNotificationHour(selectedHabit.transactions),
+    );
+    final result = await RealAlarmService.scheduleRealAlarm(
+      id: alarmId,
+      dateTime: scheduledAt,
+      title: selectedHabit.title,
+      message: selectedHabit.body,
+    );
+
+    if (!result.success) {
+      return false;
+    }
+
+    _removeNotificationCardsByPrefix('smart_habit_', keepId: cardId);
+    _addNotification(
+      NotificationItem(
+        id: cardId,
+        title: selectedHabit.title,
+        body: selectedHabit.body,
+        type: NotificationType.smartReminder,
+        scheduledDate: scheduledAt,
+      ),
+    );
+    await prefs.setString(_smartHabitAlarmIdsKey, jsonEncode([alarmId]));
+    await prefs.setString(_smartHabitSignatureKey, signature);
+    return true;
   }
 
   int _averageGapDays(List<TransactionModel> transactions) {
@@ -862,6 +922,7 @@ class NotificationService {
     }
 
     await preferences.remove(_smartHabitAlarmIdsKey);
+    await preferences.remove(_smartHabitSignatureKey);
   }
 
   List<int> _readSmartHabitAlarmIds(SharedPreferences prefs) {
@@ -876,7 +937,18 @@ class NotificationService {
     }
   }
 
-  int _dayKey(DateTime date) => date.year * 10000 + date.month * 100 + date.day;
+  void _removeNotificationCardsByPrefix(String prefix, {String? keepId}) {
+    final obsoleteIds = _notifications
+        .where(
+          (notification) =>
+              notification.id.startsWith(prefix) && notification.id != keepId,
+        )
+        .map((notification) => notification.id)
+        .toList();
+    for (final id in obsoleteIds) {
+      removeNotification(id);
+    }
+  }
 
   int _stablePositiveHash(String value) {
     var hash = 0;

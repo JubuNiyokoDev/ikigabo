@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -25,7 +27,6 @@ import '../assets/assets_list_screen.dart';
 import '../debts/debts_list_screen.dart';
 import '../transactions/transactions_list_screen.dart';
 import '../notifications/notifications_screen.dart';
-import '../../../core/services/ads_service.dart';
 import '../../../core/services/ad_manager.dart';
 import '../../../core/services/habit_sync_service.dart';
 import '../../providers/isar_provider.dart';
@@ -43,19 +44,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialiser Unity Ads et déclencher ads dashboard une seule fois
+    // Déclencher la fréquence dashboard une seule fois.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_hasTriggeredAd) {
-        AdsService.initialize();
-        AdManager.showDashboardAd();
-        _hasTriggeredAd = true;
+      if (_hasTriggeredAd) return;
+      _hasTriggeredAd = true;
 
-        // Synchroniser les habitudes avec le serveur push
+      Future<void>.delayed(const Duration(milliseconds: 1200), () {
+        if (!mounted) return;
+        unawaited(AdManager.showDashboardAd());
+
         final isarAsync = ref.read(isarProvider);
         isarAsync.whenData((isar) {
-          HabitSyncService.syncOnAppOpen(isar);
+          unawaited(HabitSyncService.syncOnAppOpen(isar));
         });
-      }
+      });
     });
   }
 
