@@ -1,11 +1,14 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../../js/push-notification-server"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": ".",
+    },
+    {
+      "path": "../../js/push-notification-server",
+    },
+    {
+      "path": "../../jubuniyokodev.github.io",
+    },
+  ],
+  "settings": {},
 }
