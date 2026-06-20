@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'ad_policy.dart';
 import 'ads_service.dart';
 
@@ -14,6 +17,8 @@ class AdManager {
   static const String _reportViewCount = 'report_view_count';
   static const String _rewardedActionCount = 'rewarded_action_count';
   static const String _lastInterstitialAtKey = 'last_interstitial_at';
+  static const String _pendingInterstitialActionKey =
+      'pending_interstitial_action';
 
   static const int _rewardedAdFrequency = 15;
   static bool _isFullScreenAdInProgress = false;
@@ -93,29 +98,43 @@ class AdManager {
   static Future<void> _showAdForAction(String countKey, int frequency) async {
     final prefs = await SharedPreferences.getInstance();
     final previousCount = prefs.getInt(countKey) ?? 0;
-    final count = (previousCount % frequency) + 1;
+    final count = (previousCount + 1).clamp(1, frequency).toInt();
     await prefs.setInt(countKey, count);
 
     print('Action $countKey: $count/$frequency');
 
-    // Afficher ad si fréquence atteinte
-    if (count % frequency == 0) {
-      if (_isFullScreenAdInProgress) return;
+    var pendingAction = prefs.getString(_pendingInterstitialActionKey);
+    if (pendingAction == null && count >= frequency) {
+      pendingAction = countKey;
+      await prefs.setString(_pendingInterstitialActionKey, countKey);
+    }
+
+    if (pendingAction != null) {
+      if (_isFullScreenAdInProgress) {
+        print('Interstitial différée: une publicité est déjà en cours');
+        return;
+      }
 
       final now = DateTime.now().millisecondsSinceEpoch;
       final lastInterstitialAt = prefs.getInt(_lastInterstitialAtKey) ?? 0;
       if (now - lastInterstitialAt <
           AdPolicy.interstitialCooldown.inMilliseconds) {
+        print('Interstitial différée: cooldown actif');
         return;
       }
 
-      print('Tentative d\'affichage interstitial pour $countKey');
+      print('Tentative d\'affichage interstitial pour $pendingAction');
       _isFullScreenAdInProgress = true;
       try {
         final shown = await AdsService.showInterstitial();
         if (shown) {
           await prefs.setInt(_lastInterstitialAtKey, now);
+          await prefs.setInt(pendingAction, 0);
+          await prefs.remove(_pendingInterstitialActionKey);
           print('Interstitial affichée avec succès');
+        } else {
+          print('Interstitial différée: aucune publicité prête');
+          unawaited(AdsService.refreshFullScreenCaches());
         }
       } catch (e) {
         print('Erreur interstitial: $e');
@@ -125,7 +144,7 @@ class AdManager {
     }
 
     // Incrémenter compteur rewarded
-    showAutoRewardedAd();
+    unawaited(showAutoRewardedAd());
   }
 
   // Logique commune pour rewarded automatique (simple)

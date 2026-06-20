@@ -19,6 +19,7 @@ class AdsService {
 
   static Completer<bool>? _interstitialLoadCompleter;
   static Completer<void>? _interstitialShowCompleter;
+  static bool _interstitialDidShow = false;
   static Completer<bool>? _rewardedLoadCompleter;
   static Completer<void>? _rewardedShowCompleter;
   static VoidCallback? _pendingReward;
@@ -26,6 +27,7 @@ class AdsService {
 
   static final Map<String, Completer<bool>> _bannerLoadCompleters = {};
   static final Map<String, DateTime> _bannerRetryAfter = {};
+  static final Map<String, DateTime> _loadStartedAt = {};
   static Completer<bool>? _nativeLoadCompleter;
 
   static Future<bool> initialize() async {
@@ -87,9 +89,11 @@ class AdsService {
 
   static Future<void> _enableAutomaticLoading() async {
     try {
+      _markLoadStarted('interstitial', TopOnAdConfig.interstitialPlacementId);
       await ATInterstitialManager.autoLoadInterstitialAD(
         placementIDs: TopOnAdConfig.interstitialPlacementId,
       );
+      _markLoadStarted('rewarded', TopOnAdConfig.rewardedPlacementId);
       await ATRewardedManager.autoLoadRewardedVideo(
         placementIDs: TopOnAdConfig.rewardedPlacementId,
       );
@@ -131,6 +135,7 @@ class AdsService {
 
     final completer = Completer<bool>();
     _interstitialLoadCompleter = completer;
+    _markLoadStarted('interstitial', TopOnAdConfig.interstitialPlacementId);
     if (!_automaticLoadingEnabled) {
       try {
         await ATInterstitialManager.loadInterstitialAd(
@@ -161,14 +166,25 @@ class AdsService {
         placementID: TopOnAdConfig.interstitialPlacementId,
       );
       if (!ready) {
+        _adDiagnosticLog(
+          'show_skipped_not_ready',
+          format: 'interstitial',
+          placementId: TopOnAdConfig.interstitialPlacementId,
+        );
         if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
         return false;
       }
     } catch (_) {
+      _adDiagnosticLog(
+        'show_ready_check_failed',
+        format: 'interstitial',
+        placementId: TopOnAdConfig.interstitialPlacementId,
+      );
       return false;
     }
 
     final completer = Completer<void>();
+    _interstitialDidShow = false;
     _interstitialShowCompleter = completer;
     try {
       if (_automaticLoadingEnabled) {
@@ -188,7 +204,7 @@ class AdsService {
         },
       );
       if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
-      return true;
+      return _interstitialDidShow;
     } catch (error) {
       _completeInterstitialShow();
       if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
@@ -214,6 +230,7 @@ class AdsService {
 
     final completer = Completer<bool>();
     _rewardedLoadCompleter = completer;
+    _markLoadStarted('rewarded', TopOnAdConfig.rewardedPlacementId);
     if (!_automaticLoadingEnabled) {
       try {
         await ATRewardedManager.loadRewardedVideo(
@@ -298,6 +315,7 @@ class AdsService {
 
     final completer = Completer<bool>();
     _bannerLoadCompleters[placementId] = completer;
+    _markLoadStarted('banner', placementId);
 
     try {
       await ATBannerManager.loadBannerAd(
@@ -346,6 +364,7 @@ class AdsService {
 
     final completer = Completer<bool>();
     _nativeLoadCompleter = completer;
+    _markLoadStarted('native', TopOnAdConfig.nativePlacementId);
 
     try {
       await ATNativeManager.loadNativeAd(
@@ -384,6 +403,13 @@ class AdsService {
 
   static void _handleInterstitialEvent(ATInterstitialResponse event) {
     if (event.placementID != TopOnAdConfig.interstitialPlacementId) return;
+    _logAdSourceEvent(
+      format: 'interstitial',
+      placementId: event.placementID,
+      status: event.interstatus.name,
+      extra: event.extraMap,
+      error: event.requestMessage,
+    );
 
     switch (event.interstatus) {
       case InterstitialStatus.interstitialAdDidFinishLoading:
@@ -391,6 +417,7 @@ class AdsService {
         _completeInterstitialLoad(true);
         debugPrint('TopOn interstitial loaded');
       case InterstitialStatus.interstitialDidShowSucceed:
+        _interstitialDidShow = true;
         debugPrint('TopOn interstitial shown');
       case InterstitialStatus.interstitialAdFailToLoadAD:
         _completeInterstitialLoad(false);
@@ -406,6 +433,13 @@ class AdsService {
 
   static void _handleRewardedEvent(ATRewardResponse event) {
     if (event.placementID != TopOnAdConfig.rewardedPlacementId) return;
+    _logAdSourceEvent(
+      format: 'rewarded',
+      placementId: event.placementID,
+      status: event.rewardStatus.name,
+      extra: event.extraMap,
+      error: event.requestMessage,
+    );
 
     switch (event.rewardStatus) {
       case RewardedStatus.rewardedVideoDidFinishLoading:
@@ -432,6 +466,16 @@ class AdsService {
   }
 
   static void _handleBannerEvent(ATBannerResponse event) {
+    _logAdSourceEvent(
+      format: event.placementID == TopOnAdConfig.mediumRectanglePlacementId
+          ? 'medium_rectangle'
+          : 'banner',
+      placementId: event.placementID,
+      status: event.bannerStatus.name,
+      extra: event.extraMap,
+      error: event.requestMessage,
+    );
+
     switch (event.bannerStatus) {
       case BannerStatus.bannerAdDidFinishLoading:
       case BannerStatus.bannerAdDidMultipleLoaded:
@@ -452,6 +496,13 @@ class AdsService {
 
   static void _handleNativeEvent(ATNativeResponse event) {
     if (event.placementID != TopOnAdConfig.nativePlacementId) return;
+    _logAdSourceEvent(
+      format: 'native',
+      placementId: event.placementID,
+      status: event.nativeStatus.name,
+      extra: event.extraMap,
+      error: event.requestMessage,
+    );
 
     switch (event.nativeStatus) {
       case NativeStatus.nativeAdDidFinishLoading:
@@ -517,5 +568,104 @@ class AdsService {
     if (completer != null && !completer.isCompleted) {
       completer.complete(loaded);
     }
+  }
+
+  static void _markLoadStarted(String format, String placementId) {
+    _loadStartedAt[placementId] = DateTime.now();
+    _adDiagnosticLog('load_start', format: format, placementId: placementId);
+  }
+
+  static void _logAdSourceEvent({
+    required String format,
+    required String placementId,
+    required String status,
+    required Map extra,
+    required String error,
+  }) {
+    final isTerminal =
+        status.contains('FinishLoading') ||
+        status.contains('MultipleLoaded') ||
+        status.contains('FailToLoad') ||
+        status.contains('LoadFilled') ||
+        status.contains('LoadFail') ||
+        status.contains('ShowSucceed') ||
+        status.contains('DidShow') ||
+        status.contains('StartPlaying');
+    if (!isTerminal) return;
+
+    final startedAt = _loadStartedAt[placementId];
+    final elapsedMs = startedAt == null
+        ? null
+        : DateTime.now().difference(startedAt).inMilliseconds;
+    final network = _firstValue(extra, const [
+      'network_name',
+      'networkName',
+      'network_firm_name',
+    ]);
+    final networkFirmId = _firstValue(extra, const [
+      'network_firm_id',
+      'networkFirmId',
+    ]);
+    final adSourceId = _firstValue(extra, const [
+      'adsource_id',
+      'ad_source_id',
+      'adSourceId',
+    ]);
+
+    _adDiagnosticLog(
+      status,
+      format: format,
+      placementId: placementId,
+      network: network,
+      networkFirmId: networkFirmId,
+      adSourceId: adSourceId,
+      elapsedMs: elapsedMs,
+      error: error,
+      details: _compactExtra(extra),
+    );
+  }
+
+  static Object? _firstValue(Map source, List<String> keys) {
+    for (final key in keys) {
+      final value = source[key];
+      if (value != null && value.toString().isNotEmpty) return value;
+    }
+    return null;
+  }
+
+  static void _adDiagnosticLog(
+    String event, {
+    required String format,
+    required String placementId,
+    Object? network,
+    Object? networkFirmId,
+    Object? adSourceId,
+    int? elapsedMs,
+    String? error,
+    String? details,
+  }) {
+    final parts = <String>[
+      'IKIGABO_AD_DIAG',
+      'event=$event',
+      'format=$format',
+      'placement=$placementId',
+      if (network != null) 'network=$network',
+      if (networkFirmId != null) 'networkFirmId=$networkFirmId',
+      if (adSourceId != null) 'adSourceId=$adSourceId',
+      if (elapsedMs != null) 'elapsedMs=$elapsedMs',
+      if (error != null && error.trim().isNotEmpty)
+        'error=${error.replaceAll(RegExp(r'\s+'), ' ').trim()}',
+      if (details != null && details.isNotEmpty) 'details=$details',
+    ];
+    debugPrint(parts.join(' | '));
+  }
+
+  static String _compactExtra(Map extra) {
+    final compact = extra.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (compact == '{message: No additional information}') return '';
+    const maxLength = 700;
+    return compact.length <= maxLength
+        ? compact
+        : '${compact.substring(0, maxLength)}...';
   }
 }
