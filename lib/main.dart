@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_icons.dart';
+import 'core/services/ad_policy.dart';
 import 'core/services/ads_service.dart';
 import 'core/services/habit_sync_service.dart';
 import 'core/services/in_app_update_service.dart';
@@ -49,7 +50,8 @@ class IkigaboApp extends ConsumerStatefulWidget {
   ConsumerState<IkigaboApp> createState() => _IkigaboAppState();
 }
 
-class _IkigaboAppState extends ConsumerState<IkigaboApp> {
+class _IkigaboAppState extends ConsumerState<IkigaboApp>
+    with WidgetsBindingObserver {
   final InAppUpdateService _inAppUpdateService = InAppUpdateService();
   Timer? _notificationInitTimer;
   Timer? _adsInitTimer;
@@ -58,8 +60,17 @@ class _IkigaboAppState extends ConsumerState<IkigaboApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scheduleDeferredServices();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    Future<void>.delayed(AdPolicy.foregroundCacheRefreshDelay, () {
+      unawaited(AdsService.refreshFullScreenCaches());
     });
   }
 
@@ -84,6 +95,7 @@ class _IkigaboAppState extends ConsumerState<IkigaboApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _notificationInitTimer?.cancel();
     _adsInitTimer?.cancel();
     _updateCheckTimer?.cancel();

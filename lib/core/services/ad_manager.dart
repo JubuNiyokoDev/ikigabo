@@ -16,6 +16,7 @@ class AdManager {
   static const String _lastInterstitialAtKey = 'last_interstitial_at';
 
   static const int _rewardedAdFrequency = 15;
+  static bool _isFullScreenAdInProgress = false;
 
   static Future<void> showTransactionAd() async {
     await _showAdForAction(
@@ -91,13 +92,16 @@ class AdManager {
   // Logique commune pour interstitial (simple et efficace)
   static Future<void> _showAdForAction(String countKey, int frequency) async {
     final prefs = await SharedPreferences.getInstance();
-    final count = (prefs.getInt(countKey) ?? 0) + 1;
+    final previousCount = prefs.getInt(countKey) ?? 0;
+    final count = (previousCount % frequency) + 1;
     await prefs.setInt(countKey, count);
 
     print('Action $countKey: $count/$frequency');
 
     // Afficher ad si fréquence atteinte
     if (count % frequency == 0) {
+      if (_isFullScreenAdInProgress) return;
+
       final now = DateTime.now().millisecondsSinceEpoch;
       final lastInterstitialAt = prefs.getInt(_lastInterstitialAtKey) ?? 0;
       if (now - lastInterstitialAt <
@@ -106,6 +110,7 @@ class AdManager {
       }
 
       print('Tentative d\'affichage interstitial pour $countKey');
+      _isFullScreenAdInProgress = true;
       try {
         final shown = await AdsService.showInterstitial();
         if (shown) {
@@ -114,6 +119,8 @@ class AdManager {
         }
       } catch (e) {
         print('Erreur interstitial: $e');
+      } finally {
+        _isFullScreenAdInProgress = false;
       }
     }
 

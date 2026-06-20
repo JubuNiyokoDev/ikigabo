@@ -11,8 +11,7 @@ import '../../providers/debt_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
 import '../../widgets/search_bar.dart' as custom;
-import '../../widgets/inline_banner_ad.dart';
-import '../../widgets/medium_rectangle_ad.dart';
+import '../../widgets/dynamic_list_ads.dart';
 import 'add_debt_screen.dart';
 import 'debt_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -488,18 +487,18 @@ class _DebtsListScreenState extends ConsumerState<DebtsListScreen> {
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length + 2,
+          itemCount: DynamicListAds.itemCount(items.length),
           itemBuilder: (context, index) {
-            final bannerIndex = items.length > 2 ? 2 : items.length;
-            final nativeIndex = items.length > 5 ? 5 : -1;
-            if (index == bannerIndex) return const InlineBannerAd();
-            if (nativeIndex > 0 && index == nativeIndex) {
-              return const MediumRectangleAd();
-            }
-            int offset = 0;
-            if (index > bannerIndex) offset++;
-            if (nativeIndex > 0 && index > nativeIndex) offset++;
-            final itemIndex = index - offset;
+            final ad = DynamicListAds.adAt(
+              listIndex: index,
+              contentCount: items.length,
+            );
+            if (ad != null) return ad;
+
+            final itemIndex = DynamicListAds.contentIndex(
+              listIndex: index,
+              contentCount: items.length,
+            );
             if (itemIndex < 0 || itemIndex >= items.length) {
               return const SizedBox.shrink();
             }

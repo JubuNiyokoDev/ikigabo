@@ -169,27 +169,32 @@ public class ATAdRewardVideoManger implements HandleSecmtpMethod {
                 break;
             case "entryRewardedVideoScenario":
                 helper.entryScenario(placementID,scenario);
+                result.success("");
                 break;
             case "autoLoadRewardedVideoAD":
                 if (helper != null) {
                     helper.autoLoadRewardedVideo(placementIDArr);
                 }
+                result.success("");
                 break;
             case "cancelAutoLoadRewardedVideoAD":
                 if (helper != null) {
                     helper.removePlacementId(placementIDArr);
                 }
+                result.success("");
                 break;
             case "showAutoLoadRewardedVideoAD":
                 if (helper != null) {
                     helper.showAutoLoadRewardedVideoAD(placementID,scenario);
                 }
+                result.success("");
                 break;
             case "autoLoadRewardedVideoADSetLocalExtra":
                 if (helper != null) {
                     Map<String, Object> settingMap = methodCall.argument(Const.EXTRA_DIC);
                     helper.autoLoadRewardedVideoSetLocalExtra(placementID,settingMap);
                 }
+                result.success("");
                 break;
         }
     }

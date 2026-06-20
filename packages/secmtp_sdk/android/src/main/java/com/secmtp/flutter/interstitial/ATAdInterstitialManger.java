@@ -153,27 +153,32 @@ public class ATAdInterstitialManger implements HandleSecmtpMethod {
                 break;
             case "entryInterstitialScenario":
                 helper.entryScenario(placementID,scenario);
+                result.success(true);
                 break;
             case "autoLoadInterstitialAD":
                 if (helper != null) {
                     helper.autoLoadInterstitial(placementIDArr);
                 }
+                result.success("");
                 break;
             case "cancelAutoLoadInterstitialAD":
                 if (helper != null) {
                     helper.removePlacementId(placementIDArr);
                 }
+                result.success("");
                 break;
             case "showAutoLoadInterstitialAD":
                 if (helper != null) {
                     helper.showAutoLoadInterstitialAD(placementID,scenario);
                 }
+                result.success("");
                 break;
             case "autoLoadInterstitialADSetLocalExtra":
                 if (helper != null) {
                     Map<String, Object> settingMap = methodCall.argument(Const.EXTRA_DIC);
                     helper.autoLoadInterstitialSetLocalExtra(placementID,settingMap);
                 }
+                result.success("");
                 break;
         }
     }

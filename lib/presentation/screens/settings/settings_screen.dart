@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -46,6 +48,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadAppVersion();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(AdManager.showSettingsAd());
+    });
   }
 
   Future<void> _loadAppVersion() async {
@@ -559,11 +564,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Déclencher ads settings
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      AdManager.showSettingsAd();
-    });
-
     final themeMode = ref.watch(themeProvider);
     final currentLocale = ref.watch(localeProvider);
     final displayCurrencyAsync = ref.watch(displayCurrencyProvider);

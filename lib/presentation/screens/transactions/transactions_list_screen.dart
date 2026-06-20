@@ -8,8 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
-import '../../widgets/inline_banner_ad.dart';
-import '../../widgets/native_ad_list_item.dart';
+import '../../widgets/dynamic_list_ads.dart';
 import 'transaction_detail_screen.dart';
 import 'edit_transaction_screen.dart';
 
@@ -71,7 +70,9 @@ class TransactionsListScreen extends ConsumerWidget {
                       l10n.transactionsWillAppear,
                       style: TextStyle(
                         fontSize: 14,
-                        color: isDark ? AppColors.textSecondaryDark : Colors.grey,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey,
                       ),
                     ),
                   ],
@@ -81,13 +82,18 @@ class TransactionsListScreen extends ConsumerWidget {
 
             return ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: transactions.length + 2,
+              itemCount: DynamicListAds.itemCount(transactions.length),
               itemBuilder: (context, index) {
-                // Banner à position 2, Native à position 5
-                if (index == 2) return const InlineBannerAd();
-                if (index == 5) return const NativeAdListItem();
-                final offset = (index > 5 ? 2 : (index > 2 ? 1 : 0));
-                final txIndex = index - offset;
+                final ad = DynamicListAds.adAt(
+                  listIndex: index,
+                  contentCount: transactions.length,
+                );
+                if (ad != null) return ad;
+
+                final txIndex = DynamicListAds.contentIndex(
+                  listIndex: index,
+                  contentCount: transactions.length,
+                );
                 if (txIndex < 0 || txIndex >= transactions.length) {
                   return const SizedBox.shrink();
                 }
@@ -136,7 +142,8 @@ class TransactionsListScreen extends ConsumerWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TransactionDetailScreen(transaction: transaction),
+                        builder: (_) =>
+                            TransactionDetailScreen(transaction: transaction),
                       ),
                     ),
                   ).animate().fadeIn(delay: (index * 50).ms),
@@ -156,7 +163,11 @@ class TransactionsListScreen extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _showDeleteDialog(BuildContext context, TransactionModel transaction, WidgetRef ref) async {
+  Future<bool?> _showDeleteDialog(
+    BuildContext context,
+    TransactionModel transaction,
+    WidgetRef ref,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
@@ -171,7 +182,9 @@ class TransactionsListScreen extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               try {
-                await ref.read(transactionControllerProvider.notifier).deleteTransaction(transaction.id);
+                await ref
+                    .read(transactionControllerProvider.notifier)
+                    .deleteTransaction(transaction.id);
                 Navigator.pop(context, true);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -189,14 +202,21 @@ class TransactionsListScreen extends ConsumerWidget {
                 );
               }
             },
-            child: Text(l10n.delete, style: const TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showEditDialog(BuildContext context, TransactionModel transaction, WidgetRef ref) {
+  void _showEditDialog(
+    BuildContext context,
+    TransactionModel transaction,
+    WidgetRef ref,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -19,6 +19,7 @@ class AdPolicy {
   static const Duration sdkInitializationTimeout = Duration(seconds: 15);
   static const Duration sdkInitializationRetryDelay = Duration(seconds: 30);
   static const Duration bannerRetryDelay = Duration(minutes: 2);
+  static const Duration foregroundCacheRefreshDelay = Duration(seconds: 2);
 
   static bool get shouldGateCoreActions => useRewardedForCoreActions;
 }

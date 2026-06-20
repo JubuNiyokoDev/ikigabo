@@ -8,6 +8,7 @@ import 'topon_ad_config.dart';
 
 class AdsService {
   static bool _isInitialized = false;
+  static bool _automaticLoadingEnabled = false;
   static Completer<bool>? _initializeCompleter;
   static DateTime? _lastInitializationFailure;
 
@@ -52,6 +53,7 @@ class AdsService {
       ).timeout(AdPolicy.sdkInitializationTimeout);
       _isInitialized = true;
       _lastInitializationFailure = null;
+      await _enableAutomaticLoading();
       debugPrint('TopOn SDK initialized');
     } catch (error) {
       _lastInitializationFailure = DateTime.now();
@@ -66,12 +68,37 @@ class AdsService {
 
   static Future<void> warmUp() async {
     if (!await initialize()) return;
+    if (!_automaticLoadingEnabled) {
+      unawaited(loadInterstitial());
+      unawaited(
+        Future<void>.delayed(const Duration(seconds: 12), () async {
+          await loadRewarded();
+        }),
+      );
+    }
+  }
+
+  static Future<void> refreshFullScreenCaches() async {
+    if (!await initialize()) return;
+    if (_automaticLoadingEnabled) return;
     unawaited(loadInterstitial());
-    unawaited(
-      Future<void>.delayed(const Duration(seconds: 12), () async {
-        await loadRewarded();
-      }),
-    );
+    unawaited(loadRewarded());
+  }
+
+  static Future<void> _enableAutomaticLoading() async {
+    try {
+      await ATInterstitialManager.autoLoadInterstitialAD(
+        placementIDs: TopOnAdConfig.interstitialPlacementId,
+      );
+      await ATRewardedManager.autoLoadRewardedVideo(
+        placementIDs: TopOnAdConfig.rewardedPlacementId,
+      );
+      _automaticLoadingEnabled = true;
+      debugPrint('TopOn automatic full-screen loading enabled');
+    } catch (error) {
+      _automaticLoadingEnabled = false;
+      debugPrint('TopOn automatic loading unavailable: $error');
+    }
   }
 
   static void _bindListeners() {
@@ -104,14 +131,16 @@ class AdsService {
 
     final completer = Completer<bool>();
     _interstitialLoadCompleter = completer;
-    try {
-      await ATInterstitialManager.loadInterstitialAd(
-        placementID: TopOnAdConfig.interstitialPlacementId,
-        extraMap: const {},
-      );
-    } catch (error) {
-      _completeInterstitialLoad(false);
-      debugPrint('TopOn interstitial load failed to start: $error');
+    if (!_automaticLoadingEnabled) {
+      try {
+        await ATInterstitialManager.loadInterstitialAd(
+          placementID: TopOnAdConfig.interstitialPlacementId,
+          extraMap: const {},
+        );
+      } catch (error) {
+        _completeInterstitialLoad(false);
+        debugPrint('TopOn interstitial load failed to start: $error');
+      }
     }
 
     return completer.future.timeout(
@@ -125,25 +154,44 @@ class AdsService {
   }
 
   static Future<bool> showInterstitial() async {
-    if (!await loadInterstitial()) return false;
+    if (!await initialize()) return false;
+
+    try {
+      final ready = await ATInterstitialManager.hasInterstitialAdReady(
+        placementID: TopOnAdConfig.interstitialPlacementId,
+      );
+      if (!ready) {
+        if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
+        return false;
+      }
+    } catch (_) {
+      return false;
+    }
 
     final completer = Completer<void>();
     _interstitialShowCompleter = completer;
     try {
-      await ATInterstitialManager.showInterstitialAd(
-        placementID: TopOnAdConfig.interstitialPlacementId,
-      );
+      if (_automaticLoadingEnabled) {
+        await ATInterstitialManager.showAutoLoadInterstitialAD(
+          placementID: TopOnAdConfig.interstitialPlacementId,
+          sceneID: '',
+        );
+      } else {
+        await ATInterstitialManager.showInterstitialAd(
+          placementID: TopOnAdConfig.interstitialPlacementId,
+        );
+      }
       await completer.future.timeout(
         const Duration(minutes: 2),
         onTimeout: () {
           _completeInterstitialShow();
         },
       );
-      unawaited(loadInterstitial());
+      if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
       return true;
     } catch (error) {
       _completeInterstitialShow();
-      unawaited(loadInterstitial());
+      if (!_automaticLoadingEnabled) unawaited(loadInterstitial());
       debugPrint('TopOn interstitial show failed: $error');
       return false;
     }
@@ -166,14 +214,16 @@ class AdsService {
 
     final completer = Completer<bool>();
     _rewardedLoadCompleter = completer;
-    try {
-      await ATRewardedManager.loadRewardedVideo(
-        placementID: TopOnAdConfig.rewardedPlacementId,
-        extraMap: const {},
-      );
-    } catch (error) {
-      _completeRewardedLoad(false);
-      debugPrint('TopOn rewarded load failed to start: $error');
+    if (!_automaticLoadingEnabled) {
+      try {
+        await ATRewardedManager.loadRewardedVideo(
+          placementID: TopOnAdConfig.rewardedPlacementId,
+          extraMap: const {},
+        );
+      } catch (error) {
+        _completeRewardedLoad(false);
+        debugPrint('TopOn rewarded load failed to start: $error');
+      }
     }
 
     return completer.future.timeout(
@@ -195,9 +245,16 @@ class AdsService {
     _rewardedShowCompleter = completer;
 
     try {
-      await ATRewardedManager.showRewardedVideo(
-        placementID: TopOnAdConfig.rewardedPlacementId,
-      );
+      if (_automaticLoadingEnabled) {
+        await ATRewardedManager.showAutoLoadRewardedVideoAD(
+          placementID: TopOnAdConfig.rewardedPlacementId,
+          sceneID: '',
+        );
+      } else {
+        await ATRewardedManager.showRewardedVideo(
+          placementID: TopOnAdConfig.rewardedPlacementId,
+        );
+      }
       await completer.future.timeout(
         const Duration(minutes: 3),
         onTimeout: () {
@@ -206,12 +263,12 @@ class AdsService {
       );
       final rewarded = _rewardGranted;
       _pendingReward = null;
-      unawaited(loadRewarded());
+      if (!_automaticLoadingEnabled) unawaited(loadRewarded());
       return rewarded;
     } catch (error) {
       _pendingReward = null;
       _completeRewardedShow();
-      unawaited(loadRewarded());
+      if (!_automaticLoadingEnabled) unawaited(loadRewarded());
       debugPrint('TopOn rewarded show failed: $error');
       return false;
     }

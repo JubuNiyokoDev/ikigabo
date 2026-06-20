@@ -12,7 +12,7 @@ import '../../providers/bank_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../widgets/currency_amount_widget.dart';
-import '../../widgets/inline_banner_ad.dart';
+import '../../widgets/dynamic_list_ads.dart';
 import 'add_bank_screen.dart';
 import 'bank_detail_screen.dart';
 import '../../../core/services/ad_manager.dart';
@@ -177,14 +177,18 @@ class BanksListScreen extends ConsumerWidget {
             .toList();
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: items.length + 1,
+          itemCount: DynamicListAds.itemCount(items.length),
           itemBuilder: (context, index) {
-            final bannerIndex = items.length > 2 ? 2 : items.length;
-            if (index == bannerIndex) {
-              return const InlineBannerAd();
-            }
+            final ad = DynamicListAds.adAt(
+              listIndex: index,
+              contentCount: items.length,
+            );
+            if (ad != null) return ad;
 
-            final itemIndex = index > bannerIndex ? index - 1 : index;
+            final itemIndex = DynamicListAds.contentIndex(
+              listIndex: index,
+              contentCount: items.length,
+            );
             return items[itemIndex];
           },
         );
